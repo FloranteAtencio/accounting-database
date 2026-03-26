@@ -24,7 +24,7 @@ echo "[$(date)] Starting backup..." >> "$LOG_FILE"
 
 # 1. Backup to internal storage
 echo "[$(date)] Backing up to internal storage: $BACKUP_DIR/$BACKUP_FILE" >> "$LOG_FILE"
-docker exec "$CONTAINER_NAME" pg_dump -U "$DB_USER" "$DB_NAME" > "$BACKUP_DIR/$BACKUP_FILE"
+docker exec "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" > "$BACKUP_DIR/$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     echo "[$(date)] ✓ Internal backup successful" >> "$LOG_FILE"
