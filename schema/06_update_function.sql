@@ -58,7 +58,6 @@ BEGIN
             WHERE TransactionID = a_TransactionID;
             FOR UPDATE
 
-            PERFORM 1
             SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
                 ) INTO v_balance
@@ -171,8 +170,7 @@ BEGIN
             FROM Finance.suppliers
             WHERE SupplierID = a_SupplierID
             FOR UPDATE;
-            
-            PERFORM 1
+        
             SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
                 ) INTO v_balance
