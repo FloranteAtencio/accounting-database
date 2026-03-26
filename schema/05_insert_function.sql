@@ -225,7 +225,7 @@ CREATE OR REPLACE PROCEDURE Finance.ap_Transaction(
     IN p_BillDate DATE,
     IN p_Amount DECIMAL(12,2),
     IN p_Status VARCHAR(20),
-    IN p_idempotency_key VARCHAR(255)
+    IN p_idempotency_key VARCHAR
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
@@ -264,7 +264,6 @@ BEGIN
             WHERE SupplierID = p_SupplierID
             FOR UPDATE;
             
-            PERFORM 1
             SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
             ) INTO v_balance
@@ -316,7 +315,7 @@ CREATE OR REPLACE PROCEDURE Finance.ar_transaction(
     IN p_InvoiceDate DATE,
     IN p_Amount DECIMAL(12,2),
     IN p_Status VARCHAR(20)
-    IN p_idempotency_key VARCHAR(255)
+    IN p_idempotency_key VARCHAR
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
@@ -357,7 +356,6 @@ BEGIN
         WHERE CustomerID = p_CustomerID
         FOR UPDATE;
 
-        PERFORM 1
         SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
             ) INTO v_balance
