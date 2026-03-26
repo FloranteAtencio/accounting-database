@@ -50,12 +50,12 @@ BEGIN
 
             PERFORM 1
             FROM Finance.accountreceivables
-            WHERE ReceivableID = a_ReceivableID;
+            WHERE ReceivableID = a_ReceivableID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
-            WHERE TransactionID = a_TransactionID;
+            WHERE TransactionID = a_TransactionID
             FOR UPDATE;
 
             SELECT SUM(
