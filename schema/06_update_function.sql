@@ -48,10 +48,10 @@ BEGIN
             WHERE CustomerID = a_CustomerID
             FOR UPDATE;
 
-            PERFORM 1
-            FROM Finance.accountreceivables
-            WHERE ReceivableID = a_ReceivableID;
-            FOR UPDATE;
+            -- PERFORM 1
+            -- FROM Finance.accountreceivables
+            -- WHERE ReceivableID = a_ReceivableID;
+            -- FOR UPDATE;
 
             PERFORM 1
             FROM Finance.Transactions
@@ -156,10 +156,10 @@ BEGIN
 
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-            PERFORM 1
-            FROM Finance.accountpayables
-            WHERE PayableID = a_PayableID
-            FOR UPDATE;
+            -- PERFORM 1
+            -- FROM Finance.accountpayables
+            -- WHERE PayableID = a_PayableID
+            -- FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
