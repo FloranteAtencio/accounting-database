@@ -44,17 +44,17 @@ BEGIN
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
-            FROM Finance.Customers 
+            FROM Finance.customers 
             WHERE CustomerID = a_CustomerID
             FOR UPDATE;
 
-            -- PERFORM 1
-            -- FROM Finance.accountreceivables
-            -- WHERE ReceivableID = a_ReceivableID;
-            -- FOR UPDATE;
+            PERFORM 1
+            FROM Finance.accountreceivables
+            WHERE ReceivableID = a_ReceivableID;
+            FOR UPDATE;
 
             PERFORM 1
-            FROM Finance.Transactions
+            FROM Finance.transactions
             WHERE TransactionID = a_TransactionID;
             FOR UPDATE;
 
@@ -156,10 +156,10 @@ BEGIN
 
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-            -- PERFORM 1
-            -- FROM Finance.accountpayables
-            -- WHERE PayableID = a_PayableID
-            -- FOR UPDATE;
+            PERFORM 1
+            FROM Finance.accountpayables
+            WHERE PayableID = a_PayableID
+            FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
