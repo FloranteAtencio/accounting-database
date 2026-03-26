@@ -260,7 +260,7 @@ BEGIN
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
             
             PERFORM 1
-            FROM Finance.Suppliers
+            FROM Finance.suppliers
             WHERE SupplierID = p_SupplierID
             FOR UPDATE;
             
@@ -352,7 +352,7 @@ BEGIN
         SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
         
         PERFORM 1
-        FROM Finance.Customers 
+        FROM Finance.customers 
         WHERE CustomerID = p_CustomerID
         FOR UPDATE;
 
