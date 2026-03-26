@@ -1,8 +1,51 @@
-
 CREATE TABLESPACE hotspace LOCATION '/mnt/ssd_hot';
 CREATE TABLESPACE coldspace LOCATION '/mnt/hdd_cold';
+
+CREATE OR REPLACE FUNCTION Finance.partion_monthly_basis(tableselected text, schemaselected text)
+RETURNS void AS $$
+DECLARE
+    s_date date := date_trunc('month', current_date);
+    e_date date := s_date + interval '30 days';
+    part_name text;    
+BEGIN
+    part_name := schemaselected || '.' || tableselected || '_' || to_char(s_date, 'YYYY_MM') || 'wk' || extract(week from s_date);
+
+    EXECUTE format(
+        'CREATE TABLE %I PARTITION OF %I.%I 
+        FOR VALUES FROM (%L) TO (%L)
+        TABLESPACE hotspace;',
+        part_name, schemaselected, tableselected, s_date, e_date
+    );
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION Finance.partion_weekly_basis(tableselected text, schemaselected text)
+RETURNS void AS $$
+DECLARE
+    s_date date := date_trunc('week', current_date);
+    e_date date := s_date + interval '7 days';
+    part_name text;    
+BEGIN
+    part_name := schemaselected || '.' || tableselected || '_' || to_char(s_date, 'YYYY_MM') || 'wk' || extract(week from s_date);
+
+    EXECUTE format(
+        'CREATE TABLE %I PARTITION OF %I.%I 
+        FOR VALUES FROM (%L) TO (%L)
+        TABLESPACE hotspace;',
+        part_name, schemaselected, tableselected, s_date, e_date
+    );
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+END;
+$$ LANGUAGE plpgsql;
+
  
-BEGIN;
 CREATE OR REPLACE FUNCTION alter_tables_space_weekly_basis(
     schemaselect text,
     tableselected text
@@ -13,10 +56,7 @@ DECLARE
     part_name text;
 BEGIN
     -- Example: journals_2026_03_wk11
-    part_name := tableselected || '_' ||
-
-                 to_char(start_date, 'YYYY_MM') || '_wk' ||
-                 extract(week from start_date);
+    part_name := tableselected || '_' || to_char(start_date, 'YYYY_MM') || '_wk' || extract(week from start_date);
 
     EXECUTE format(
         'ALTER TABLE %I.%I SET TABLESPACE coldspace;',
@@ -25,10 +65,7 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
-COMMIT;
 
-
-BEGIN;
 CREATE OR REPLACE FUNCTION alter_tables_space_monthly_basis(
     schemaselect text,
     tableselected text
@@ -39,10 +76,7 @@ DECLARE
     part_name text;
 BEGIN
     -- Example: journals_2026_03_wk11
-    part_name := tableselected || '_' ||
-
-                 to_char(start_date, 'YYYY_MM') || '_wk' ||
-                 extract(month from start_date);
+    part_name := tableselected || '_' || to_char(start_date, 'YYYY_MM') || '_wk' || extract(month from start_date);
 
     EXECUTE format(
         'ALTER TABLE %I.%I SET TABLESPACE coldspace;',
@@ -51,55 +85,7 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
-COMMIT;
 
-BEGIN;
-CREATE OR REPLACE FUNCTION partion_weekly_basis (tableselected text, schemaselected text)
-RETURNS void AS $$
-DECLARE
-
-    s_date := date_trunc('week', current_date);
-    e_date := s_date + interval '7 days';
-    part_name text;
-    
-BEGIN
-
-    part_name := shemaselected || '.' || tableselected || '_' || to_char(s_date, 'YYYY_MM') || 'wk' || extract(week from s_date);
-
-    EXECUTE format(
-        'CREATE TABLE %I PARTITION OF %I.%I 
-        FOR VALUES FROM (%L) TO (%L)
-        TABLESPACE hotspace;',
-        part_name,schemaselected,tableselected,s_date,e_date
-    );
-
-END;
-$$ LANGUAGE plpgsql;
-COMMIT;
-
-BEGIN;
-CREATE OR REPLACE FUNCTION partion_monthly_basis (tableselected text, schemaselected text)
-RETURNS void AS $$
-DECLARE
-
-    s_date := date_trunc('month', current_date);
-    e_date := s_date + interval '30 days';
-    part_name text;
-    
-BEGIN
-
-    part_name := shemaselected || '.' || tableselected || '_' || to_char(s_date, 'YYYY_MM') || 'wk' || extract(month from s_date);
-
-    EXECUTE format(
-        'CREATE TABLE %I PARTITION OF %I.%I 
-        FOR VALUES FROM (%L) TO (%L)
-        TABLESPACE hotspace;',
-        part_name,schemaselected,tableselected,s_date,e_date
-    );
-
-END;
-$$ LANGUAGE plpgsql;
-COMMIT;
 
 -- 0 2 * * 0 docker exec -it erp_postgres psql -U erp_admin -d erp_db -c \ "Select alter_tables_space_weekly_basis('Finance','journals');"
 -- 0 2 1 * * docker exec -it erp_postgres psql -U erp_admin -d erp_db -c \ "Select alter_tables_space_monthly_basis('Finance','accountpayables');"
@@ -138,3 +124,5 @@ COMMIT;
 --     );
 -- END;
 -- $$ LANGUAGE plpgsql;
+
+
