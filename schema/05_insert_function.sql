@@ -314,7 +314,7 @@ CREATE OR REPLACE PROCEDURE Finance.ar_transaction(
     IN p_DueDate DATE ,
     IN p_InvoiceDate DATE,
     IN p_Amount DECIMAL(12,2),
-    IN p_Status VARCHAR(20)
+    IN p_Status VARCHAR(20),
     IN p_idempotency_key VARCHAR
 ) LANGUAGE plpgsql AS $$
 DECLARE
