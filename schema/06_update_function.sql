@@ -41,7 +41,7 @@ BEGIN
                 RAISE EXCEPTION 'Vendor ID cannot be Null';
             END IF;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.Customers 
@@ -154,7 +154,7 @@ BEGIN
                 RAISE EXCEPTION 'Vendor ID cannot be Null';
             END IF;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.accountpayables
@@ -252,7 +252,7 @@ BEGIN
                 RAISE EXCEPTION 'Quantity must be positive';
             END IF;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.products
