@@ -287,9 +287,8 @@ BEGIN
 
             UPDATE Finance.transactions
             SET
-                Description = CONCAT(ActionType, ' of ProductID: ', ProductID, ' in WarehouseID: ', WarehouseID, ' quantity of:', Quantity, 'This had been Updated')
+                Description = CONCAT(a_ActionType, ' of ProductID: ', a_ProductID, ' in WarehouseID: ', a_WarehouseID, ' quantity of:', a_Quantity, 'This had been Updated')
             WHERE TransactionID = a_TransactionID;
-
 
             IF ActionType = 'Purchase' THEN
                 -- Update Accounts Payable
