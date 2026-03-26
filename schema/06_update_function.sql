@@ -256,12 +256,12 @@ BEGIN
 
             PERFORM 1
             FROM Finance.products
-            WHERE ProductID = a_ProductID;
+            WHERE ProductID = a_ProductID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.warehouses
-            WHERE WarehouseID = a_WarehouseID;
+            WHERE WarehouseID = a_WarehouseID
             FOR UPDATE;
 
 
