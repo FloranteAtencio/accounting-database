@@ -41,6 +41,11 @@ BEGIN
                 RAISE EXCEPTION 'Vendor ID cannot be Null';
             END IF;
 
+            SELECT ChartID INTO v_cash_chart 
+            FROM Finance.charts 
+            WHERE Account = 'Cash/Bank' 
+            LIMIT 1;
+
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
@@ -65,14 +70,14 @@ BEGIN
             WHERE ChartID = v_cash_chart
             FOR UPDATE;
 
-            IF p_Amount < v_balance THEN
+            IF a_Amount < v_balance THEN
                 RAISE EXCEPTION 'Insufficient Funds';
             END IF;
             
             UPDATE Finance.accountreceivables
             SET
-                CustomersID = a_CustomersID,
-                DueDate = a_DueDate,
+                CustomerID = a_CustomerID,
+                DueDate = a_Duedate,
                 InvoiceDate = a_Invoicedate,
                 Amount = a_Amount
             WHERE 
@@ -85,7 +90,7 @@ BEGIN
 
             UPDATE Finance.journals
             SET
-                Date = a_Billdate,
+                Date = a_BillDate,
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
             
@@ -153,6 +158,11 @@ BEGIN
             IF a_PayableID IS NULL THEN
                 RAISE EXCEPTION 'Vendor ID cannot be Null';
             END IF;
+
+            SELECT ChartID INTO v_cash_chart 
+            FROM Finance.charts 
+            WHERE Account = 'Cash/Bank' 
+            LIMIT 1;
 
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
@@ -361,8 +371,7 @@ BEGIN
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
         
                 ELSE
-                    RETURN;
-                    -- RAISE EXCEPTION 'Unsupported action type';
+                    RAISE EXCEPTION 'Unsupported action type';
                 END IF;
 
             EXIT;
@@ -372,7 +381,7 @@ BEGIN
                     s_count := s_count + 1;
 
                     IF s_count >= s_max THEN
-                        RAISE EXCEPTION 'Transaction Failed % attempted % ', s_count;
+                        RAISE EXCEPTION 'Transaction Failed attempted % ', s_count;
                     END IF;
                     PERFORM pg_sleep(0.1);
 
