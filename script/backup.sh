@@ -4,7 +4,7 @@
 set -e  # Exit on error
 
 # Configuration
-BACKUP_DIR="/backup"
+BACKUP_DIR="../backup"
 EXTERNAL_DRIVE="/mnt/external-backup"
 CONTAINER_NAME="erp_postgres"
 DB_USER="erp_admin"
@@ -15,6 +15,7 @@ LOG_FILE="/var/log/erp-backup.log"
 # Create directories if they don't exist
 mkdir -p "$BACKUP_DIR"
 mkdir -p "$EXTERNAL_DRIVE"
+touch "LOG_FILE"
 
 # Timestamp
 TIMESTAMP=$(date +%F_%H-%M-%S)

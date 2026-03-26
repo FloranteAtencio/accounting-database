@@ -1,10 +1,10 @@
 #!/bin/bash
-# scripts/restore.sh
+# script/restore.sh
 
 set -e
 
 # Configuration
-BACKUP_DIR="/backup"
+BACKUP_DIR="../backup"
 CONTAINER_NAME="erp_postgres"
 DB_USER="erp_admin"
 DB_NAME="erp_db"
