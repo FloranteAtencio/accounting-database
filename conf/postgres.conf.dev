@@ -1,0 +1,34 @@
+# PostgreSQL Development Configuration
+# For local development and feature testing
+# Generated: 2026-03-20
+
+# ===== REPLICATION =====
+wal_level = replica
+max_wal_senders = 5
+wal_keep_size = 256MB
+
+# ===== PARTITIONING =====
+constraint_exclusion = partition
+
+# ===== MEMORY & PERFORMANCE =====
+shared_buffers = 128MB
+effective_cache_size = 512MB
+work_mem = 32MB
+maintenance_work_mem = 32MB
+
+# ===== CONNECTIONS =====
+max_connections = 50
+
+# ===== LOGGING =====
+log_statement = 'all'
+log_min_duration_statement = 100
+log_duration = on
+
+# ===== CHECKPOINTS =====
+checkpoint_timeout = 5min
+checkpoint_completion_target = 0.7
+
+# ===== DEVELOPMENT FEATURES =====
+log_connections = on
+log_disconnections = on
+log_line_prefix = '%t [%p] %u@%d '

@@ -1,0 +1,33 @@
+# PostgreSQL Staging Configuration
+# For testing replication, partitioning, and performance
+# Generated: 2026-03-20
+
+# ===== REPLICATION =====
+wal_level = replica
+max_wal_senders = 10
+wal_keep_size = 512MB
+
+# ===== PARTITIONING =====
+constraint_exclusion = partition
+
+# ===== MEMORY & PERFORMANCE =====
+shared_buffers = 256MB
+effective_cache_size = 1GB
+work_mem = 64MB
+maintenance_work_mem = 64MB
+
+# ===== CONNECTIONS =====
+max_connections = 100
+
+# ===== LOGGING =====
+log_statement = 'mod'
+log_min_duration_statement = 500
+log_duration = on
+
+# ===== CHECKPOINTS =====
+checkpoint_timeout = 10min
+checkpoint_completion_target = 0.8
+
+# ===== MONITORING =====
+track_io_timing = on
+track_functions = all
