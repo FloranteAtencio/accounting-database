@@ -359,9 +359,11 @@ BEGIN
                     SET 
                         Amount = Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
                     WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
+        
                 ELSE
-                    RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+                    RAISE EXCEPTION 'Unsupported action type';
                 END IF;
+
             EXIT;
 
             EXCEPTION 
@@ -374,6 +376,7 @@ BEGIN
             EXCEPTION
                 WHEN OTHERS THEN
                     RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+
         END;
     END LOOP;            
 END;
