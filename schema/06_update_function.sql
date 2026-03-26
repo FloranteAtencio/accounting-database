@@ -49,7 +49,7 @@ BEGIN
             FOR UPDATE;
 
             PERFORM 1
-            FROM Finance.receivables
+            FROM Finance.accountreceivables
             WHERE ReceivableID = a_ReceivableID;
             FOR UPDATE;
 
