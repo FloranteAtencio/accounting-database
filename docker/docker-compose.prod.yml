@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: erp_postgres
+    restart: always
+    env_file:
+      - ../.env.prod
+    ports:
+      - "127.0.0.1:5432:5432"   # 🔒 LOCAL ONLY
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../schema:/docker-entrypoint-initdb.d
+      - ../conf/postgres.conf.prod:/etc/postgresql/postgresql.conf
+      - ../conf/pg_hba.conf.prod:/etc/postgresql/pg_hba.conf
+    networks:
+      - erp_network
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+
+volumes:
+  pgdata:
+
+networks:
+  erp_network:

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: staging_env
+    restart: always
+    env_file:
+      - ../.env.staging
+    ports:
+      - "5432:5432"   # 🔒 LOCAL ONLY
+    volumes:
+      - staging_pgdata:/var/lib/postgresql/data
+      - ../conf/postgres.conf.stagin:/etc/postgresql/postgresql.conf
+      - ../conf/pg_hba.conf.stagin:/etc/postgresql/pg_hba.conf
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+volumes:
+  staging_pgdata:
