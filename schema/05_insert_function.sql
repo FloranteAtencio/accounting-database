@@ -423,7 +423,7 @@ DECLARE
     new_transaction_id INT;
     v_retry_count INT := 0;
     v_max_retries INT := 3;
-    v_prodcut_name VARCHAR(255);
+    v_product_name VARCHAR(255);
 BEGIN
     -- 🔁 Retry loop for serialization / deadlocks
     LOOP
