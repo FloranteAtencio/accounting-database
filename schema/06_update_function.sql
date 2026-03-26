@@ -125,7 +125,7 @@ DECLARE
     v_balance DECIMAL(12,2);
 BEGIN
     LOOP
-        END    
+        BEGIN
             IF a_Status NOT IN ('Pending', 'Paid', 'Overdue') OR a_Status =  '' THEN
                 RAISE EXCEPTION 'Invalid Status';
             END IF;
