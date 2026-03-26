@@ -291,10 +291,10 @@ BEGIN
                 WHERE TransactionID = a_TransactionID;
 
                     -- Update Journal entry for inventory movement
-            UPDATE Finance.journals
-            SET 
-                Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
-            WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Inventory', 'Accounts Payable'));
+                UPDATE Finance.journals
+                SET 
+                    Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Inventory', 'Accounts Payable'));
 
             ELSIF ActionType = 'Sale' THEN
                     -- Update Accounts Receivable
@@ -315,27 +315,27 @@ BEGIN
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts b WHERE b.Account IN ('Cost of Goods Sold', 'Inventory'));
         
             ELSIF ActionType = 'Sales Return' THEN
-                    UPDATE Finance.salereturns
-                    SET 
-                        ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
-                        ReturnDate = a_MovementDate
-                    WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables a WHERE a.TransactionID = a_TransactionID);
+                UPDATE Finance.salereturns
+                SET 
+                    ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                    ReturnDate = a_MovementDate
+                WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables a WHERE a.TransactionID = a_TransactionID);
 
-                    -- Update Journal entry for inventory movement
-                    UPDATE Finance.journals
-                    SET
-                        Amount = Quantity * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
-                    WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts z WHERE z.Account IN ('Sales Returns and Allowances', 'Accounts Receivable')); 
+                -- Update Journal entry for inventory movement
+                UPDATE Finance.journals
+                SET
+                    Amount = Quantity * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
+                WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts z WHERE z.Account IN ('Sales Returns and Allowances', 'Accounts Receivable')); 
                     
-                    UPDATE Finance.journals
-                    SET Amount = Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
-                    WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
+                UPDATE Finance.journals
+                SET Amount = Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
+                WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
 
             ELSIF ActionType = 'Purchase Return' THEN
-                    UPDATE Finance.purchasereturns
-                    SET ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
-                        ReturnDate = a_MovementDate
-                    WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables a WHERE a.TransactionID = a_TransactionID);
+                UPDATE Finance.purchasereturns
+                SET ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                    ReturnDate = a_MovementDate
+                WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables a WHERE a.TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
@@ -350,15 +350,15 @@ BEGIN
 
             ELSIF ActionType = 'Transfer' THEN
                     -- Update Journal entry for inventory movement
-                    UPDATE Finance.journals
-                    SET 
-                        Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
-                    WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account = 'Inventory'); 
+                UPDATE Finance.journals
+                SET 
+                    Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account = 'Inventory'); 
 
-                    UPDATE Finance.journals
-                    SET 
-                        Amount = Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
-                    WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
+                UPDATE Finance.journals
+                SET 
+                    Amount = Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
+                WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
         
                 ELSE
                     RAISE EXCEPTION 'Unsupported action type';
@@ -370,8 +370,10 @@ BEGIN
                 WHEN serialization_failure OR deadlock_detected THEN
                     s_count := s_count + 1;
 
-                    if s_count >= s_max then
+                    IF s_count >= s_max THEN
                         RAISE EXCEPTION 'Transaction Failed % attempted % ', s_count;
+                    END IF;
+                    PERFORM pg_sleep(0.1);
 
             EXCEPTION
                 WHEN OTHERS THEN
