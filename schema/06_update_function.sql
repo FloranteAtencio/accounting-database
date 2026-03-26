@@ -361,7 +361,8 @@ BEGIN
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
         
                 ELSE
-                    RAISE EXCEPTION 'Unsupported action type';
+                    RETURN;
+                    -- RAISE EXCEPTION 'Unsupported action type';
                 END IF;
 
             EXIT;
