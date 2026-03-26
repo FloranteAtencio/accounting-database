@@ -168,9 +168,3 @@ This system simulates a real ERP backend where:
 * API or frontend dashboard integration
 
 ---
-
-## 📄 License
-
-This project is for educational and portfolio purposes.
-
----
