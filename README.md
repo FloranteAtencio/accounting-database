@@ -162,8 +162,7 @@ This system simulates a real ERP backend where:
 
 ## 📌 Future Improvements
 
-* Automated partition creation (monthly)
-* Materialized views for faster reporting
+* Data Replication(Master Slave)
 * Data warehouse integration (analytics layer)
 * API or frontend dashboard integration
 
