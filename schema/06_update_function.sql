@@ -360,7 +360,7 @@ BEGIN
                         Amount = Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
                     WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
                 ELSE
-                    RAISE EXCEPTION 'Invalid Action Type';
+                    RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
                 END IF;
             EXIT;
 
