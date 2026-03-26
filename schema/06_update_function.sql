@@ -384,7 +384,6 @@ BEGIN
                     END IF;
                     PERFORM pg_sleep(0.1);
 
-            EXCEPTION
                 WHEN OTHERS THEN
                     RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
 
