@@ -305,7 +305,7 @@ BEGIN
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
         END;
-    END LOOP
+    END LOOP;
 END;
 $$;
 
