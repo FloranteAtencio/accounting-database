@@ -56,7 +56,7 @@ BEGIN
             PERFORM 1
             FROM Finance.Transactions
             WHERE TransactionID = a_TransactionID;
-            FOR UPDATE
+            FOR UPDATE;
 
             SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
