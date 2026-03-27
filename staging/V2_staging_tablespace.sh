@@ -1,12 +1,11 @@
 #!/bin/bash
-#./staing/V2_staginb_tablespace.sh
+# staing/V2_staginb_tablespace.sh
 
-
-SCRIPT_DIR = "../tmp"
-DB_NAME = "erp_staging"
-DB_USER = "staging_user"
-CONTAINER_NAME = "stagin_env"
-LOG_FILE = "/var/log/erp-V2_staging.log
+SCRIPT_DIR="../tmp"
+DB_NAME="erp_staging"
+DB_USER="staging_user"
+CONTAINER_NAME="stagin_env"
+LOG_FILE="/var/log/erp-V2_staging.log"
 
 echo "[$(date)] V2_staginb_tablespace testing" >> "$LOG_FILE"
 
