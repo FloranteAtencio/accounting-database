@@ -8,8 +8,6 @@ DB_USER="staging_user"
 CONTAINER_NAME="stagin_env"
 LOG_FILE="/var/log/erp-V2_staging.log"
 
-mkdir -p "$SCRIPT_DIR"
-
 echo "[$(date)] V2_staging_tablespace testing" >> "$LOG_FILE"
 
 docker exec -i $CONTAINER_NAME psql -U $DB_USER -d $DB_NAME < "$SCRIPT_DIR/01_Startup_staging.sql"
