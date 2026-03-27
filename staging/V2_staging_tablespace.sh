@@ -25,3 +25,5 @@ else
     echo "[$(date)] Staging Startup Operation failed" >> "$LOG_FILE"
     exit 1
 fi
+
+echo "[$(date)] succesful staging" >> "$LOG_FILE"
