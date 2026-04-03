@@ -112,6 +112,11 @@ BEGIN
     WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
+    PERFORM 1
+    FROM Finance.customers
+    WHERE CustomerID = (p_payload->>'customer_id')::INT
+    FOR UPDATE;
+
     -- create transaction
     INSERT INTO Finance.transactions (Description)
     VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
@@ -175,6 +180,11 @@ BEGIN
     WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
+    PERFORM 1
+    FROM Finance.customers
+    WHERE CustomerID = (p_payload->>'customer_id')::INT
+    FOR UPDATE;
+    
     -- create transaction
     INSERT INTO Finance.transactions (Description)
     VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
@@ -238,6 +248,11 @@ BEGIN
     WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
+    PERFORM 1
+    FROM Finance.customers
+    WHERE CustomerID = (p_payload->>'customer_id')::INT
+    FOR UPDATE;
+    
     -- create transaction
     INSERT INTO Finance.transactions (Description)
     VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
