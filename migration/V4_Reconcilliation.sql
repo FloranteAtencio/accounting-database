@@ -136,7 +136,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION Finance.reconcile_ap()
 RETURNS TABLE (
     TransactionID INT,

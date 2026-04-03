@@ -17,33 +17,9 @@ CREATE TABLE Finance.event_log (
 );
 
 
----========================================
---- Insert into and parametarized
---=========================================
-
-CREATE OR REPLACE PROCEDURE Finance.process_inventory_transaction(...)
-AS $$
-BEGIN
-    INSERT INTO Finance.event_log (
-        EventType,
-        Payload,
-        IdempotencyKey
-    )
-    VALUES (
-        'INVENTORY',
-        jsonb_build_object(
-            'product_id', p_product_id,
-            'warehouse_id', p_warehouse_id,
-            'action_type', p_action_type,
-            'quantity', p_quantity,
-            'date', p_date,
-            'reference_id', p_reference_id
-        ),
-        p_idempotency_key
-    )
-    ON CONFLICT (IdempotencyKey) DO NOTHING;
-END;
-$$;
+-- ===============================
+-- Plain and simple insert into
+-- ===============================
 
 INSERT INTO Finance.event_log (EventType, Payload, IdempotencyKey)
 VALUES (
@@ -87,6 +63,12 @@ BEGIN
             ELSIF rec.EventType = 'RETURN' THEN
                 CALL Finance.handle_return(rec.Payload);
 
+            ELSIF rec.EventType = 'RECEIVABLE' THEN
+                CALL Finance.handle_receivable(rec.Payload);
+            
+            ELSIF rec.EventType = 'PAYABLE' THEN
+                CALL Finance.handle_payable(rec.Payload);
+            
             ELSE
                 RAISE EXCEPTION 'Unknown event type';
             END IF;
@@ -108,7 +90,7 @@ END;
 $$;
 
 ---========================================
---- Handle Transaction
+--- Handle Transaction Sale
 --=========================================
 
 CREATE OR REPLACE PROCEDURE Finance.handle_sale(p_payload JSONB)
@@ -117,9 +99,22 @@ AS $$
 DECLARE
     v_transaction_id INT;
 BEGIN
+
+    
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    PERFORM 1
+    FROM Finance.products
+    WHERE ProductID = (p_payload->>'product_id')::INT
+    FOR UPDATE;
+
+    PERFORM 1
+    FROM Finance.warehouses
+    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    FOR UPDATE;
+
     -- create transaction
     INSERT INTO Finance.transactions (Description)
-    VALUES ('Sale event')
+    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
     RETURNING TransactionID INTO v_transaction_id;
 
     -- inventory
@@ -127,7 +122,7 @@ BEGIN
         (p_payload->>'product_id')::INT,
         (p_payload->>'warehouse_id')::INT,
         v_transaction_id,
-        'Sale',
+        (p_payload->>'action_type')::TEXT,
         (p_payload->>'quantity')::INT,
         (p_payload->>'date')::DATE
     );
@@ -136,14 +131,196 @@ BEGIN
     CALL Finance.accounting_module(
         v_transaction_id,
         (p_payload->>'product_id')::INT,
-        'Sale',
+        (p_payload->>'action_type')::TEXT,
         (p_payload->>'quantity')::INT,
         (p_payload->>'date')::DATE,
         (p_payload->>'customer_id')::INT
     );
 
+    EXIT;
+
+    EXCEPTION
+        WHEN serialization_failure OR deadlock_detected THEN
+            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+                -- ⏳ Small delay before retry (helps contention)
+                PERFORM pg_sleep(0.1);
+
+            WHEN OTHERS THEN
+                -- ❌ Real error → stop immediately
+                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
 END;
 $$;
 
 
+---========================================
+--- Handle Transaction Purchase
+--=========================================
 
+CREATE OR REPLACE PROCEDURE Finance.handle_purchase(p_payload JSONB)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_transaction_id INT;
+BEGIN
+
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    PERFORM 1
+    FROM Finance.products
+    WHERE ProductID = (p_payload->>'product_id')::INT
+    FOR UPDATE;
+
+    PERFORM 1
+    FROM Finance.warehouses
+    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    FOR UPDATE;
+
+    -- create transaction
+    INSERT INTO Finance.transactions (Description)
+    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    RETURNING TransactionID INTO v_transaction_id;
+
+    -- inventory
+    CALL Finance.inventory_module(
+        (p_payload->>'product_id')::INT,
+        (p_payload->>'warehouse_id')::INT,
+        v_transaction_id,
+        (p_payload->>'action_type')::TEXT,
+        (p_payload->>'quantity')::INT,
+        (p_payload->>'date')::DATE
+    );
+
+    -- accounting
+    CALL Finance.accounting_module(
+        v_transaction_id,
+        (p_payload->>'product_id')::INT,
+        (p_payload->>'action_type')::TEXT,
+        (p_payload->>'quantity')::INT,
+        (p_payload->>'date')::DATE,
+        (p_payload->>'customer_id')::INT
+    );
+
+    EXIT;
+
+    EXCEPTION
+        WHEN serialization_failure OR deadlock_detected THEN
+            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+                -- ⏳ Small delay before retry (helps contention)
+                PERFORM pg_sleep(0.1);
+
+            WHEN OTHERS THEN
+                -- ❌ Real error → stop immediately
+                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+
+END;
+$$;
+
+---========================================
+--- Handle Transaction Purchase
+--=========================================
+
+CREATE OR REPLACE PROCEDURE Finance.handle_return(p_payload JSONB)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_transaction_id INT;
+BEGIN
+
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    PERFORM 1
+    FROM Finance.products
+    WHERE ProductID = (p_payload->>'product_id')::INT
+    FOR UPDATE;
+
+    PERFORM 1
+    FROM Finance.warehouses
+    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    FOR UPDATE;
+
+    -- create transaction
+    INSERT INTO Finance.transactions (Description)
+    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    RETURNING TransactionID INTO v_transaction_id;
+
+    -- inventory
+    CALL Finance.inventory_module(
+        (p_payload->>'product_id')::INT,
+        (p_payload->>'warehouse_id')::INT,
+        v_transaction_id,
+        (p_payload->>'action_type')::TEXT,
+        (p_payload->>'quantity')::INT,
+        (p_payload->>'date')::DATE
+    );
+
+    -- accounting
+    CALL Finance.return_module(
+        v_transaction_id,
+        (p_payload->>'product_id')::INT,
+        (p_payload->>'action_type')::TEXT,
+        (p_payload->>'quantity')::INT,
+        (p_payload->>'date')::DATE,
+        (p_payload->>'customer_id')::INT
+    );
+
+    EXIT;
+
+    EXCEPTION
+        WHEN serialization_failure OR deadlock_detected THEN
+            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+                -- ⏳ Small delay before retry (helps contention)
+                PERFORM pg_sleep(0.1);
+
+            WHEN OTHERS THEN
+                -- ❌ Real error → stop immediately
+                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE Finance.handle_receivable(p_payload JSONB)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_transaction_id INT;
+BEGIN
+    -- create transaction
+    -- INSERT INTO Finance.transactions (Description)
+    -- VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    -- RETURNING TransactionID INTO v_transaction_id;
+
+    -- inventory
+    CALL Finance.ap_Transaction(
+        (p_payload->>'supplier_id')::INT,
+        (p_payload->>'due_date')::DATE,
+        -- v_transaction_id,
+        (p_payload->>'bill_date')::DATE,
+        (p_payload->>'amount')::DECIMAL,
+        (p_payload->>'status')::TEXT
+    );
+END;
+$$;
+
+
+CREATE OR REPLACE PROCEDURE Finance.handle_payable(p_payload JSONB)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_transaction_id INT;
+BEGIN
+    -- create transaction
+    -- INSERT INTO Finance.transactions (Description)
+    -- VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    -- RETURNING TransactionID INTO v_transaction_id;
+
+    -- inventory
+    CALL Finance.ap_Transaction(
+        (p_payload->>'customer_id')::INT,
+        (p_payload->>'due_date')::DATE,
+        -- v_transaction_id,
+        (p_payload->>'invoice_date')::DATE,
+        (p_payload->>'amount')::DECIMAL,
+        (p_payload->>'status')::TEXT
+    );
+END;
+$$;
