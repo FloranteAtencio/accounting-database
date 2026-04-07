@@ -1,9 +1,9 @@
 --- SQL script to create tables for Inventory Management System
 --- First part is Journal and Charts, second part is Inventory
 -------------- 1️⃣ Schema Tables ------------------
-CREATE OR REPLACE PROCEDURE Finance.schema_tables(
+-- CREATE OR REPLACE PROCEDURE Finance.schema_tables(
 
-) LANGUAGE plpgsql AS $$
+-- ) LANGUAGE plpgsql AS $$
 BEGIN
     DROP TABLE IF EXISTS Finance.charts CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.charts (
@@ -158,9 +158,9 @@ BEGIN
             RAISE EXCEPTION 'Tables failed: %', SQLERRM;
             
 
-END;        
-$$;
+-- END;        
+-- $$;
 
-BEGIN;
+-- BEGIN;
 CALL Finance.schema_tables();
 COMMIT;

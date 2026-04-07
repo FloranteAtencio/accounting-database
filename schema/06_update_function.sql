@@ -46,7 +46,7 @@ BEGIN
             WHERE Account = 'Cash/Bank' 
             LIMIT 1;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.customers 
@@ -63,17 +63,6 @@ BEGIN
             WHERE TransactionID = a_TransactionID
             FOR UPDATE;
 
-            SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
-                ) INTO v_balance
-            FROM Finance.journals
-            WHERE ChartID = v_cash_chart
-            FOR UPDATE;
-
-            IF a_Amount < v_balance THEN
-                RAISE EXCEPTION 'Insufficient Funds';
-            END IF;
-            
             UPDATE Finance.accountreceivables
             SET
                 CustomerID = a_CustomerID,
@@ -90,21 +79,33 @@ BEGIN
 
             UPDATE Finance.journals
             SET
-                Date = a_BillDate,
+                Date = a_Invoicedate,
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
+
             
-            EXIT;
+            SELECT SUM(
+                CASE WHEN Journal THEN Amount ELSE -Amount END
+                ) INTO v_balance
+            FROM Finance.journals
+            WHERE ChartID = v_cash_chart
+            FOR UPDATE;
+
+            IF a_Amount < v_balance THEN
+                RAISE EXCEPTION 'Insufficient Funds';
+            END IF;
+                        
+            -- EXIT;
         
         EXCEPTION
-            WHEN serialization_failure OR deadlock_detected THEN
-                s_counter := s_counter + 1;
-            IF 
-                s_counter >= s_max then
-                RAISE EXCEPTION 'Transaction failed after % try', s_max;
-            END IF;
+            -- WHEN serialization_failure OR deadlock_detected THEN
+            --     s_counter := s_counter + 1;
+            -- IF 
+            --     s_counter >= s_max then
+            --     RAISE EXCEPTION 'Transaction failed after % try', s_max;
+            -- END IF;
 
-            PERFORM pg_sleep(0.1);
+            -- PERFORM pg_sleep(0.1);
 
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
@@ -164,7 +165,7 @@ BEGIN
             WHERE Account = 'Cash/Bank' 
             LIMIT 1;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.accountpayables
@@ -181,17 +182,7 @@ BEGIN
             WHERE SupplierID = a_SupplierID
             FOR UPDATE;
         
-            SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
-                ) INTO v_balance
-            FROM Finance.journals
-            WHERE ChartID = v_cash_chart
-            FOR UPDATE;
-
-            IF p_Amount < v_balance THEN
-                RAISE EXCEPTION 'Insufficient Funds';
-            END IF;
-
+            
             UPDATE Finance.accountpayables
             SET
                 SupplierID = a_SupplierID,
@@ -210,18 +201,29 @@ BEGIN
                 Date = a_BillDate,
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Payable'));
-                
-            EXIT;
+
+            SELECT SUM(
+                CASE WHEN Journal THEN Amount ELSE -Amount END
+                ) INTO v_balance
+            FROM Finance.journals
+            WHERE ChartID = v_cash_chart
+            FOR UPDATE;
+
+            IF a_Amount < v_balance THEN
+                RAISE EXCEPTION 'Insufficient Funds';
+            END IF;
+
+            -- EXIT;
 
             EXCEPTION
-                WHEN serialization_failure OR deadlock_detected THEN
-                    s_counter := s_counter + 1;
-                IF 
-                    s_counter >= s_max then
-                    RAISE EXCEPTION 'Transaction failed after % try', s_max;
-                END IF;
+                -- WHEN serialization_failure OR deadlock_detected THEN
+                --     s_counter := s_counter + 1;
+                -- IF 
+                --     s_counter >= s_max then
+                --     RAISE EXCEPTION 'Transaction failed after % try', s_max;
+                -- END IF;
 
-                PERFORM pg_sleep(0.1);
+                -- PERFORM pg_sleep(0.1);
 
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
@@ -250,7 +252,7 @@ BEGIN
     LOOP
         BEGIN
 
-            IF a_ProductID IS NULL OR a_WarehouseID IS NULL THEN
+            IF a_ProductID IS NULL OR a_WarehouseID IS NULL OR a_TransactionID IS NULL THEN
                 RAISE EXCEPTION 'Invalid product or warehouse ID';
             END IF;
             
@@ -262,7 +264,9 @@ BEGIN
                 RAISE EXCEPTION 'Quantity must be positive';
             END IF;
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+
+            -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.products
@@ -290,99 +294,99 @@ BEGIN
                 Description = CONCAT(a_ActionType, ' of ProductID: ', a_ProductID, ' in WarehouseID: ', a_WarehouseID, ' quantity of:', a_Quantity, 'This had been Updated')
             WHERE TransactionID = a_TransactionID;
 
-            IF ActionType = 'Purchase' THEN
+            IF a_ActionType = 'Purchase' THEN
                 -- Update Accounts Payable
                 UPDATE Finance.accountpayables
-                SET Amount = Quantity * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = ProductID),
-                    DueDate = MovementDate + INTERVAL '30 days',
-                    BillDate = MovementDate,
+                SET Amount = a_Quantity * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = ProductID),
+                    DueDate = a_MovementDate + INTERVAL '30 days',
+                    BillDate = a_MovementDate,
                     Status = 'Pending'
                 WHERE TransactionID = a_TransactionID;
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Inventory', 'Accounts Payable'));
 
-            ELSIF ActionType = 'Sale' THEN
+            ELSIF a_ActionType = 'Sale' THEN
                     -- Update Accounts Receivable
                 UPDATE Finance.accountreceivables
-                SET Amount = Quantity * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = ProductID),
-                    DueDate = MovementDate + INTERVAL '30 days',
-                    InvoiceDate = MovementDate,
+                SET Amount = a_Quantity * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = ProductID),
+                    DueDate = a_MovementDate + INTERVAL '30 days',
+                    InvoiceDate = a_MovementDate,
                     Status = 'Pending'
                 WHERE TransactionID = a_TransactionID;
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
-                SET Amount = Quantity * (SELECT Productprice FROM Finance.products z WHERE z.ProductID = a_ProductID)
+                SET Amount = a_Quantity * (SELECT Productprice FROM Finance.products z WHERE z.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Account Receivable', 'Revenue'));
 
                 UPDATE Finance.journals
                 SET Amount = Quantity * (SELECT Productcost FROM Finance.products c WHERE c.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts b WHERE b.Account IN ('Cost of Goods Sold', 'Inventory'));
         
-            ELSIF ActionType = 'Sales Return' THEN
+            ELSIF a_ActionType = 'Sales Return' THEN
                 UPDATE Finance.salereturns
                 SET 
-                    ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                    ReturnAmount = a_Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
                     ReturnDate = a_MovementDate
                 WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables a WHERE a.TransactionID = a_TransactionID);
 
                 -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET
-                    Amount = Quantity * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts z WHERE z.Account IN ('Sales Returns and Allowances', 'Accounts Receivable')); 
                     
                 UPDATE Finance.journals
-                SET Amount = Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
+                SET Amount = a_Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
 
-            ELSIF ActionType = 'Purchase Return' THEN
+            ELSIF a_ActionType = 'Purchase Return' THEN
                 UPDATE Finance.purchasereturns
-                SET ReturnAmount = Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                SET ReturnAmount = a_Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
                     ReturnDate = a_MovementDate
                 WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables a WHERE a.TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = Quantity * (SELECT Productprice FROM Finance.products v WHERE v.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productprice FROM Finance.products v WHERE v.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts w WHERE w.Account IN ('Accounts Payable', 'Purchase Returns and Allowances'));
             
                 UPDATE Finance.journals
                 SET 
-                    Amount = Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
 
-            ELSIF ActionType = 'Transfer' THEN
+            ELSIF a_ActionType = 'Transfer' THEN
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account = 'Inventory'); 
 
                 UPDATE Finance.journals
                 SET 
-                    Amount = Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
+                    Amount = a_Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory');
         
                 ELSE
                     RAISE EXCEPTION 'Unsupported action type';
                 END IF;
 
-            EXIT;
+            -- EXIT;
 
             EXCEPTION 
-                WHEN serialization_failure OR deadlock_detected THEN
-                    s_count := s_count + 1;
+                -- WHEN serialization_failure OR deadlock_detected THEN
+                --     s_count := s_count + 1;
 
-                    IF s_count >= s_max THEN
-                        RAISE EXCEPTION 'Transaction Failed attempted % ', s_count;
-                    END IF;
-                    PERFORM pg_sleep(0.1);
+                --     IF s_count >= s_max THEN
+                --         RAISE EXCEPTION 'Transaction Failed attempted % ', s_count;
+                --     END IF;
+                --     PERFORM pg_sleep(0.1);
 
                 WHEN OTHERS THEN
                     RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
