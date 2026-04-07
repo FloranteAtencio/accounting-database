@@ -278,15 +278,15 @@ BEGIN
             INSERT INTO Finance.transactions (Description, idempotencyKey)
             VALUES (CONCAT('Account Payable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status ))
             RETURNING TransactionID INTO new_transaction_id;
-            -- ON CONFLICT(idempotencyKey) DO NOTHING
+            ON CONFLICT(idempotencyKey) DO NOTHING
 
-            -- IF new_transaction_id IS NULL THEN
-            --     SELECT TransactionID INTO new_transaction_id
-            --     FROM Finance.transactions
-            --     WHERE idempotencyKey = p_idempotency_key;
+            IF new_transaction_id IS NULL THEN
+                SELECT TransactionID INTO new_transaction_id
+                FROM Finance.transactions
+                WHERE idempotencyKey = p_idempotency_key;
                 
-            --     RETURN;
-            -- END IF;
+                RETURN;
+            END IF;
             
             INSERT INTO Finance.accountpayables (SupplierID, TransactionID, Amount, DueDate,BillDate,Status)
             VALUES (p_SupplierID,new_transaction_id,p_Amount,p_DueDate,p_BillDate,'Paid');
@@ -372,16 +372,16 @@ BEGIN
         INSERT INTO Finance.transactions (Description, idempotencyKey)
         VALUES (CONCAT('Account Receivable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status ))
         RETURNING TransactionID INTO new_transaction_id;
-        -- ON CONFLICT(idempotencyKey) DO NOTHING
+        ON CONFLICT(idempotencyKey) DO NOTHING
 
 
-        -- IF new_transaction_id IS NULL THEN
-        --     SELECT TransactionID INTO new_transaction_id
-        --     FROM Finance.transactions
-        --     WHERE idempotencyKey = p_idempotency_key;
+        IF new_transaction_id IS NULL THEN
+            SELECT TransactionID INTO new_transaction_id
+            FROM Finance.transactions
+            WHERE idempotencyKey = p_idempotency_key;
             
-        --     RETURN;
-        -- END IF;
+            RETURN;
+        END IF;
 
         INSERT INTO Finance.accountreceivables (CustomersID, TransactionID, Amount, DueDate,InvoiceDate,Status)
         VALUES (p_CustomersID,new_transaction_id,p_Amount,p_DueDate,p_InvoiceDate,'Paid');

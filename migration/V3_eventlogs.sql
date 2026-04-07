@@ -245,15 +245,14 @@ BEGIN
 
     -- EXIT;
 
-    EXCEPTION
-        -- WHEN serialization_failure OR deadlock_detected THEN
-        --     RAISE EXCEPTION 'Transaction failed %', SQLERRM;
-        --         -- ⏳ Small delay before retry (helps contention)
-        --         PERFORM pg_sleep(0.1);
-
-            WHEN OTHERS THEN
-                -- ❌ Real error → stop immediately
-                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+EXCEPTION
+    WHEN OTHERS THEN
+    -- ❌ Real error → stop immediately
+        RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+    -- WHEN serialization_failure OR deadlock_detected THEN
+    --  RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+    --  -- ⏳ Small delay before retry (helps contention)
+    --  PERFORM pg_sleep(0.1);
 
 END;
 $$;
@@ -325,16 +324,15 @@ BEGIN
 
     -- EXIT;
 
-    EXCEPTION
-        -- WHEN serialization_failure OR deadlock_detected THEN
-        --     RAISE EXCEPTION 'Transaction failed %', SQLERRM;
-        --         -- ⏳ Small delay before retry (helps contention)
-        --         PERFORM pg_sleep(0.1);
-
-        WHEN OTHERS THEN
-        -- ❌ Real error → stop immediately
-            RAISE EXCEPTION 'Stop immediately %', SQLERRM;
-
+EXCEPTION
+    WHEN OTHERS THEN
+    -- ❌ Real error → stop immediately
+    RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+    -- WHEN serialization_failure OR deadlock_detected THEN
+    --     RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+    --         -- ⏳ Small delay before retry (helps contention)
+    --     PERFORM pg_sleep(0.1);
+    
 END;
 $$;
 
