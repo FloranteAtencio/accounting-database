@@ -16,12 +16,14 @@ CREATE TABLE Finance.event_log (
     ProcessedAt TIMESTAMP
 );
 
+ALTER TABLE Finance.event_log
+ADD COLUMN RetryCount INT DEFAULT 0;
 
 -- ===============================
 -- Plain and simple insert into
 -- ===============================
 
-INSERT INTO Finance.event_log (EventType, Payload, IdempotencyKey)
+INSERT INTO Finance.event_log (EventType, Payload,idempotencyKey)
 VALUES (
     'SALE',
     jsonb_build_object(
@@ -30,13 +32,11 @@ VALUES (
         'quantity', 5,
         'price', 100,
         'customer_id', 10,
-        'date', CURRENT_DATE
-    ),
-    'sale-2026-0001'
-)
-ON CONFLICT (IdempotencyKey) DO NOTHING;
-
-
+        'date', CURRENT_DATE,
+        'idempotency_key','sale-2026-0001'
+    )
+    ,'sale-2026-0001'
+);
 ---========================================
 --- Automate process
 --=========================================
@@ -46,11 +46,14 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     rec RECORD;
+    retry_count INT := 0;
 BEGIN
-    FOR rec IN 
-        SELECT * FROM Finance.event_log
-        WHERE Status = 'PENDING'
-        ORDER BY EventID
+  FOR rec IN 
+    SELECT *
+    FROM Finance.event_log
+    WHERE Status = 'PENDING'
+    ORDER BY EventID
+    FOR UPDATE SKIP LOCKED
     LOOP
         BEGIN
             -- route based on event type
@@ -79,11 +82,24 @@ BEGIN
                 ProcessedAt = CURRENT_TIMESTAMP
             WHERE EventID = rec.EventID;
 
+
+
         EXCEPTION
             WHEN OTHERS THEN
                 UPDATE Finance.event_log
-                SET Status = 'FAILED'
-                WHERE EventID = rec.EventID;
+                SET RetryCount = RetryCount + 1
+                WHERE EventID = rec.EventID
+                RETURNING RetryCount INTO retry_count;
+
+                IF retry_count >= 3 THEN
+                    UPDATE Finance.event_log
+                    SET Status = 'FAILED'
+                    WHERE EventID = rec.EventID;
+                ELSE
+                    UPDATE Finance.event_log
+                    SET Status = 'PENDING'
+                    WHERE EventID = rec.EventID;
+                END IF;
         END;
     END LOOP;
 END;
@@ -99,9 +115,8 @@ AS $$
 DECLARE
     v_transaction_id INT;
 BEGIN
-
     
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     PERFORM 1
     FROM Finance.products
     WHERE ProductID = (p_payload->>'product_id')::INT
@@ -118,10 +133,19 @@ BEGIN
     FOR UPDATE;
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description)
-    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    INSERT INTO Finance.transactions (Description,IdempotencyKey)
+    VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
+    ,p_payload->>'idempotency_key')
+    ON CONFLICT(idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
+     IF v_transaction_id IS NULL THEN
+        SELECT TransactionID INTO v_transaction_id
+        FROM Finance.transactions 
+        WHERE idempotencyKey = p_payload->>'idempotency_key';
+                
+        RETURN;
+    END IF;
     -- inventory
     CALL Finance.inventory_module(
         (p_payload->>'product_id')::INT,
@@ -142,17 +166,17 @@ BEGIN
         (p_payload->>'customer_id')::INT
     );
 
-    EXIT;
+    -- EXIT;
 
-    EXCEPTION
-        WHEN serialization_failure OR deadlock_detected THEN
-            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
-                -- ⏳ Small delay before retry (helps contention)
-                PERFORM pg_sleep(0.1);
+EXCEPTION
+    WHEN OTHERS THEN
+        -- ❌ Real error → stop immediately
+        RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+    --     WHEN serialization_failure OR deadlock_detected THEN
+    --         RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+    --             -- ⏳ Small delay before retry (helps contention)
+    --             PERFORM pg_sleep(0.1);
 
-            WHEN OTHERS THEN
-                -- ❌ Real error → stop immediately
-                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
 END;
 $$;
 
@@ -168,7 +192,7 @@ DECLARE
     v_transaction_id INT;
 BEGIN
 
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
     PERFORM 1
     FROM Finance.products
@@ -186,10 +210,19 @@ BEGIN
     FOR UPDATE;
     
     -- create transaction
-    INSERT INTO Finance.transactions (Description)
-    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    INSERT INTO Finance.transactions (Description, idempotencyKey)
+    VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
+    ,p_payload->>'idempotency_key')
+    ON CONFLICT(idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
+     IF v_transaction_id IS NULL THEN
+        SELECT TransactionID INTO v_transaction_id
+        FROM Finance.transactions 
+        WHERE idempotencyKey = p_payload->>'idempotency_key';
+                
+        RETURN;
+    END IF;
     -- inventory
     CALL Finance.inventory_module(
         (p_payload->>'product_id')::INT,
@@ -210,13 +243,13 @@ BEGIN
         (p_payload->>'customer_id')::INT
     );
 
-    EXIT;
+    -- EXIT;
 
     EXCEPTION
-        WHEN serialization_failure OR deadlock_detected THEN
-            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
-                -- ⏳ Small delay before retry (helps contention)
-                PERFORM pg_sleep(0.1);
+        -- WHEN serialization_failure OR deadlock_detected THEN
+        --     RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+        --         -- ⏳ Small delay before retry (helps contention)
+        --         PERFORM pg_sleep(0.1);
 
             WHEN OTHERS THEN
                 -- ❌ Real error → stop immediately
@@ -236,7 +269,7 @@ DECLARE
     v_transaction_id INT;
 BEGIN
 
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
     PERFORM 1
     FROM Finance.products
@@ -253,11 +286,23 @@ BEGIN
     WHERE CustomerID = (p_payload->>'customer_id')::INT
     FOR UPDATE;
     
+
+
     -- create transaction
-    INSERT INTO Finance.transactions (Description)
-    VALUES (CONCAT('Produdct ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date'))
+    INSERT INTO Finance.transactions (Description , idempotencyKey)
+    VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
+    ,p_payload->>'idempotency_key')
+    ON CONFLICT(idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
+     IF v_transaction_id IS NULL THEN
+        SELECT TransactionID INTO v_transaction_id
+        FROM Finance.transactions 
+        WHERE idempotencyKey = p_payload->>'idempotency_key';
+                
+        RETURN;
+    END IF;
+    
     -- inventory
     CALL Finance.inventory_module(
         (p_payload->>'product_id')::INT,
@@ -278,17 +323,17 @@ BEGIN
         (p_payload->>'customer_id')::INT
     );
 
-    EXIT;
+    -- EXIT;
 
     EXCEPTION
-        WHEN serialization_failure OR deadlock_detected THEN
-            RAISE EXCEPTION 'Transaction failed %', SQLERRM;
-                -- ⏳ Small delay before retry (helps contention)
-                PERFORM pg_sleep(0.1);
+        -- WHEN serialization_failure OR deadlock_detected THEN
+        --     RAISE EXCEPTION 'Transaction failed %', SQLERRM;
+        --         -- ⏳ Small delay before retry (helps contention)
+        --         PERFORM pg_sleep(0.1);
 
-            WHEN OTHERS THEN
-                -- ❌ Real error → stop immediately
-                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
+        WHEN OTHERS THEN
+        -- ❌ Real error → stop immediately
+            RAISE EXCEPTION 'Stop immediately %', SQLERRM;
 
 END;
 $$;
