@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE indexes_at()LANGUAGE plpgsql AS $$
+-- CREATE OR REPLACE PROCEDURE indexes_at()LANGUAGE plpgsql AS $$
 BEGIN
 
     CREATE INDEX idx_inventory_product ON Finance.inventoryaudits(productid);
@@ -15,8 +15,8 @@ BEGIN
     CREATE INDEX idx_inventory_composite 
     ON Finance.inventoryaudits(productid, warehouseid); 
 
-END;
-$$;
-BEGIN;
-Call indexes_at();
+-- END;
+-- $$;
+-- BEGIN;
+-- Call indexes_at();
 COMMIT;
