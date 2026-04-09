@@ -140,7 +140,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-    -- RETURN QUERY
+    RETURN QUERY
     SELECT 
         j.TransactionID,
         SUM(CASE WHEN j.Journal = TRUE THEN j.Amount ELSE 0 END) AS TotalDebit,
@@ -164,7 +164,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-    -- RETURN QUERY
+    RETURN QUERY
     SELECT 
         ar.TransactionID,
         ar.Amount,
