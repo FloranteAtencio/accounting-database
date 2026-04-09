@@ -1,5 +1,5 @@
 -- CREATE OR REPLACE PROCEDURE indexes_at()LANGUAGE plpgsql AS $$
-BEGIN
+BEGIN;
 
     CREATE INDEX idx_inventory_product ON Finance.inventoryaudits(productid);
     CREATE INDEX idx_inventory_warehouse ON Finance.inventoryaudits(warehouseid);

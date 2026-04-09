@@ -225,7 +225,7 @@ CREATE OR REPLACE PROCEDURE Finance.ap_Transaction(
     IN p_BillDate DATE,
     IN p_Amount DECIMAL(12,2),
     IN p_Status VARCHAR(20),
-    --IN p_idempotency_key VARCHAR
+    IN p_idempotency_key VARCHAR
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
@@ -276,10 +276,15 @@ BEGIN
             END IF;
 
             INSERT INTO Finance.transactions (Description, idempotencyKey)
-            VALUES (CONCAT('Account Payable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status ))
+            VALUES (   
+                CONCAT( 'Account Payable With Amount of ', p_Amount, 
+                        'Due Date on ',p_DueDate, 
+                        'Status ',  p_Status ),
+                p_idempotency_key
+                )
+            ON CONFLICT (idempotencyKey) DO NOTHING
             RETURNING TransactionID INTO new_transaction_id;
-            ON CONFLICT(idempotencyKey) DO NOTHING
-
+            
             IF new_transaction_id IS NULL THEN
                 SELECT TransactionID INTO new_transaction_id
                 FROM Finance.transactions
@@ -317,7 +322,7 @@ CREATE OR REPLACE PROCEDURE Finance.ar_transaction(
     IN p_InvoiceDate DATE,
     IN p_Amount DECIMAL(12,2),
     IN p_Status VARCHAR(20),
-    --IN p_idempotency_key VARCHAR
+    IN p_idempotency_key VARCHAR
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
@@ -370,10 +375,15 @@ BEGIN
             END IF;
 
         INSERT INTO Finance.transactions (Description, idempotencyKey)
-        VALUES (CONCAT('Account Receivable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status ))
+        VALUES (
+            CONCAT( 'Account Receivable With Amount of ', p_Amount, 
+                    'Due Date on ',p_DueDate, 
+                    'Status ',  p_Status ),
+            p_idempotency_key
+            )
+        ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
-        ON CONFLICT(idempotencyKey) DO NOTHING
-
+        
 
         IF new_transaction_id IS NULL THEN
             SELECT TransactionID INTO new_transaction_id
@@ -454,10 +464,24 @@ BEGIN
             FOR UPDATE;
 
             INSERT INTO Finance.transactions (Description, idempotencyKey)
-            VALUES (CONCAT('Inventory Transaction With Action Type of ', p_action_type , ' Date on ',p_Date, ' Product name ', v_product_name)
-                    ,p_idempotency_key)
+            VALUES (
+                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                        ' Date on ',p_Date, 
+                        ' Product name ', v_product_name),
+                p_idempotency_key
+                )
             ON CONFLICT(idempotencyKey) DO NOTHING
             RETURNING TransactionID INTO new_transaction_id;
+
+            -- INSERT INTO Finance.transactions (Description, idempotencyKey)
+            -- VALUES (
+            --     CONCAT('Inventory Transaction With Action Type of ', p_action_type, 
+            --         ' Date on ', p_Date, 
+            --         ' Product name ', v_product_name),
+            --     p_idempotency_key
+            -- )
+            -- ON CONFLICT (idempotencyKey) DO NOTHING
+            -- RETURNING TransactionID INTO new_transaction_id;
 
             IF new_transaction_id IS NULL THEN
                 SELECT TransactionID INTO new_transaction_id
