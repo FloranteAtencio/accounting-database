@@ -275,17 +275,24 @@ BEGIN
                 RAISE EXCEPTION 'Insufficient Funds';
             END IF;
 
-
             INSERT INTO Finance.transactions (Description, idempotencyKey)
-            VALUES (CONCAT('Account Payable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status )
-                    ,p_idempotency_key)
-            ON CONFLICT(idempotencyKey) DO NOTHING
+            VALUES (   
+                CONCAT( 'Account Payable With Amount of ', p_Amount, 
+                        'Due Date on ',p_DueDate, 
+                        'Status ',  p_Status ),
+                p_idempotency_key
+                )
+            ON CONFLICT (idempotencyKey) DO NOTHING
             RETURNING TransactionID INTO new_transaction_id;
-
-
-            -- INSERT INTO Finance.transactions (Description)
-            -- VALUES (CONCAT('Account Payable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status )) RETURNING TransactionID INTO new_transaction_id;
-
+            
+            IF new_transaction_id IS NULL THEN
+                SELECT TransactionID INTO new_transaction_id
+                FROM Finance.transactions
+                WHERE idempotencyKey = p_idempotency_key;
+                
+                RETURN;
+            END IF;
+            
             INSERT INTO Finance.accountpayables (SupplierID, TransactionID, Amount, DueDate,BillDate,Status)
             VALUES (p_SupplierID,new_transaction_id,p_Amount,p_DueDate,p_BillDate,'Paid');
             
@@ -305,7 +312,7 @@ BEGIN
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
         END;
-    END LOOP;
+    END LOOP; 
 END;
 $$;
 
@@ -368,10 +375,15 @@ BEGIN
             END IF;
 
         INSERT INTO Finance.transactions (Description, idempotencyKey)
-        VALUES (CONCAT('Account Receivable With Amount of ', p_Amount, 'Due Date on ',p_DueDate, 'Status ',  p_Status )
-                ,p_idempotency_key)
-        ON CONFLICT(idempotencyKey) DO NOTHING
+        VALUES (
+            CONCAT( 'Account Receivable With Amount of ', p_Amount, 
+                    'Due Date on ',p_DueDate, 
+                    'Status ',  p_Status ),
+            p_idempotency_key
+            )
+        ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
+        
 
         IF new_transaction_id IS NULL THEN
             SELECT TransactionID INTO new_transaction_id
@@ -383,7 +395,6 @@ BEGIN
 
         INSERT INTO Finance.accountreceivables (CustomersID, TransactionID, Amount, DueDate,InvoiceDate,Status)
         VALUES (p_CustomersID,new_transaction_id,p_Amount,p_DueDate,p_InvoiceDate,'Paid');
-
         CALL Finance.insert_journal(new_transaction_id, 'Cash/Bank', FALSE, Amount, InvoiceDate);
         CALL Finance.insert_journal(new_transaction_id, 'Accounts Receivable', TRUE, p_Amount, p_InvoiceDate);
 
@@ -453,10 +464,24 @@ BEGIN
             FOR UPDATE;
 
             INSERT INTO Finance.transactions (Description, idempotencyKey)
-            VALUES (CONCAT('Inventory Transaction With Action Type of ', p_action_type , ' Date on ',p_Date, ' Product name ', v_product_name)
-                    ,p_idempotency_key)
+            VALUES (
+                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                        ' Date on ',p_Date, 
+                        ' Product name ', v_product_name),
+                p_idempotency_key
+                )
             ON CONFLICT(idempotencyKey) DO NOTHING
             RETURNING TransactionID INTO new_transaction_id;
+
+            -- INSERT INTO Finance.transactions (Description, idempotencyKey)
+            -- VALUES (
+            --     CONCAT('Inventory Transaction With Action Type of ', p_action_type, 
+            --         ' Date on ', p_Date, 
+            --         ' Product name ', v_product_name),
+            --     p_idempotency_key
+            -- )
+            -- ON CONFLICT (idempotencyKey) DO NOTHING
+            -- RETURNING TransactionID INTO new_transaction_id;
 
             IF new_transaction_id IS NULL THEN
                 SELECT TransactionID INTO new_transaction_id

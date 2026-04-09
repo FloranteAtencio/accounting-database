@@ -4,7 +4,7 @@
 -- CREATE OR REPLACE PROCEDURE Finance.schema_tables(
 
 -- ) LANGUAGE plpgsql AS $$
-BEGIN
+BEGIN;
     DROP TABLE IF EXISTS Finance.charts CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.charts (
         ChartID SERIAL PRIMARY KEY,
@@ -153,14 +153,14 @@ BEGIN
         LogTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         ChangedBy VARCHAR(50) NOT NULL
     );    
-    EXCEPTION
-        WHEN OTHERS THEN
-            RAISE EXCEPTION 'Tables failed: %', SQLERRM;
+--     EXCEPTION
+--         WHEN OTHERS THEN
+--             RAISE EXCEPTION 'Tables failed: %', SQLERRM;
             
 
--- END;        
--- $$;
+-- -- END;        
+-- -- $$;
 
--- BEGIN;
-CALL Finance.schema_tables();
+-- -- BEGIN;
+-- CALL Finance.schema_tables();
 COMMIT;
