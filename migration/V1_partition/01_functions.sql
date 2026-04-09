@@ -1,4 +1,3 @@
-BEGIN;
 CREATE OR REPLACE FUNCTION partion_weekly_basis (tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
@@ -19,9 +18,7 @@ BEGIN
 
 END;
 $$ LANGUAGE plgsql;
-COMMIT;
 
-BEGIN;
 CREATE OR REPLACE FUNCTION partion_monthly_basis (tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
@@ -42,7 +39,6 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
-COMMIT;
 
 -- 0 2 * * 0 docker exec -it erp_postgres psql -U erp_admin -d erp_db -c \ "Select partion_monthly_basis('Finance','journals');"
 -- 0 2 1 * * docker exec -it erp_postgres psql -U erp_admin -d erp_db -c \ "Select partion_monthly_basis('Finance','accountpayables');"

@@ -5,49 +5,97 @@
 ---========================================
 -- Critical Reconciliation Journal Balance check
 ---========================================
-SELECT 
-    TransactionID,
-    SUM(CASE WHEN Journal = TRUE THEN Amount ELSE 0 END) AS total_debit,
-    SUM(CASE WHEN Journal = FALSE THEN Amount ELSE 0 END) AS total_credit
-FROM Finance.journals
-GROUP BY TransactionID
-HAVING SUM(CASE WHEN Journal = TRUE THEN Amount ELSE 0 END)
-     != SUM(CASE WHEN Journal = FALSE THEN Amount ELSE 0 END);
+CREATE OR REPLACE FUNCTION Finance.balance_check()
+RETURNS TABLE(
+    TransactionID INT
+    ,total_debit DECIMAL
+    ,total_credit DECIMAL
+)
+AS $$
+BEGIN
+    -- RETURN QUERY
+
+    SELECT 
+        TransactionID,
+        SUM(CASE WHEN Journal = TRUE THEN Amount ELSE 0 END) AS total_debit,
+        SUM(CASE WHEN Journal = FALSE THEN Amount ELSE 0 END) AS total_credit
+    FROM Finance.journals
+    GROUP BY TransactionID
+    HAVING SUM(CASE WHEN Journal = TRUE THEN Amount ELSE 0 END)
+        != SUM(CASE WHEN Journal = FALSE THEN Amount ELSE 0 END);
+END;
+$$ LANGUAGE plgsql;
+
+
+
 
 ---=======================================
 -- Inventory vs movement check
 ---=======================================
 
-SELECT
-    ProductID,
-    SUM(CASE
-        WHEN ActionType IN ('Purchase','Sales Return') THEN Quantity
-        WHEN ActionType IN ('Sales', 'Purchase Return') THEN -Quantity
-        ELSE 0
-    END ) AS calculated_stock
-FROM Finance.inventoryaudits
-GROUP BY ProductID;
+CREATE OR REPLACE Finance.get_stock()
+RETURNS TABLE(
+    ProductID INT
+    ,calculated_stock DECIMAL
+
+)
+AS $$
+BEGIN
+    -- RETURN QUERY
+    SELECT
+        ProductID,
+        SUM(CASE
+            WHEN ActionType IN ('Purchase','Sales Return') THEN Quantity
+            WHEN ActionType IN ('Sales', 'Purchase Return') THEN -Quantity
+            ELSE 0
+        END ) AS calculated_stock
+    FROM Finance.inventoryaudits
+    GROUP BY ProductID;
+END;
+$$ LANGUAGE plgsql;
+
 ---=======================================
 --- Cash vs Transaction Check
 ---=======================================
+CREATE OR REPLACE FUNCTION get_balance (startdate DATE, enddate DATE)
+RETURNS TABLE(
+    cash_balance DECIMAL
+)
+AS $$
+BEGIN
+    SELECT 
+        SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = TRUE THEN j.Amount ELSE 0 END) -
+        SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = FALSE THEN j.Amount ELSE 0 END)
+        AS cash_balance
+    FROM Finance.journals j
+    JOIN Finance.charts c ON j.ChartID = c.ChartID;
+    WHERE J.Date BETWEEN startdate AND enddate;
+END;
+$$ LANGUAGE plgsql;
 
-SELECT 
-    SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = TRUE THEN j.Amount ELSE 0 END) -
-    SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = FALSE THEN j.Amount ELSE 0 END)
-    AS cash_balance
-FROM Finance.journals j
-JOIN Finance.charts c ON j.ChartID = c.ChartID;
 ---=======================================
 --- simple tax report
 ---=======================================
-SELECT
-    SUM(CASE WHEN c.Type = 'Revenue' THEN j.Amount ELSE 0 END) AS total_revenue,
-    SUM(CASE WHEN c.Type = 'Expense' THEN j.Amount ELSE 0 END) AS total_expense,
-    SUM(CASE WHEN c.Type = 'Revenue' THEN j.Amount ELSE 0 END) -
-    SUM(CASE WHEN c.Type = 'Expense' THEN j.Amount ELSE 0 END) AS net_income
-FROM Finance.journals j
-JOIN Finance.charts c ON j.ChartID = c.ChartID
-WHERE j.Date BETWEEN '2026-01-01' AND '2026-12-31';
+
+CREATE OR REPLACE Finance.simple_tax(startdate DATE, enddate DATE)
+RETURNS TABLE(
+    total_revenue DECIMAL
+    ,total_expense DECIMAL
+    ,net_income DECIMAL
+)
+AS $$
+BEGIN
+
+    SELECT
+        SUM(CASE WHEN c.Type = 'Revenue' THEN j.Amount ELSE 0 END) AS total_revenue,
+        SUM(CASE WHEN c.Type = 'Expense' THEN j.Amount ELSE 0 END) AS total_expense,
+        SUM(CASE WHEN c.Type = 'Revenue' THEN j.Amount ELSE 0 END) -
+        SUM(CASE WHEN c.Type = 'Expense' THEN j.Amount ELSE 0 END) AS net_income
+    FROM Finance.journals j
+    JOIN Finance.charts c ON j.ChartID = c.ChartID
+    WHERE j.Date BETWEEN startdate AND enddate;
+END;
+$$ LANGUAGE plgsql;
 
 ---========================================
 -- Functions 
@@ -62,26 +110,26 @@ WHERE j.Date BETWEEN '2026-01-01' AND '2026-12-31';
 -- VALUES
 -- (v_transaction_id, 'VAT_OUTPUT', 12, v_tax, v_base);
 
-CREATE OR REPLACE FUNCTION Finance.get_vat_summary(start_date DATE, end_date DATE)
-RETURNS TABLE (
-    TaxType VARCHAR,
-    TotalTax DECIMAL
-)
-AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        TaxType,
-        SUM(TaxAmount)
-    FROM Finance.tax_entries
-    WHERE TransactionID IN (
-        SELECT TransactionID 
-        FROM Finance.transactions
-        WHERE Description IS NOT NULL
-    )
-    GROUP BY TaxType;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION Finance.get_vat_summary(start_date DATE, end_date DATE)
+-- RETURNS TABLE (
+--     TaxType VARCHAR,
+--     TotalTax DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     -- RETURN QUERY
+--     SELECT 
+--         TaxType,
+--         SUM(TaxAmount)
+--     FROM Finance.tax_entries
+--     WHERE TransactionID IN (
+--         SELECT TransactionID 
+--         FROM Finance.transactions
+--         WHERE Description IS NOT NULL
+--     )
+--     GROUP BY TaxType;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION Finance.check_journal_balance()
 RETURNS TABLE (
@@ -92,7 +140,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-    RETURN QUERY
+    -- RETURN QUERY
     SELECT 
         j.TransactionID,
         SUM(CASE WHEN j.Journal = TRUE THEN j.Amount ELSE 0 END) AS TotalDebit,
@@ -116,7 +164,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-    RETURN QUERY
+    -- RETURN QUERY
     SELECT 
         ar.TransactionID,
         ar.Amount,

@@ -1,6 +1,3 @@
-CREATE TABLESPACE hotspace LOCATION '/mnt/ssd_hot';
-CREATE TABLESPACE coldspace LOCATION '/mnt/hdd_cold';
-
 CREATE OR REPLACE FUNCTION Finance.partion_monthly_basis(tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
@@ -124,5 +121,4 @@ $$ LANGUAGE plpgsql;
 --     );
 -- END;
 -- $$ LANGUAGE plpgsql;
-
 
