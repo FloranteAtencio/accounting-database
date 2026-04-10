@@ -439,17 +439,19 @@ BEGIN
     -- 🔁 Retry loop for serialization / deadlocks
     LOOP
         BEGIN
+	    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             IF p_quantity <= 0 OR p_quantity IS NULL THEN
                 RAISE EXCEPTION 'Quantity must be greater than 0';
             END IF;
             
-            SELECT ProductName INTO v_product_name
+
+            -- 🧠 Isolation level (strong consistency)
+
+	    SELECT ProductName INTO v_product_name
             FROM Finance.products
             WHERE ProductID = p_product_id;
 
-            -- 🧠 Isolation level (strong consistency)
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
             PERFORM 1

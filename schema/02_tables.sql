@@ -148,7 +148,7 @@ BEGIN;
     CREATE TABLE IF NOT EXISTS Finance.auditlogs (
         AuditID SERIAL PRIMARY KEY,
         TableName VARCHAR(50) NOT NULL,
-        RecordedID INT NOT NULL,
+        RecTransact TEXT NOT NULL,
         Operation VARCHAR(20) NOT NULL,  -- CHECK (Operation IN ('INSERT', 'UPDATE', 'DELETE')),
         LogTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         ChangedBy VARCHAR(50) NOT NULL
