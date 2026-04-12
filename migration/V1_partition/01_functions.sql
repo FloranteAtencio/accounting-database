@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partion_weekly_basis (tableselected text, schemaselected text)
+CREATE OR REPLACE FUNCTION partition_weekly_basis (tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
 
@@ -19,7 +19,7 @@ BEGIN
 END;
 $$ LANGUAGE plgsql;
 
-CREATE OR REPLACE FUNCTION partion_monthly_basis (tableselected text, schemaselected text)
+CREATE OR REPLACE FUNCTION partition_monthly_basis (tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
 
