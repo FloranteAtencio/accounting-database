@@ -11,10 +11,10 @@
 --\i schema/07_select_function.sql
 
 -- Verify schema created
-SELECT finance.partion_weekly_basis('journals','finance');
-SELECT finance.partion_weekly_basis('accountpayables','finance');
-SELECT finance.partion_weekly_basis('accountreceivables','finance');
-SELECT finance.partion_weekly_monthly('inventoryaudits','finance');
+SELECT finance.partition_weekly_basis('journals','finance');
+SELECT finance.partition_weekly_basis('accountpayables','finance');
+SELECT finance.partition_weekly_basis('accountreceivables','finance');
+SELECT finance.partition_monthly_basis('inventoryaudits','finance');
 
 BEGIN;
 INSERT INTO Finance.products (Productname, Description, Productunit, Productcost, Productprice)
@@ -48,37 +48,3 @@ BEGIN;
 INSERT INTO Finance.suppliers (SupplierName, ContactInfo, Email, Address)
 VALUES ('Tech Supplies Inc.', '555-5678', 'info@techsupplies.com', '789 Tech Blvd, Techville');
 COMMIT;
-BEGIN;
-CALL Finance.process_inventory_transaction(
-    1,  -- product_id
-    1,  -- warehouse
-    'Purchase',
-    10, -- quantity
-    CURRENT_DATE,
-    1,   -- supplier_id
-    'Sales-2026-01-01-Mr.Atencio-03'
-);
-COMMIT;
-BEGIN;
-CALL Finance.process_inventory_transaction(
-    1,
-    1,
-    'Sale',
-    5,
-    CURRENT_DATE,
-    1, -- customer_id
-    'Sales-2026-01-01-Mr.Atencio-05'
-);
-COMMIT;
-BEGIN;
-CALL Finance.process_inventory_transaction(
-    1,
-    1,
-    'Sale Return',
-    2,
-    CURRENT_DATE,
-    1, -- receivable_id
-    'Sales-2026-01-01-Mr.Atencio-02'
-);
-COMMIT;
-SELECT 'Schema initialization complete!' as status;

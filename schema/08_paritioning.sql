@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION Finance.partion_weekly_basis(tableselected text, schemaselected text)
+CREATE OR REPLACE FUNCTION Finance.partition_weekly_basis(tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
     s_date date := date_trunc('week', current_date);
@@ -19,7 +19,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.partion_weekly_monthly(tableselected text, schemaselected text)
+CREATE OR REPLACE FUNCTION Finance.partition_monthly_basis(tableselected text, schemaselected text)
 RETURNS void AS $$
 DECLARE
     s_date date := date_trunc('month', current_date);

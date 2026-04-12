@@ -103,7 +103,7 @@ BEGIN;
         BillDate DATE NOT NULL,
         ReturnAmount DECIMAL(10, 2) NOT NULL CHECK (ReturnAmount >= 0),
         ReturnDate DATE NOT NULL,
-        FOREIGN KEY (PayableID,BillDate) REFERENCES Finance.accountpayables(PayableID,BillDate) ON DELETE NO ACTION
+        FOREIGN KEY (PayableID,BillDate) REFERENCES Finance.accountpayables(PayableID,BillDate) ON DELETE NO ACTION ON UPDATE CASCADE
         );
 
     DROP TABLE IF EXISTS Finance.accountreceivables CASCADE;
@@ -127,7 +127,7 @@ BEGIN;
         InvoiceDate DATE NOT NULL,
         ReturnAmount DECIMAL(10, 2) NOT NULL CHECK (ReturnAmount >= 0),
         ReturnDate DATE NOT NULL,
-        FOREIGN KEY (ReceivableID,InvoiceDate) REFERENCES Finance.accountreceivables(ReceivableID,InvoiceDate) ON DELETE NO ACTION
+        FOREIGN KEY (ReceivableID,InvoiceDate) REFERENCES Finance.accountreceivables(ReceivableID,InvoiceDate) ON DELETE NO ACTION ON UPDATE CASCADE
         );
 
     DROP TABLE IF EXISTS Finance.inventorytransfers CASCADE;
