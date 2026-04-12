@@ -15,6 +15,8 @@ SELECT finance.partition_weekly_basis('journals','finance');
 SELECT finance.partition_weekly_basis('accountpayables','finance');
 SELECT finance.partition_weekly_basis('accountreceivables','finance');
 SELECT finance.partition_monthly_basis('inventoryaudits','finance');
+SELECT finance.partition_weekly_basis('ar_ext','finance');
+SELECT finance.partition_weekly_basis('ap_ext','finance');
 
 BEGIN;
 INSERT INTO Finance.products (Productname, Description, Productunit, Productcost, Productprice)

@@ -74,6 +74,7 @@ AS $$
 DECLARE
     v_cost DECIMAL;
     v_price DECIMAL;
+    new_returning_id INT;
 BEGIN
 
 
@@ -85,26 +86,40 @@ BEGIN
     IF LOWER(p_action_type) = 'purchase' THEN
 
         -- Accounts Payable
-        INSERT INTO Finance.accountpayables
-        (SupplierID, TransactionID, Amount, DueDate, BillDate, Status)
+        INSERT INTO Finance.accountpayables 
+		(SupplierID, TransactionID)
         VALUES
-        (p_reference_id, p_transaction_id, p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending');
+		(p_reference_id, p_transaction_id)
+	RETURNING PayableID INTO new_returning_id;
 
-        -- Journal
-        CALL Finance.insert_journal(p_transaction_id, 'Inventory', TRUE, p_quantity * v_cost, p_date);
-        CALL Finance.insert_journal(p_transaction_id, 'Accounts Payable', FALSE, p_quantity * v_cost, p_date);
+	INSERT INTO Finance.ap_ext
+		(Amount, DueDate, BillDate, Status,PayableID)
+        VALUES
+		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+	-- Journal
+        CALL Finance.insert_journal
+		(p_transaction_id, 'Inventory', TRUE, p_quantity * v_cost, p_date);
+        CALL Finance.insert_journal
+		(p_transaction_id, 'Accounts Payable', FALSE, p_quantity * v_cost, p_date);
 
     ELSIF LOWER(p_action_type) = 'sale' THEN
 
         -- Accounts Receivable
         INSERT INTO Finance.accountreceivables
-        (CustomerID, TransactionID, Amount, DueDate, InvoiceDate, Status)
+        	(CustomerID, TransactionID)
         VALUES
-        (p_reference_id, p_transaction_id, p_quantity * v_price, p_date + INTERVAL '30 days', p_date, 'Pending');
-
+        	(p_reference_id, p_transaction_id)
+	RETURNING ReceivableID INTO new_returning_id;
         -- Journal
-        CALL Finance.insert_journal(p_transaction_id, 'Accounts Receivable', TRUE, p_quantity * v_price, p_date);
-        CALL Finance.insert_journal(p_transaction_id, 'Revenue', FALSE, p_quantity * v_price, p_date);
+	INSERT INTO Finance.ar_ext
+		(Amount, DueDate, InvoiceDate, Status, ReceivableID)
+        VALUES
+		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+
+        CALL Finance.insert_journal
+		(p_transaction_id, 'Accounts Receivable', TRUE, p_quantity * v_price, p_date);
+        CALL Finance.insert_journal
+		(p_transaction_id, 'Revenue', FALSE, p_quantity * v_price, p_date);
 
     ELSE
         RAISE EXCEPTION 'Unsupported action type';
@@ -141,14 +156,17 @@ BEGIN
 
     IF LOWER(p_action_type) = 'sale return' THEN
             -- Journal entry for inventory movement
-            INSERT INTO Finance.salereturns(ReceivableID,  ReturnAmount, InvoiceDate, ReturnDate)
-            VALUES (p_reference_id, p_quantity * v_price ,(SELECT InvoiceDate from Finance.accountreceivables where ReceivableID = p_reference_id) , p_date);
+            INSERT INTO Finance.salereturns
+		(ReceivableID,  ReturnAmount, ReturnDate)
+            VALUES 
+		(p_reference_id, p_quantity * v_price, p_date);
             
-        Update Finance.accountreceivables
+        Update Finance.ar_ext
         SET
         Status = 'Returned'
         WHERE 
            ReceivableID = p_reference_id;
+
         CALL Finance.insert_journal(p_transaction_id, 'Sales Returns and Allowances', TRUE, p_quantity * v_price, p_date);
         CALL Finance.insert_journal(p_transaction_id, 'Accounts Receivable', FALSE, p_quantity * v_price, p_date);
         CALL Finance.insert_journal(p_transaction_id, 'Inventory', TRUE, p_quantity * v_cost, p_date);
@@ -156,10 +174,12 @@ BEGIN
 
     ELSIF p_action_type = 'Purchase Return' THEN
         -- Journal entry for inventory movement
-        INSERT INTO Finance.purchasereturns(PayableID,  ReturnAmount, BillDate, ReturnDate)
-        VALUES (p_reference_id, p_quantity * v_price, (SELECT BillDate from Finance.accountpayables where PayableID = p_reference_id), p_date);
+        INSERT INTO Finance.purchasereturns
+		(PayableID,  ReturnAmount, ReturnDate)
+        VALUES 
+		(p_reference_id, p_quantity * v_price, p_date);
             
-        Update Finance.accountpayables
+        Update Finance.ap_ext
         SET
         Status = 'Returned'
         WHERE 
@@ -229,12 +249,13 @@ CREATE OR REPLACE PROCEDURE Finance.ap_Transaction(
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
+    new_returning_id INT;
     s_count INT:=0;
     s_max INT:=3;
     v_cash_chart INT;
     v_balance DECIMAL(12,2);
 BEGIN
-    LOOP
+    --LOOP
         BEGIN
 
             IF p_Status NOT IN ('Pending', 'Paid', 'Overdue') OR p_Status =  '' THEN
@@ -292,27 +313,37 @@ BEGIN
                 
                 RETURN;
             END IF;
+ 	INSERT INTO Finance.accountpayables 
+		(SupplierID, TransactionID)
+        VALUES
+		(p_SupplierID,new_transaction_id)
+	RETURNING PayableID INTO new_returning_id;
+
+	INSERT INTO Finance.ap_ext
+		(Amount, DueDate, BillDate, Status,PayableID)
+        VALUES
+		(p_Amount,p_DueDate,p_BillDate,p_Status,new_returning_id);
             
-            INSERT INTO Finance.accountpayables (SupplierID, TransactionID, Amount, DueDate,BillDate,Status)
-            VALUES (p_SupplierID,new_transaction_id,p_Amount,p_DueDate,p_BillDate,p_Status);
+           -- INSERT INTO Finance.accountpayables (SupplierID, TransactionID, Amount, DueDate,BillDate,Status)
+           -- VALUES (p_SupplierID,new_transaction_id,p_Amount,p_DueDate,p_BillDate,p_Status);
             
             CALL Finance.insert_journal(new_transaction_id, 'Cash/Bank', FALSE, p_Amount, p_BillDate);
             CALL Finance.insert_journal(new_transaction_id, 'Accounts Payable', TRUE, p_Amount, p_BillDate);
-        EXIT;
+      --  EXIT;
 
         EXCEPTION
-            WHEN serialization_failure or deadlock_detected THEN
-                s_count := s_count + 1;
-                IF s_count >= s_max then
-                    RAISE EXCEPTION 'Transaction failed after % attempts', s_count;
-                END IF;
+            --WHEN serialization_failure or deadlock_detected THEN
+              --  s_count := s_count + 1;
+                --IF s_count >= s_max then
+                  --  RAISE EXCEPTION 'Transaction failed after % attempts', s_count;
+                --END IF;
 
-                PERFORM pg_sleep(0.1);
+               -- PERFORM pg_sleep(0.1);
     
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
         END;
-    END LOOP; 
+  --  END LOOP; 
 END;
 $$;
 
@@ -326,12 +357,13 @@ CREATE OR REPLACE PROCEDURE Finance.ar_transaction(
 ) LANGUAGE plpgsql AS $$
 DECLARE
     new_transaction_id  INT;
+    new_returning_id INT;
     s_counter INT := 0;
     s_max INT:= 2;
     v_cash_chart INT;
     v_balance DECIMAL(12,2);
 BEGIN
-    LOOP
+    --LOOP
     BEGIN
         
         IF p_Status NOT IN ('Pending', 'Paid', 'Overdue') OR p_Status =  '' THEN
@@ -392,28 +424,41 @@ BEGIN
             
             RETURN;
         END IF;
+	
+	INSERT INTO Finance.accountreceivables
+        	(CustomerID, TransactionID)
+        VALUES
+        	(p_CustomersID,new_transaction_id)
+	RETURNING ReceivableID INTO new_returning_id;
+        -- Journal
+	INSERT INTO Finance.ar_ext
+		(Amount, DueDate, InvoiceDate, Status, ReceivableID)
+        VALUES
+		(p_Amount,p_DueDate,p_InvoiceDate,p_Status,new_returning_id);
 
-        INSERT INTO Finance.accountreceivables (CustomerID, TransactionID, Amount, DueDate,InvoiceDate,Status)
-        VALUES (p_CustomersID,new_transaction_id,p_Amount,p_DueDate,p_InvoiceDate,p_Status);
-        CALL Finance.insert_journal(new_transaction_id, 'Cash/Bank', FALSE, p_Amount,p_InvoiceDate);
+
+        --INSERT INTO Finance.accountreceivables (CustomerID, TransactionID, Amount, DueDate,InvoiceDate,Status)
+        --VALUES (p_CustomersID,new_transaction_id,p_Amount,p_DueDate,p_InvoiceDate,p_Status);
+        
+	CALL Finance.insert_journal(new_transaction_id, 'Cash/Bank', FALSE, p_Amount,p_InvoiceDate);
         CALL Finance.insert_journal(new_transaction_id, 'Accounts Receivable', TRUE, p_Amount, p_InvoiceDate);
 
-        EXIT;
+        --EXIT;
 
     EXCEPTION
-        WHEN serialization_failure OR deadlock_detected THEN
-            s_counter := s_counter + 1;
-        IF 
-            s_counter >= s_max then
-                RAISE EXCEPTION 'Transaction failed after % try', s_max;
-        END IF;
+        --WHEN serialization_failure OR deadlock_detected THEN
+          --  s_counter := s_counter + 1;
+        --IF 
+          --  s_counter >= s_max then
+           --     RAISE EXCEPTION 'Transaction failed after % try', s_max;
+        --END IF;
 
-        PERFORM pg_sleep(0.1);
+       -- PERFORM pg_sleep(0.1);
 
         WHEN OTHERS THEN
             RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
         END;
-    END LOOP;
+    --END LOOP;
 END;
 $$;
 
@@ -437,7 +482,7 @@ DECLARE
     v_product_name VARCHAR(255);
 BEGIN
     -- 🔁 Retry loop for serialization / deadlocks
-    LOOP
+    --LOOP
         BEGIN
 	    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
@@ -525,24 +570,24 @@ BEGIN
             END IF;
 
             -- ✅ SUCCESS → exit retry loop
-            EXIT;
+     --       EXIT;
 
         EXCEPTION
-            WHEN serialization_failure OR deadlock_detected THEN
-                v_retry_count := v_retry_count + 1;
+      --      WHEN serialization_failure OR deadlock_detected THEN
+        --        v_retry_count := v_retry_count + 1;
 
-                IF v_retry_count >= v_max_retries THEN
-                    RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
-                END IF;
+          --      IF v_retry_count >= v_max_retries THEN
+            --        RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
+              --  END IF;
 
                 -- ⏳ Small delay before retry (helps contention)
-                PERFORM pg_sleep(0.1);
+               -- PERFORM pg_sleep(0.1);
 
             WHEN OTHERS THEN
                 -- ❌ Real error → stop immediately
                 RAISE;
         END;
-    END LOOP;
+   -- END LOOP;
 END;
 $$;
 
@@ -551,7 +596,6 @@ $$;
 ---------  Insert Stored Procedure       ----------
 
 
--- ----- Simplle CRUD can be ignore -------
 -- CREATE OR REPLACE PROCEDURE Finance.products_transaction
 -- (
 --     IN Productname VARCHAR(100),
