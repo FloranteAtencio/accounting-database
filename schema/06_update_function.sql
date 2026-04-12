@@ -53,10 +53,10 @@ BEGIN
             WHERE CustomerID = a_CustomerID
             FOR UPDATE;
 
-            PERFORM 1
-            FROM Finance.accountreceivables
-            WHERE ReceivableID = a_ReceivableID
-            FOR UPDATE;
+--            PERFORM 1
+  --          FROM Finance.accountreceivables
+    --        WHERE ReceivableID = a_ReceivableID
+      --      FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
@@ -74,7 +74,7 @@ BEGIN
 
             UPDATE Finance.transactions
             SET
-                Description = CONCAT('Account Receivable With Amount of ', Amount, 'Due Date on ',DueDate, 'Status ',  a_Status , 'This had been Updated')
+                Description = CONCAT('Account Receivable With Amount of ', a_Amount, 'Due Date on ', a_DueDate, 'Status ',  a_Status , 'This had been Updated')
             WHERE TransactionID = a_TransactionID;
 
             UPDATE Finance.journals
@@ -88,14 +88,14 @@ BEGIN
                 CASE WHEN Journal THEN Amount ELSE -Amount END
                 ) INTO v_balance
             FROM Finance.journals
-            WHERE ChartID = v_cash_chart
-            FOR UPDATE;
+            WHERE ChartID = v_cash_chart;
+--            FOR UPDATE;
 
             IF a_Amount < v_balance THEN
                 RAISE EXCEPTION 'Insufficient Funds';
             END IF;
                         
-            -- EXIT;
+            EXIT;
         
         EXCEPTION
             -- WHEN serialization_failure OR deadlock_detected THEN
@@ -206,14 +206,14 @@ BEGIN
                 CASE WHEN Journal THEN Amount ELSE -Amount END
                 ) INTO v_balance
             FROM Finance.journals
-            WHERE ChartID = v_cash_chart
-            FOR UPDATE;
+            WHERE ChartID = v_cash_chart;
+            --FOR UPDATE;
 
             IF a_Amount < v_balance THEN
                 RAISE EXCEPTION 'Insufficient Funds';
             END IF;
 
-            -- EXIT;
+            EXIT;
 
             EXCEPTION
                 -- WHEN serialization_failure OR deadlock_detected THEN

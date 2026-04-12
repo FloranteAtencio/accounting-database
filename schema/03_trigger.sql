@@ -14,7 +14,7 @@ BEGIN
 
     INSERT INTO Finance.auditlogs (
         TableName,
-        RecordedID,
+        RecTransact,
         Operation,
         ChangedBy,
         prev_hash,
