@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE PROCEDURE Finance.process_events()
 LANGUAGE plpgsql
 AS $$
@@ -40,8 +39,6 @@ BEGIN
                 ProcessedAt = CURRENT_TIMESTAMP
             WHERE EventID = rec.EventID;
 
-
-
         EXCEPTION
             WHEN OTHERS THEN
                 UPDATE Finance.event_log
@@ -58,6 +55,7 @@ BEGIN
                     SET Status = 'PENDING'
                     WHERE EventID = rec.EventID;
                 END IF;
+                RAISE EXCEPTION 'Stop immediately %', SQLERRM;
         END;
     END LOOP;
 END;
@@ -91,10 +89,10 @@ BEGIN
     FOR UPDATE;
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description,IdempotencyKey)
+    INSERT INTO Finance.transactions (Description,idempotencyKey)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,p_payload->>'idempotency_key')
-    ON CONFLICT(idempotencyKey) DO NOTHING
+    ,(p_payload->>'idempotency_key')::TEXT)
+    ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
@@ -163,15 +161,15 @@ BEGIN
     FOR UPDATE;
 
     PERFORM 1
-    FROM Finance.customers
-    WHERE CustomerID = (p_payload->>'customer_id')::INT
+    FROM Finance.suppliers
+    WHERE CustomerID = (p_payload->>'supplier_id')::INT
     FOR UPDATE;
     
     -- create transaction
     INSERT INTO Finance.transactions (Description, idempotencyKey)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,p_payload->>'idempotency_key')
-    ON CONFLICT(idempotencyKey) DO NOTHING
+    ,(p_payload->>'idempotency_key')::TEXT)
+    ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
@@ -198,7 +196,7 @@ BEGIN
         (p_payload->>'action_type')::TEXT,
         (p_payload->>'quantity')::INT,
         (p_payload->>'date')::DATE,
-        (p_payload->>'customer_id')::INT
+        (p_payload->>'supplier_id')::INT
     );
 
     -- EXIT;
@@ -238,18 +236,18 @@ BEGIN
     WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
-    PERFORM 1
-    FROM Finance.customers
-    WHERE CustomerID = (p_payload->>'customer_id')::INT
-    FOR UPDATE;
+    -- PERFORM 1
+    -- FROM Finance.customers
+    -- WHERE CustomerID = (p_payload->>'customer_id')::INT
+    -- FOR UPDATE;
     
 
 
     -- create transaction
     INSERT INTO Finance.transactions (Description , idempotencyKey)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,p_payload->>'idempotency_key')
-    ON CONFLICT(idempotencyKey) DO NOTHING
+    ,(p_payload->>'idempotency_key')::TEXT)
+    ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
@@ -277,7 +275,7 @@ BEGIN
         (p_payload->>'action_type')::TEXT,
         (p_payload->>'quantity')::INT,
         (p_payload->>'date')::DATE,
-        (p_payload->>'customer_id')::INT
+        (p_payload->>'ref_id')::INT
     );
 
     -- EXIT;
