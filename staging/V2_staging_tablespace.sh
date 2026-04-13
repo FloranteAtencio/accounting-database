@@ -6,7 +6,7 @@ SCRIPT_DIR="../tmp"
 DB_NAME="erp_staging"
 DB_USER="staging_user"
 CONTAINER_NAME="staging_env"
-LOG_FILE="/var/log/erp-V2-staging.log"
+LOG_FILE="/var/log/erp-staging.log"
 
 echo "[$(date)] V2_staging_tablespace_testing" >> "$LOG_FILE"
 

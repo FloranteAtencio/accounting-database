@@ -15,7 +15,7 @@ LOG_FILE="/var/log/erp-backup.log"
 # Create directories if they don't exist
 mkdir -p "$BACKUP_DIR"
 mkdir -p "$EXTERNAL_DRIVE"
-touch "LOG_FILE"
+
 
 # Timestamp
 TIMESTAMP=$(date +%F_%H-%M-%S)
