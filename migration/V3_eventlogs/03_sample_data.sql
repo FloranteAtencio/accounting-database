@@ -22,7 +22,7 @@ VALUES (
         'warehouse_id', 1,
         'quantity', 20,
         'action_type','Purchase',
-        'customer_id', 1,
+        'supplier_id', 1,
         'date', CURRENT_DATE,
         'idempotency_key','sale-2026-0002'
     )
