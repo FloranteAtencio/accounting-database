@@ -162,7 +162,7 @@ BEGIN
 
     PERFORM 1
     FROM Finance.suppliers
-    WHERE CustomerID = (p_payload->>'supplier_id')::INT
+    WHERE SupplierID = (p_payload->>'supplier_id')::INT
     FOR UPDATE;
     
     -- create transaction
