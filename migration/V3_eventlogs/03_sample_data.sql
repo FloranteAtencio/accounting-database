@@ -28,3 +28,18 @@ VALUES (
     )
     ,'sale-2026-0002'
 );
+
+INSERT INTO Finance.event_log (EventType, Payload,idempotencyKey)
+VALUES (
+    'RETURN',
+    jsonb_build_object(
+        'product_id', 1,
+        'warehouse_id', 1,
+        'quantity', 20,
+        'action_type','Purchase Return',
+        'ref_id', 1,
+        'date', CURRENT_DATE,
+        'idempotency_key','sale-2026-0003'
+    )
+    ,'sale-2026-0003'
+);

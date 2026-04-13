@@ -315,7 +315,6 @@ BEGIN
 END;
 $$;
 
-
 CREATE OR REPLACE PROCEDURE Finance.handle_payable(p_payload JSONB)
 LANGUAGE plpgsql
 AS $$
