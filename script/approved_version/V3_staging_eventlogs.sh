@@ -2,16 +2,16 @@
 
 set -e
 
-SCRIPT_DIR="."
-DB_NAME="erp_postgres"
+SCRIPT_DIR="../../migration/V3_eventlogs"
+DB_NAME="erp_db"
 DB_USER="erp_admin"
-CONTAINER_NAME="erp_db"
+CONTAINER_NAME="erp_postgres"
 LOG_FILE="/var/log/erp-production.log"
 
 echo "[$(date)] V2_staging_tablespace_testing" >> "$LOG_FILE"
 
 # Run Startup SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/01_tables.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/01_table.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Production Version 2 tables SQL alright!" >> "$LOG_FILE"
 else
@@ -20,7 +20,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/02_altertables.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/02_altertable.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Production Version 2 alter tables SQL alright!" >> "$LOG_FILE"
 else
