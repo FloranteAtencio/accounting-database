@@ -6,7 +6,7 @@ VALUES (
         'warehouse_id', 1,
         'quantity', 5,
         'price', 100,
-        'customer_id', 10,
+        'customer_id', 1,
         'date', CURRENT_DATE,
         'idempotency_key','sale-2026-0001'
     )
