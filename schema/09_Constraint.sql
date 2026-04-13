@@ -5,10 +5,10 @@ BEGIN;
     ALTER TABLE Finance.inventoryaudits 
     ADD CONSTRAINT inventoryaudits_chk_actiontype CHECK (ActionType IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
 
-    ALTER TABLE Finance.accountpayables 
+    ALTER TABLE Finance.ap_ext 
     ADD CONSTRAINT accountpayable_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
-    ALTER TABLE Finance.accountreceivables 
+    ALTER TABLE Finance.ar_ext
     ADD CONSTRAINT accountreceivables_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
     ALTER TABLE Finance.auditlogs 
