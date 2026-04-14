@@ -65,7 +65,7 @@ BEGIN
 
             UPDATE Finance.accountreceivables
             SET
-                CustomerID = a_CustomerID,
+                CustomerID = a_CustomerID
              --   DueDate = a_Duedate,
              --   InvoiceDate = a_Invoicedate,
              --   Amount = a_Amount
@@ -192,7 +192,7 @@ BEGIN
             
             UPDATE Finance.accountpayables
             SET
-                SupplierID = a_SupplierID,
+                SupplierID = a_SupplierID
                 --DueDate = a_DueDate,
                 --BillDate = a_BillDate,
                 --Amount = a_Amount
