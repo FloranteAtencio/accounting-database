@@ -66,11 +66,19 @@ BEGIN
             UPDATE Finance.accountreceivables
             SET
                 CustomerID = a_CustomerID,
-                DueDate = a_Duedate,
-                InvoiceDate = a_Invoicedate,
-                Amount = a_Amount
+             --   DueDate = a_Duedate,
+             --   InvoiceDate = a_Invoicedate,
+             --   Amount = a_Amount
             WHERE 
                 ReceivableID = a_ReceivableID AND TransactionID = a_TransactionID;
+
+            UPDATE Finance.ar_ext
+            SET
+                DueDate = a_DueDate,
+                InvoiceDate = a_Invoicedate,
+                Amount = a_Amount
+            WHERE
+                ReceivableID = a_ReceivableID
 
             UPDATE Finance.transactions
             SET
@@ -83,7 +91,6 @@ BEGIN
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
 
-            
             SELECT SUM(
                 CASE WHEN Journal THEN Amount ELSE -Amount END
                 ) INTO v_balance
@@ -186,10 +193,18 @@ BEGIN
             UPDATE Finance.accountpayables
             SET
                 SupplierID = a_SupplierID,
+                --DueDate = a_DueDate,
+                --BillDate = a_BillDate,
+                --Amount = a_Amount
+            WHERE PayableID = a_PayableID AND TransactionID = a_TransactionID;
+
+            UPDATE Finance.ap_ext
+            SET 
                 DueDate = a_DueDate,
                 BillDate = a_BillDate,
                 Amount = a_Amount
-            WHERE PayableID = a_PayableID AND TransactionID = a_TransactionID;
+            WHERE
+                PayableID = a_PayableID;
 
             UPDATE Finance.transactions
             SET
@@ -296,12 +311,12 @@ BEGIN
 
             IF a_ActionType = 'Purchase' THEN
                 -- Update Accounts Payable
-                UPDATE Finance.accountpayables
+                UPDATE Finance.ap_ext
                 SET Amount = a_Quantity * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = ProductID),
                     DueDate = a_MovementDate + INTERVAL '30 days',
                     BillDate = a_MovementDate,
                     Status = 'Pending'
-                WHERE TransactionID = a_TransactionID;
+                WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables WHERE TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
@@ -311,12 +326,12 @@ BEGIN
 
             ELSIF a_ActionType = 'Sale' THEN
                     -- Update Accounts Receivable
-                UPDATE Finance.accountreceivables
+                UPDATE Finance.ar_ext
                 SET Amount = a_Quantity * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = ProductID),
                     DueDate = a_MovementDate + INTERVAL '30 days',
                     InvoiceDate = a_MovementDate,
                     Status = 'Pending'
-                WHERE TransactionID = a_TransactionID;
+                WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables WHERE TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
