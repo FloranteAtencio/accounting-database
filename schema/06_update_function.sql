@@ -53,10 +53,10 @@ BEGIN
             WHERE CustomerID = a_CustomerID
             FOR UPDATE;
 
---            PERFORM 1
-  --          FROM Finance.accountreceivables
-    --        WHERE ReceivableID = a_ReceivableID
-      --      FOR UPDATE;
+            PERFORM 1
+            FROM Finance.accountreceivables
+            WHERE ReceivableID = a_ReceivableID
+            FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
@@ -76,8 +76,7 @@ BEGIN
             SET
                 DueDate = a_DueDate,
                 InvoiceDate = a_Invoicedate,
-                Amount = a_Amount,
-                Status = a_Status
+                Amount = a_Amount
             WHERE
                 ReceivableID = a_ReceivableID;
 
@@ -92,18 +91,18 @@ BEGIN
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
 
---             SELECT SUM(
---                 CASE WHEN Journal THEN Amount ELSE -Amount END
---                 ) INTO v_balance
---             FROM Finance.journals
---             WHERE ChartID = v_cash_chart;
--- --            FOR UPDATE;
+            SELECT SUM(
+                CASE WHEN Journal THEN Amount ELSE -Amount END
+                ) INTO v_balance
+            FROM Finance.journals
+            WHERE ChartID = v_cash_chart;
+--            FOR UPDATE;
 
---             IF a_Amount < v_balance THEN
---                 RAISE EXCEPTION 'Insufficient Funds';
---             END IF;
+            IF a_Amount < v_balance THEN
+                RAISE EXCEPTION 'Insufficient Funds';
+            END IF;
                         
-            --EXIT;
+            EXIT;
         
         EXCEPTION
             -- WHEN serialization_failure OR deadlock_detected THEN
@@ -119,133 +118,6 @@ BEGIN
                 RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
         END;
     END LOOP;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE Finance.ap_update_transaction(
-    IN a_PayableID INT,
-    IN a_TransactionID INT,
-    IN a_SupplierID INT,
-    IN a_DueDate DATE ,
-    IN a_BillDate DATE,
-    IN a_Amount DECIMAL(12,2),
-    IN a_Status VARCHAR(20)
-) LANGUAGE plpgsql AS $$
-DECLARE
-    new_transaction_id  INT;
-    s_counter INT := 0;
-    s_max INT:= 2;              
-    v_cash_chart INT;
-    v_balance DECIMAL(12,2);
-BEGIN
-    LOOP
-        BEGIN
-            IF a_Status NOT IN ('Pending', 'Paid', 'Overdue') OR a_Status =  '' THEN
-                RAISE EXCEPTION 'Invalid Status';
-            END IF;
-
-            IF a_SupplierID IS NULL THEN
-                RAISE EXCEPTION  'Invalid Supplier ID';
-            END IF;
-
-            IF a_BillDate IS NULL THEN
-                RAISE EXCEPTION 'Invalid  Due Date';
-            END IF;
-
-            IF a_DueDate IS NULL THEN
-                RAISE EXCEPTION 'Invalid  Due Date';
-            END IF;
-
-            IF a_Amount < 0 OR a_Amount IS NULL THEN
-                RAISE EXCEPTION 'Invalid Amount';
-            END IF;
-
-            IF a_TransactionID IS NULL THEN
-                RAISE EXCEPTION 'Vendor ID cannot be Null';
-            END IF;
-
-            IF a_PayableID IS NULL THEN
-                RAISE EXCEPTION 'Vendor ID cannot be Null';
-            END IF;
-
-            SELECT ChartID INTO v_cash_chart 
-            FROM Finance.charts 
-            WHERE Account = 'Cash/Bank' 
-            LIMIT 1;
-
-            -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
-            -- PERFORM 1
-            -- FROM Finance.accountpayables
-            -- WHERE PayableID = a_PayableID
-            -- FOR UPDATE;
-
-            PERFORM 1
-            FROM Finance.transactions
-            WHERE TransactionID = a_TransactionID
-            FOR UPDATE;
-            
-            PERFORM 1
-            FROM Finance.suppliers
-            WHERE SupplierID = a_SupplierID
-            FOR UPDATE;
-        
-            
-            UPDATE Finance.accountpayables
-            SET
-                SupplierID = a_SupplierID
-                --DueDate = a_DueDate,
-                --BillDate = a_BillDate,
-                --Amount = a_Amount
-            WHERE PayableID = a_PayableID AND TransactionID = a_TransactionID;
-
-            UPDATE Finance.ap_ext
-            SET 
-                DueDate = a_DueDate,
-                BillDate = a_BillDate,
-                Amount = a_Amount,
-                Status = a_Status
-            WHERE
-                PayableID = a_PayableID;
-
-            UPDATE Finance.transactions
-            SET
-                Description = CONCAT('Account Receivable With Amount of ', Amount, 'Due Date on ',DueDate, 'Status ',  a_Status , 'This had been Updated')
-            WHERE TransactionID = a_TransactionID;
-
-            UPDATE Finance.journals
-            SET
-                Date = a_BillDate,
-                Amount = a_Amount
-            WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Payable'));
-
-            --SELECT SUM(
-                --CASE WHEN Journal THEN Amount ELSE -Amount END
-              --  ) INTO v_balance
-            --FROM Finance.journals
-            --WHERE ChartID = v_cash_chart;
-            --FOR UPDATE;
-
-            --IF a_Amount < v_balance THEN
-              --  RAISE EXCEPTION 'Insufficient Funds';
-            --END IF;
-
-            --EXIT;
-
-            EXCEPTION
-                -- WHEN serialization_failure OR deadlock_detected THEN
-                --     s_counter := s_counter + 1;
-                -- IF 
-                --     s_counter >= s_max then
-                --     RAISE EXCEPTION 'Transaction failed after % try', s_max;
-                -- END IF;
-
-                -- PERFORM pg_sleep(0.1);
-
-            WHEN OTHERS THEN
-                RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
-        END;
-    END LOOP;    
 END;
 $$;
 
