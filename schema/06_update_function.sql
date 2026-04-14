@@ -78,7 +78,7 @@ BEGIN
                 InvoiceDate = a_Invoicedate,
                 Amount = a_Amount
             WHERE
-                ReceivableID = a_ReceivableID
+                ReceivableID = a_ReceivableID;
 
             UPDATE Finance.transactions
             SET
