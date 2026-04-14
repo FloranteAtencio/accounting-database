@@ -121,7 +121,7 @@ BEGIN
     END LOOP;
 END;
 $$;
-CREATE OR REPLACE PROCEDURE Finance.ap_update_transaction(
+CREATE OR REPLACE PROCEDURE Finance.ar_update_transaction(
     IN a_ReceivableID INT,
     IN a_TransactionID INT,
     IN a_CustomerID INT,
@@ -195,7 +195,7 @@ BEGIN
             WHERE 
                 ReceivableID = a_ReceivableID AND TransactionID = a_TransactionID;
 
-            UPDATE Finance.ap_ext
+            UPDATE Finance.a_ext
             SET
                 DueDate = a_DueDate,
                 InvoiceDate = a_Invoicedate,
