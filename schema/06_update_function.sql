@@ -76,7 +76,8 @@ BEGIN
             SET
                 DueDate = a_DueDate,
                 InvoiceDate = a_Invoicedate,
-                Amount = a_Amount
+                Amount = a_Amount,
+                Status = a_Status
             WHERE
                 ReceivableID = a_ReceivableID;
 
@@ -91,18 +92,18 @@ BEGIN
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
 
-            SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
-                ) INTO v_balance
-            FROM Finance.journals
-            WHERE ChartID = v_cash_chart;
---            FOR UPDATE;
+--             SELECT SUM(
+--                 CASE WHEN Journal THEN Amount ELSE -Amount END
+--                 ) INTO v_balance
+--             FROM Finance.journals
+--             WHERE ChartID = v_cash_chart;
+-- --            FOR UPDATE;
 
-            IF a_Amount < v_balance THEN
-                RAISE EXCEPTION 'Insufficient Funds';
-            END IF;
+--             IF a_Amount < v_balance THEN
+--                 RAISE EXCEPTION 'Insufficient Funds';
+--             END IF;
                         
-            EXIT;
+            --EXIT;
         
         EXCEPTION
             -- WHEN serialization_failure OR deadlock_detected THEN
@@ -174,10 +175,10 @@ BEGIN
 
             -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-            PERFORM 1
-            FROM Finance.accountpayables
-            WHERE PayableID = a_PayableID
-            FOR UPDATE;
+            -- PERFORM 1
+            -- FROM Finance.accountpayables
+            -- WHERE PayableID = a_PayableID
+            -- FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
@@ -202,7 +203,8 @@ BEGIN
             SET 
                 DueDate = a_DueDate,
                 BillDate = a_BillDate,
-                Amount = a_Amount
+                Amount = a_Amount,
+                Status = a_Status
             WHERE
                 PayableID = a_PayableID;
 
@@ -217,18 +219,18 @@ BEGIN
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Payable'));
 
-            SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
-                ) INTO v_balance
-            FROM Finance.journals
-            WHERE ChartID = v_cash_chart;
+            --SELECT SUM(
+                --CASE WHEN Journal THEN Amount ELSE -Amount END
+              --  ) INTO v_balance
+            --FROM Finance.journals
+            --WHERE ChartID = v_cash_chart;
             --FOR UPDATE;
 
-            IF a_Amount < v_balance THEN
-                RAISE EXCEPTION 'Insufficient Funds';
-            END IF;
+            --IF a_Amount < v_balance THEN
+              --  RAISE EXCEPTION 'Insufficient Funds';
+            --END IF;
 
-            EXIT;
+            --EXIT;
 
             EXCEPTION
                 -- WHEN serialization_failure OR deadlock_detected THEN
