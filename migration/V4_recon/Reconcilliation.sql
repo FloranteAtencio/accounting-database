@@ -3,17 +3,17 @@
 ---========================================
 
 ---========================================
--- Critical Reconciliation Journal Balance check
----========================================
-CREATE OR REPLACE FUNCTION Finance.balance_check()
-RETURNS TABLE(
-    TransactionID INT
-    ,total_debit DECIMAL
-    ,total_credit DECIMAL
-)
-AS $$
-BEGIN
-    -- RETURN QUERY
+-- -- Critical Reconciliation Journal Balance check
+-- ---========================================
+-- CREATE OR REPLACE FUNCTION Finance.balance_check()
+-- RETURNS TABLE(
+--     TransactionID INT
+--     ,total_debit DECIMAL
+--     ,total_credit DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     -- RETURN QUERY
 
     SELECT 
         TransactionID,
@@ -23,8 +23,8 @@ BEGIN
     GROUP BY TransactionID
     HAVING SUM(CASE WHEN Journal = TRUE THEN Amount ELSE 0 END)
         != SUM(CASE WHEN Journal = FALSE THEN Amount ELSE 0 END);
-END;
-$$ LANGUAGE plgsql;
+-- END;
+-- $$ LANGUAGE plgsql;
 
 
 
@@ -33,14 +33,14 @@ $$ LANGUAGE plgsql;
 -- Inventory vs movement check
 ---=======================================
 
-CREATE OR REPLACE Finance.get_stock()
-RETURNS TABLE(
-    ProductID INT
-    ,calculated_stock DECIMAL
+-- CREATE OR REPLACE Finance.get_stock()
+-- RETURNS TABLE(
+--     ProductID INT
+--     ,calculated_stock DECIMAL
 
-)
-AS $$
-BEGIN
+-- )
+-- AS $$
+-- BEGIN
     -- RETURN QUERY
     SELECT
         ProductID,
@@ -51,18 +51,18 @@ BEGIN
         END ) AS calculated_stock
     FROM Finance.inventoryaudits
     GROUP BY ProductID;
-END;
-$$ LANGUAGE plgsql;
+-- END;
+-- $$ LANGUAGE plgsql;
 
 ---=======================================
 --- Cash vs Transaction Check
 ---=======================================
-CREATE OR REPLACE FUNCTION get_balance (startdate DATE, enddate DATE)
-RETURNS TABLE(
-    cash_balance DECIMAL
-)
-AS $$
-BEGIN
+-- CREATE OR REPLACE FUNCTION get_balance (startdate DATE, enddate DATE)
+-- RETURNS TABLE(
+--     cash_balance DECIMAL
+-- )
+-- AS $$
+-- BEGIN
     SELECT 
         SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = TRUE THEN j.Amount ELSE 0 END) -
         SUM(CASE WHEN c.Account = 'Cash/Bank' AND j.Journal = FALSE THEN j.Amount ELSE 0 END)
@@ -70,21 +70,21 @@ BEGIN
     FROM Finance.journals j
     JOIN Finance.charts c ON j.ChartID = c.ChartID;
     WHERE J.Date BETWEEN startdate AND enddate;
-END;
-$$ LANGUAGE plgsql;
+-- END;
+-- $$ LANGUAGE plgsql;
 
 ---=======================================
 --- simple tax report
 ---=======================================
 
-CREATE OR REPLACE Finance.simple_tax(startdate DATE, enddate DATE)
-RETURNS TABLE(
-    total_revenue DECIMAL
-    ,total_expense DECIMAL
-    ,net_income DECIMAL
-)
-AS $$
-BEGIN
+-- CREATE OR REPLACE Finance.simple_tax(startdate DATE, enddate DATE)
+-- RETURNS TABLE(
+--     total_revenue DECIMAL
+--     ,total_expense DECIMAL
+--     ,net_income DECIMAL
+-- )
+-- AS $$
+-- BEGIN
 
     SELECT
         SUM(CASE WHEN c.Type = 'Revenue' THEN j.Amount ELSE 0 END) AS total_revenue,
@@ -94,8 +94,8 @@ BEGIN
     FROM Finance.journals j
     JOIN Finance.charts c ON j.ChartID = c.ChartID
     WHERE j.Date BETWEEN startdate AND enddate;
-END;
-$$ LANGUAGE plgsql;
+-- END;
+-- $$ LANGUAGE plgsql;
 
 ---========================================
 -- Functions 
@@ -118,29 +118,29 @@ $$ LANGUAGE plgsql;
 -- AS $$
 -- BEGIN
 --     -- RETURN QUERY
---     SELECT 
---         TaxType,
---         SUM(TaxAmount)
---     FROM Finance.tax_entries
---     WHERE TransactionID IN (
---         SELECT TransactionID 
---         FROM Finance.transactions
---         WHERE Description IS NOT NULL
---     )
---     GROUP BY TaxType;
+    SELECT 
+        TaxType,
+        SUM(TaxAmount)
+    FROM Finance.tax_entries
+    WHERE TransactionID IN (
+        SELECT TransactionID 
+        FROM Finance.transactions
+        WHERE Description IS NOT NULL
+    )
+    GROUP BY TaxType;
 -- END;
 -- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.check_journal_balance()
-RETURNS TABLE (
-    TransactionID INT,
-    TotalDebit DECIMAL,
-    TotalCredit DECIMAL,
-    Difference DECIMAL
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.check_journal_balance()
+-- RETURNS TABLE (
+--     TransactionID INT,
+--     TotalDebit DECIMAL,
+--     TotalCredit DECIMAL,
+--     Difference DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT 
         j.TransactionID,
         SUM(CASE WHEN j.Journal = TRUE THEN j.Amount ELSE 0 END) AS TotalDebit,
@@ -152,19 +152,19 @@ BEGIN
     HAVING 
         SUM(CASE WHEN j.Journal = TRUE THEN j.Amount ELSE 0 END) <>
         SUM(CASE WHEN j.Journal = FALSE THEN j.Amount ELSE 0 END);
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.reconcile_ar()
-RETURNS TABLE (
-    TransactionID INT,
-    AR_Amount DECIMAL,
-    Journal_Amount DECIMAL,
-    Difference DECIMAL
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.reconcile_ar()
+-- RETURNS TABLE (
+--     TransactionID INT,
+--     AR_Amount DECIMAL,
+--     Journal_Amount DECIMAL,
+--     Difference DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT 
         ar.TransactionID,
         ar.Amount,
@@ -181,19 +181,19 @@ BEGIN
     HAVING ar.Amount <> SUM(CASE 
         WHEN c.Account = 'Accounts Receivable' AND j.Journal = TRUE 
         THEN j.Amount ELSE 0 END);
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.reconcile_ap()
-RETURNS TABLE (
-    TransactionID INT,
-    AP_Amount DECIMAL,
-    Journal_Amount DECIMAL,
-    Difference DECIMAL
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.reconcile_ap()
+-- RETURNS TABLE (
+--     TransactionID INT,
+--     AP_Amount DECIMAL,
+--     Journal_Amount DECIMAL,
+--     Difference DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT 
         ap.TransactionID,
         ap.Amount,
@@ -210,19 +210,19 @@ BEGIN
     HAVING ap.Amount <> SUM(CASE 
         WHEN c.Account = 'Accounts Payable' AND j.Journal = FALSE 
         THEN j.Amount ELSE 0 END);
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.reconcile_inventory()
-RETURNS TABLE (
-    ProductID INT,
-    TotalIn INT,
-    TotalOut INT,
-    NetMovement INT
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.reconcile_inventory()
+-- RETURNS TABLE (
+--     ProductID INT,
+--     TotalIn INT,
+--     TotalOut INT,
+--     NetMovement INT
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT
         ProductID,
         SUM(CASE WHEN ActionType IN ('Purchase','Sale Return') THEN Quantity ELSE 0 END),
@@ -231,19 +231,19 @@ BEGIN
         SUM(CASE WHEN ActionType IN ('Sale','Purchase Return') THEN Quantity ELSE 0 END)
     FROM Finance.inventoryaudits
     GROUP BY ProductID;
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.reconcile_tax()
-RETURNS TABLE (
-    TransactionID INT,
-    TaxAmount DECIMAL,
-    JournalTax DECIMAL,
-    Difference DECIMAL
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.reconcile_tax()
+-- RETURNS TABLE (
+--     TransactionID INT,
+--     TaxAmount DECIMAL,
+--     JournalTax DECIMAL,
+--     Difference DECIMAL
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT 
         t.TransactionID,
         SUM(t.TaxAmount),
@@ -260,17 +260,17 @@ BEGIN
     HAVING SUM(t.TaxAmount) <> SUM(CASE 
         WHEN c.Account ILIKE '%tax%' THEN j.Amount 
         ELSE 0 END);
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION Finance.reconciliation_summary()
-RETURNS TABLE (
-    CheckType VARCHAR,
-    IssuesFound INT
-)
-AS $$
-BEGIN
-    RETURN QUERY
+-- CREATE OR REPLACE FUNCTION Finance.reconciliation_summary()
+-- RETURNS TABLE (
+--     CheckType VARCHAR,
+--     IssuesFound INT
+-- )
+-- AS $$
+-- BEGIN
+--     RETURN QUERY
     SELECT 'Journal Balance', COUNT(*) FROM Finance.check_journal_balance()
     UNION ALL
     SELECT 'AR Mismatch', COUNT(*) FROM Finance.reconcile_ar()
@@ -278,5 +278,5 @@ BEGIN
     SELECT 'AP Mismatch', COUNT(*) FROM Finance.reconcile_ap()
     UNION ALL
     SELECT 'Tax Mismatch', COUNT(*) FROM Finance.reconcile_tax();
-END;
-$$ LANGUAGE plpgsql;
+-- END;
+-- $$ LANGUAGE plpgsql;
