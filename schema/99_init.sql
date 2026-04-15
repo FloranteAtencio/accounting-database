@@ -2,7 +2,7 @@
 -- Runs all schema files in order
 
 --\i schema/01_Startup.sql
---\i schema/02_tables.sql
+--\i schema/02_tables.sqly
 --\i schema/02.1_constraint.sql
 --\i schema/03_trigger.sql
 --\i schema/04_index.sql
@@ -11,10 +11,10 @@
 --\i schema/07_select_function.sql
 
 -- Verify schema created
-SELECT finance.partition_weekly_basis('journals','finance');
+SELECT finance.partition_monthly_basis('journals','finance');
 SELECT finance.partition_monthly_basis('inventoryaudits','finance');
-SELECT finance.partition_weekly_basis('ar_ext','finance');
-SELECT finance.partition_weekly_basis('ap_ext','finance');
+SELECT finance.partition_monthly_basis('ar_ext','finance');
+SELECT finance.partition_monthly_basis('ap_ext','finance');
 
 BEGIN;
 INSERT INTO Finance.products (Productname, Description, Productunit, Productcost, Productprice)
@@ -27,7 +27,8 @@ COMMIT;
 BEGIN;
 INSERT INTO Finance.warehouses (WarehouseName, Location)
 VALUES ('Main Warehouse', '123 Main St, Cityville'),
-('Secondary Warehouse', '456 Side St, Townsville');
+('Secondary Warehouse', '456 Side St, Townsville'),
+('Third Warehouse','88 Metro st, Metrovile');
 COMMIT;
 BEGIN;
 INSERT INTO Finance.charts (Account, Type)

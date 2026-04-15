@@ -2,7 +2,7 @@
 
 set -e
 
-SCRIPT_DIR="../../migration/V4_recon"
+SCRIPT_DIR="./migration/V4_recon"
 DB_NAME="erp_db"
 DB_USER="erp_admin"
 CONTAINER_NAME="erp_postgres"

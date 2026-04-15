@@ -2,7 +2,7 @@
 
 set -e
 
-SCRIPT_DIR="../../migration/V3_eventlogs"
+SCRIPT_DIR="./migration/V3_eventlogs"
 DB_NAME="erp_db"
 DB_USER="erp_admin"
 CONTAINER_NAME="erp_postgres"
