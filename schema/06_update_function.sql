@@ -121,7 +121,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE Finance.ar_update_transaction(
+CREATE OR REPLACE PROCEDURE Finance.ap_update_transaction(
     IN a_PayableID INT,
     IN a_TransactionID INT,
     IN a_SupplierID INT,
@@ -144,11 +144,11 @@ BEGIN
                 RAISE EXCEPTION 'Invalid Status';
             END IF;
 
-            IF a_ReceivableID IS NULL THEN
+            IF a_PayableID IS NULL THEN
                 RAISE EXCEPTION  'Invalid Receivable ID';
             END IF;
 
-            IF a_Invoicedate IS NULL THEN
+            IF a_billdate IS NULL THEN
                 RAISE EXCEPTION 'Invalid  Invoice Date';
             END IF;
 
@@ -186,19 +186,19 @@ BEGIN
             WHERE TransactionID = a_TransactionID
             FOR UPDATE;
 
-            UPDATE Finance.accountreceivables
+            UPDATE Finance.accountpayables
             SET
                 PayableID = a_PayableID
              --   DueDate = a_Duedate,
              --   InvoiceDate = a_Invoicedate,
              --   Amount = a_Amount
             WHERE 
-                ReceivableID = a_ReceivableID AND TransactionID = a_TransactionID;
+                PayableID = a_PayableID AND TransactionID = a_TransactionID;
 
             UPDATE Finance.ap_ext
             SET
                 DueDate = a_DueDate,
-                BillDateDate = a_billdate,
+                BillDate = a_billdate,
                 Amount = a_Amount
             WHERE
                 PayableID = a_PayableID;
@@ -210,7 +210,7 @@ BEGIN
 
             UPDATE Finance.journals
             SET
-                Date = a_Invoicedate,
+                Date = a_billdate,
                 Amount = a_Amount
             WHERE TransactionID = a_TransactionID AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Cash/Bank', 'Accounts Receivable'));
 
@@ -261,7 +261,7 @@ DECLARE
     s_max INT := 3;
 BEGIN
  -- Input validation
-    LOOP
+--    LOOP
         BEGIN
 
             IF a_ProductID IS NULL OR a_WarehouseID IS NULL OR a_TransactionID IS NULL THEN
@@ -404,7 +404,7 @@ BEGIN
                     RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
 
         END;
-    END LOOP;            
+  --  END LOOP;            
 END;
 $$;
 
