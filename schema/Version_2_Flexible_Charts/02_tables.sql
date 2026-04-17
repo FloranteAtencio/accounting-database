@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS Finance.accountpayables (
 DROP TABLE IF EXISTS Finance.ap_ext CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     ap_ext_id SERIAL PRIMARY KEY,
-    Amount DECIMAL(12,2) NOT NULL,
+    Amount DECIMAL(12,2) NOT NULL CHECK (Amount >= 0),
     DueDate DATE NOT NULL,
     InvoiceDate DATE NOT NULL,
     Status VARCHAR(20) NOT NULL,
