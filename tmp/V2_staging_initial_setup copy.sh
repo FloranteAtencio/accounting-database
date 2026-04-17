@@ -20,12 +20,12 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/02_tables_staging.sql"
-if [ $? -eq 0 ]; then
-    echo "[$(date)] Staging tables SQL alright!" >> "$LOG_FILE"
-else
-    echo "[$(date)] Staging tables SQL failed!" >> "$LOG_FILE"
-    exit 1
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/02_tables_staging.sql"
+# if [ $? -eq 0 ]; then
+#     echo "[$(date)] Staging tables SQL alright!" >> "$LOG_FILE"
+# else
+#     echo "[$(date)] Staging tables SQL failed!" >> "$LOG_FILE"
+#     exit 1
+# fi
 
 echo "[$(date)] Successful Staging" >> "$LOG_FILE"
