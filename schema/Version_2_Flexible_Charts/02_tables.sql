@@ -12,13 +12,27 @@ CREATE TABLE IF NOT EXISTS Finance.clients (
 -- ============================================
 -- 2. COA TEMPLATES (for reference/defaults)
 -- ============================================
-DROP TABLE IF EXISTS Finance.coatemplates CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.coatemplates (
-    templateid SERIAL PRIMARY KEY,
-    templatename VARCHAR(100) NOT NULL,
+DROP TABLE IF EXISTS Finance.coa_templates CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.coa_templates (
+    template_id SERIAL PRIMARY KEY,
+    template_name VARCHAR(100) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================
+-- 2.1 COA TEMPLATES (for reference/defaults)
+-- ============================================
+DROP TABLE IF EXISTS Finance.coa_template_accounts CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.coa_template_accounts (
+    template_account_id SERIAL PRIMARY KEY,
+    template_id INT NOT NULL REFERENCES Finance.coa_templates(template_id) ON DELETE CASCADE,
+    account_code INT NOT NULL,
+    account_name VARCHAR(100) NOT NULL,
+    account_type VARCHAR(50) NOT NULL,
+    UNIQUE(template_id, account_code)
+);
+
 
 -- ============================================
 -- 3. CHART OF ACCOUNTS (client-specific)
