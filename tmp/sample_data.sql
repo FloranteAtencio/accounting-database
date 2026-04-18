@@ -60,3 +60,13 @@ INSERT INTO Finance.customers (CustomerName, ContactInfo, Email, Address) VALUES
 INSERT INTO Finance.products (ProductName, Description, ProductUnit, ProductCost, ProductPrice) VALUES ('political', 'Short toward building full.', 'unit', 73, 99);
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Default'));
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Ezra'));
+INSERT INTO Finance.products (Productname, Description, Productunit, Productcost, Productprice)
+VALUES  ('Laptop', 'High-performance laptop', 'Unit', 800.00, 1200.00),
+('Smartphone', 'Latest model smartphone', 'Unit', 500.00, 800.00),
+('Headphones', 'Noise-cancelling headphones', 'Unit', 150.00, 250.00),
+('Monitor', '24-inch LED monitor', 'Unit', 200.00, 350.00),
+('Keyboard', 'Mechanical keyboard', 'Unit', 100.00, 150.00);
+INSERT INTO Finance.warehouses (WarehouseName, Location)
+VALUES ('Main Warehouse', '123 Main St, Cityville'),
+('Secondary Warehouse', '456 Side St, Townsville'),
+('Third Warehouse', '88 Metro St, Metroville');

@@ -18,7 +18,7 @@ BEGIN
     FROM Finance.charts c
     INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
     WHERE c.clientId = p_clientId 
-      AND ar.role_name = p_account_role
+      AND ar.rolename = p_account_role
       AND c.is_active = TRUE
     LIMIT 1;
 
@@ -61,7 +61,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'cash_account_ar'
+          AND ar.rolename = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -70,7 +70,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'ar_account'
+          AND ar.rolename = 'ar_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -152,7 +152,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'cash_account_ap'
+          AND ar.rolename = 'cash_account_ap'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -161,7 +161,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'ap_account'
+          AND ar.rolename = 'ap_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -188,7 +188,7 @@ BEGIN
         END IF;
 
         -- Insert AP record
-        INSERT INTO Finance.accountspayable (VendorID, TransactionID)
+        INSERT INTO Finance.accountpayables (supplierID, TransactionID)
         VALUES (p_VendorID, new_transaction_id)
         RETURNING PayableID INTO new_returning_id;
 
@@ -229,7 +229,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'cash_account_ar'
+          AND ar.rolename = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -238,7 +238,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'expense_account'
+          AND ar.rolename = 'expense_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -292,7 +292,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'cash_account_ar'
+          AND ar.rolename = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -301,7 +301,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.role_name = 'revenue_account'
+          AND ar.rolename = 'revenue_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -333,7 +333,38 @@ BEGIN
 END;
 $$;
 
+-- ====================================================
+-- COA TEMPLATE
+-- ===================================================
+CREATE OR REPLACE PROCEDURE Finance.apply_coa_template(
+    IN p_clientId INT,
+    IN p_template_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- Copy template accounts into client's COA
+    INSERT INTO Finance.charts (clientId, account, accountCode, type, is_active)
+    SELECT 
+        p_clientId,
+        accountname,
+        accountcode,
+        accounttype,
+        TRUE
+    FROM Finance.coatemplateaccounts
+    WHERE templateid = p_template_id
+    ON CONFLICT (clientId, accountCode) DO NOTHING;  -- Skip duplicates
 
+    RAISE NOTICE 'Template % applied to client %', p_template_id, p_clientId;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'COA Transaction Failed to apply template: %', SQLERRM;
+END;
+$$;
+
+-- ====================================================
+-- INVENTORY MODULE
+-- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.inventory_module
 (
     IN p_product_id INT,
@@ -359,11 +390,14 @@ BEGIN
 
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+            RAISE EXCEPTION 'Inventory Module Transaction failed: %', SQLERRM;
 
 END;
 $$;
 
+-- ====================================================
+-- ACCOUNTING MODULE
+-- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.accounting_module
 (
     IN p_clientId INT,
@@ -398,7 +432,7 @@ BEGIN
 	RETURNING PayableID INTO new_returning_id;
 
 	INSERT INTO Finance.ap_ext
-		(Amount, DueDate, BillDate, Status,PayableID)
+		(Amount, DueDate, InvoiceDate, Status,PayableID)
         VALUES
 		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 	-- Journal
@@ -424,7 +458,7 @@ BEGIN
         CALL Finance.insert_journal
 		(p_clientId, p_transaction_id, 'ar_account', TRUE, p_quantity * v_price, p_date);
         CALL Finance.insert_journal
-		(p_clientId, p_transaction_id, 'ar_revenue', FALSE, p_quantity * v_price, p_date);
+		(p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price, p_date);
 
     ELSE
         RAISE EXCEPTION 'Unsupported action type';
@@ -433,11 +467,13 @@ BEGIN
 
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+            RAISE EXCEPTION 'Accounting Module Transaction failed: %', SQLERRM;
 END;
 $$;
 
-
+-- ====================================================
+-- RETURN MODULE
+-- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.return_module
 (
     IN p_clientId INT,
@@ -502,11 +538,15 @@ BEGIN
 
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+            RAISE EXCEPTION 'Return Module Transaction failed: %', SQLERRM;
 
 END;
 $$;
 
+
+-- ====================================================
+-- TRANSFER MODULE 
+-- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.transfer_module
 (
     IN p_clientId INT,
@@ -540,14 +580,17 @@ BEGIN
 
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
+            RAISE EXCEPTION 'Transfer Module Transaction failed: %', SQLERRM;
 
 END;
 $$;
 
-
+-- ====================================================
+-- INVENTORY PROCESS
+-- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.process_inventory_transaction
 (
+    IN p_clientId INT,
     IN p_product_id INT,
     IN p_warehouse_id INT,
     IN p_action_type VARCHAR(50),
@@ -623,19 +666,19 @@ BEGIN
             -- 💰 Accounting / Returns / Transfer
             IF p_action_type IN ('Sale', 'Purchase') THEN
                 CALL Finance.accounting_module(
-                    new_transaction_id, p_product_id, p_action_type,
+                   p_clientId, new_transaction_id, p_product_id, p_action_type,
                     p_quantity, p_date, p_reference_id
                 );
 
             ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
                 CALL Finance.return_module(
-                    new_transaction_id, p_product_id, p_action_type,
+                   p_clientId, new_transaction_id, p_product_id, p_action_type,
                     p_quantity, p_date, p_reference_id
                 );
 
             ELSIF p_action_type = 'Transfer' THEN
                 CALL Finance.transfer_module(
-                    new_transaction_id, p_product_id, p_action_type,
+                    p_clientId, new_transaction_id, p_product_id, p_action_type,
                     p_quantity, p_date, p_reference_id
                 );
             ELSE
@@ -658,7 +701,7 @@ BEGIN
 
             WHEN OTHERS THEN
                 -- ❌ Real error → stop immediately
-                RAISE;
+                RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
         END;
    -- END LOOP;
 END;
