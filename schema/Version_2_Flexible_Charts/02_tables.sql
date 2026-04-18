@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS Finance.accountroles (
     chartId INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
     roleName VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(chartId, role_name)
+    UNIQUE(chartId, roleName)
 );
 
 -- ============================================
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS Finance.ar_ext (
 DROP TABLE IF EXISTS Finance.accountpayables CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.accountpayables (
     PayableID SERIAL PRIMARY KEY,
-    suppliersID INT NOT NULL REFERENCES Finance.suppliers(SupplierID) ON DELETE CASCADE,
+    supplierID INT NOT NULL REFERENCES Finance.suppliers(SupplierID) ON DELETE CASCADE,
     TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     DueDate DATE NOT NULL,
     InvoiceDate DATE NOT NULL,
     Status VARCHAR(20) NOT NULL,
-    PayableID INT NOT NULL REFERENCES Finance.accountspayable(PayableID) ON DELETE CASCADE,
+    PayableID INT NOT NULL REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ap_ext_id,InvoiceDate)
 );    

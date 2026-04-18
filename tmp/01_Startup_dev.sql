@@ -26,7 +26,7 @@ GRANT admin_role TO admin_user;
 
 -- Developers: full privileges on 
 ---Database
-GRANT CONNECT ON DATABASE erp_staging TO dev_role;
+GRANT CONNECT ON DATABASE erp_dev TO dev_role;
 --Schema privileges
 GRANT USAGE, CREATE ON SCHEMA Finance TO dev_role;
 --Table privileges
@@ -34,7 +34,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA Finance TO dev_role;
 
 -- Finance team: can only read data
 --database privileges
-GRANT CONNECT ON DATABASE erp_staging TO finance_readonly;
+GRANT CONNECT ON DATABASE erp_dev TO finance_readonly;
 --schema privileges
 GRANT USAGE ON SCHEMA Finance TO finance_readonly;
 --table privileges
@@ -42,8 +42,8 @@ GRANT SELECT ON ALL TABLES IN SCHEMA Finance TO finance_readonly;
 
 -- Admins: manage everything
 --database privileges
-GRANT CONNECT ON DATABASE erp_staging TO admin_role;
-GRANT ALL PRIVILEGES ON DATABASE erp_staging TO admin_role;
+GRANT CONNECT ON DATABASE erp_dev TO admin_role;
+GRANT ALL PRIVILEGES ON DATABASE erp_dev TO admin_role;
 --schema privileges
 GRANT ALL PRIVILEGES ON SCHEMA Finance TO admin_role;
 GRANT ALL PRIVILEGES ON SCHEMA public TO admin_role;
