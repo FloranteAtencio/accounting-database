@@ -8,9 +8,9 @@ RETURNING template_id;
 INSERT INTO Finance.coa_template_accounts (template_id, account_code, account_name, account_type)
 VALUES
 -- Assets
-(1, 1000, 'Cash on Hand', 'Asset'),
-(1, 1010, 'Cash in Bank - Checking', 'Asset'),
-(1, 1020, 'Cash in Bank - Savings', 'Asset'),
+--(1, 1000, 'Cash on Hand', 'Asset'),
+(1, 1010, 'Cash on Hand', 'Asset'),
+(1, 1020, 'Cash in Bank', 'Asset'),
 (1, 1030, 'Petty Cash', 'Asset'),
 (1, 1100, 'Accounts Receivable', 'Asset'),
 (1, 1110, 'Allowance for Doubtful Accounts', 'Asset'),
