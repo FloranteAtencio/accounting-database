@@ -1,11 +1,11 @@
 -- Insert template header first
-INSERT INTO Finance.coa_templates (template_name, description)
+INSERT INTO Finance.coatemplates (templatename, description)
 VALUES ('Default Accounts', 'Standard COA for small businesses')
-RETURNING template_id;
+RETURNING templateid;
 -- Returns template_id = 1
 
 -- Then insert template accounts
-INSERT INTO Finance.coa_template_accounts (template_id, account_code, account_name, account_type)
+INSERT INTO Finance.coatemplateaccounts (templateid, accountcode, accountname, accounttype)
 VALUES
 -- Assets
 --(1, 1000, 'Cash on Hand', 'Asset'),

@@ -60,4 +60,3 @@ INSERT INTO Finance.customers (CustomerName, ContactInfo, Email, Address) VALUES
 INSERT INTO Finance.products (ProductName, Description, ProductUnit, ProductCost, ProductPrice) VALUES ('political', 'Short toward building full.', 'unit', 73, 99);
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Default'));
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Ezra'));
-INSERT INTO Finance.coatemplates(templatename,description) VALUES ('Small Business','Start up account');
