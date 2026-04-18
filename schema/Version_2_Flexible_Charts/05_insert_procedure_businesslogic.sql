@@ -16,7 +16,7 @@ BEGIN
     -- Find account by role (can be multiple matches, takes first)
     SELECT c.chartId INTO v_chart_id
     FROM Finance.charts c
-    INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+    INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
     WHERE c.clientId = p_clientId 
       AND ar.role_name = p_account_role
       AND c.is_active = TRUE
@@ -59,7 +59,7 @@ BEGIN
         -- Find AR cash account (client-specific)
         SELECT c.chartId INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'cash_account_ar'
           AND c.is_active = TRUE
@@ -68,7 +68,7 @@ BEGIN
         -- Find AR account
         SELECT c.chartId INTO v_ar_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'ar_account'
           AND c.is_active = TRUE
@@ -150,7 +150,7 @@ BEGIN
         -- Find AP cash account (client-specific)
         SELECT c.chartId INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'cash_account_ap'
           AND c.is_active = TRUE
@@ -159,7 +159,7 @@ BEGIN
         -- Find AP account
         SELECT c.chartId INTO v_ap_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'ap_account'
           AND c.is_active = TRUE
@@ -227,7 +227,7 @@ BEGIN
         -- Find cash account
         SELECT c.chartId INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'cash_account_ar'
           AND c.is_active = TRUE
@@ -236,7 +236,7 @@ BEGIN
         -- Find expense account
         SELECT c.chartId INTO v_expense_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'expense_account'
           AND c.is_active = TRUE
@@ -290,7 +290,7 @@ BEGIN
         -- Find cash account
         SELECT c.chartId INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'cash_account_ar'
           AND c.is_active = TRUE
@@ -299,7 +299,7 @@ BEGIN
         -- Find revenue account
         SELECT c.chartId INTO v_revenue_chart
         FROM Finance.charts c
-        INNER JOIN Finance.account_roles ar ON c.chartId = ar.chartId
+        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
           AND ar.role_name = 'revenue_account'
           AND c.is_active = TRUE
