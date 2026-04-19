@@ -90,12 +90,12 @@ BEGIN
         END IF;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey)
+        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
         VALUES (
             CONCAT('Account Receivable With Amount of ', p_Amount, 
                    ' Due Date on ', p_DueDate, 
                    ' Status ', p_Status),
-            p_idempotency_key
+            p_idempotency_key, p_clientId
         )
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
@@ -170,12 +170,12 @@ BEGIN
         END IF;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey)
+        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
         VALUES (
             CONCAT('Account Payable With Amount of ', p_Amount, 
                    ' Due Date on ', p_DueDate, 
                    ' Status ', p_Status),
-            p_idempotency_key
+            p_idempotency_key, p_clientId
         )
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
@@ -247,8 +247,8 @@ BEGIN
         END IF;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey)
-        VALUES (p_Description, p_idempotency_key)
+        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
+        VALUES (p_Description, p_idempotency_key,p_clientId)
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
 
@@ -310,8 +310,8 @@ BEGIN
         END IF;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey)
-        VALUES (p_Description, p_idempotency_key)
+        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
+        VALUES (p_Description, p_idempotency_key, p_clientId)
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
 

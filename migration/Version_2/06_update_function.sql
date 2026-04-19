@@ -1,4 +1,6 @@
+DROP PROCEDURE Finance.ar_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.ar_update_transaction(
+    IN a_clientID INT,
     IN a_ReceivableID INT,
     IN a_TransactionID INT,
     IN a_CustomerID INT,
@@ -78,7 +80,8 @@ BEGIN
             SET
                 DueDate = a_DueDate,
                 InvoiceDate = a_Invoicedate,
-                Amount = a_Amount
+                Amount = a_Amount,
+		Status = a_Status
             WHERE
                 ReceivableID = a_ReceivableID;
 
@@ -124,8 +127,9 @@ BEGIN
 END;
 $$;
 
+DROP PROCEDURE Finance.ap_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.ap_update_transaction(
-    IN a_clientid INT,
+    IN a_clientID INT,
     IN a_PayableID INT,
     IN a_TransactionID INT,
     IN a_SupplierID INT,
@@ -205,8 +209,9 @@ BEGIN
             UPDATE Finance.ap_ext
             SET
                 DueDate = a_DueDate,
-                BillDate = a_billdate,
-                Amount = a_Amount
+                Invoicedate = a_billdate,
+                Amount = a_Amount,
+		Status = a_Status
             WHERE
                 PayableID = a_PayableID;
 
@@ -252,6 +257,7 @@ BEGIN
 END;
 $$;
 
+DROP PROCEDURE Finance.inventory_audit_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.inventory_audit_update_Transaction
 (
    -- IN a_clientid INT,
@@ -260,9 +266,10 @@ CREATE OR REPLACE PROCEDURE Finance.inventory_audit_update_Transaction
     IN a_WarehouseID INT,
     IN a_TransactionID INT,
     IN a_ActionType VARCHAR(50),
-    IN a_Quantity INT,
     IN a_MovementDate DATE,
-    IN a_status VARCHAR(50)
+    IN a_status VARCHAR(50),
+    IN tities INT
+
 )
 LANGUAGE plpgsql AS $$
 DECLARE 
@@ -282,11 +289,9 @@ BEGIN
                 RAISE EXCEPTION 'Invalid product or warehouse ID';
             END IF;
 
-            IF a_Quantity <= 0 THEN
+            IF tities <= 0 THEN
                 RAISE EXCEPTION 'Quantity must be positive';
             END IF;
-
-
 
             -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
@@ -300,42 +305,42 @@ BEGIN
             WHERE WarehouseID = a_WarehouseID
             FOR UPDATE;
 
-
             -- Insert into Transactions and capture ID
             UPDATE Finance.inventoryaudits
             SET 
-                ProductID = a_ProductID,
-                WarehouseID = a_WarehouseID,
-                Quantity = a_Quantity,
-                MovementDate = a_MovementDate
+                ProductID= a_ProductID,
+                WarehouseID= a_WarehouseID,
+                MovementDate= a_MovementDate,
+		Quantity= tities
+
             WHERE
                 ManagementID = a_ManagementID AND TransactionID = a_TransactionID;
 
             UPDATE Finance.transactions
             SET
-                Description = CONCAT(a_ActionType, ' of ProductID: ', a_ProductID, ' in WarehouseID: ', a_WarehouseID, ' quantity of:', a_Quantity, 'This had been Updated')
+                Description = CONCAT(a_ActionType, ' of ProductID: ', a_ProductID, ' in WarehouseID: ', a_WarehouseID, ' quantity of:', tities, 'This had been Updated')
             WHERE TransactionID = a_TransactionID;
 
             IF a_ActionType = 'Purchase' THEN
                 -- Update Accounts Payable
                 UPDATE Finance.ap_ext
-                SET Amount = a_Quantity * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = a_ProductID),
+                SET Amount = tities * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = a_ProductID),
                     DueDate = a_MovementDate + INTERVAL '30 days',
-                    BillDate = a_MovementDate,
+                    Invoicedate = a_MovementDate,
                     Status = a_status
                 WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables WHERE TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = a_Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                    Amount = tities * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('inventory_account', 'ap_account'));
 
             ELSIF a_ActionType = 'Sale' THEN
                     -- Update Accounts Receivable
                 UPDATE Finance.ar_ext
-                SET Amount = a_Quantity * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = a_ProductID),
+                SET Amount = tities * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = a_ProductID),
                     DueDate = a_MovementDate + INTERVAL '30 days',
                     InvoiceDate = a_MovementDate,
                     Status = a_status
@@ -343,49 +348,49 @@ BEGIN
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
-                SET Amount = a_Quantity * (SELECT Productprice FROM Finance.products z WHERE z.ProductID = a_ProductID)
+                SET Amount = tities * (SELECT Productprice FROM Finance.products z WHERE z.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('ar_account', 'revenue_account'));--SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Account Receivable', 'Revenue'));
 
                 UPDATE Finance.journals
-                SET Amount = Quantity * (SELECT Productcost FROM Finance.products c WHERE c.ProductID = a_ProductID)
+                SET Amount = tities * (SELECT Productcost FROM Finance.products c WHERE c.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.charts b WHERE b.Account IN ('Cost of Goods Sold', 'Inventory'));
         
-            ELSIF a_ActionType = 'Sales Return' THEN
+            ELSIF a_ActionType = 'Sale Return' THEN
                 UPDATE Finance.salereturns
                 SET 
-                    ReturnAmount = a_Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                    ReturnAmount = tities * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
                     ReturnDate = a_MovementDate
                 WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables a WHERE a.TransactionID = a_TransactionID);
 
                 -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET
-                    Amount = a_Quantity * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
+                    Amount = tities * (SELECT Productprice FROM Finance.products x WHERE x.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('SR&Allowances', 'ar_account'));--SELECT ChartID FROM Finance.charts z WHERE z.Account IN ('Sales Returns and Allowances', 'Accounts Receivable')); 
                     
                 UPDATE Finance.journals
-                SET Amount = a_Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
+                SET Amount = tities * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('inventory_account', 'COGS'));--SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
 
             ELSIF a_ActionType = 'Purchase Return' THEN
                 UPDATE Finance.purchasereturns
-                SET ReturnAmount = a_Quantity * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
+                SET ReturnAmount = tities * (SELECT Productprice FROM Finance.products b WHERE b.ProductID = a_ProductID),
                     ReturnDate = a_MovementDate
                 WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables a WHERE a.TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = a_Quantity * (SELECT Productprice FROM Finance.products v WHERE v.ProductID = a_ProductID)
+                    Amount = tities * (SELECT Productprice FROM Finance.products v WHERE v.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('ap_account', 'PR&Allowances','inventory_account'));--SELECT ChartID FROM Finance.charts w WHERE w.Account IN ('Accounts Payable', 'Purchase Returns and Allowances'));
 	      --  UPDATE Finance.journals
               --  SET 
-              --      Amount = a_Quantity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
+              --      Amount = tity * (SELECT Productcost FROM Finance.products t WHERE t.ProductID = a_ProductID)
               --  WHERE TransactionID = a_TransactionID 
 	      -- AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('inventory_account', 'COGS'));--SELECT ChartID FROM Finance.charts u WHERE u.Account IN ('Inventory', 'Cost of Goods Sold'));
 
@@ -393,13 +398,13 @@ BEGIN
                     -- Update Journal entry for inventory movement
                 --UPDATE Finance.journals
                 --SET 
-                    --Amount = a_Quantity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                    --Amount = tity * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
                 --WHERE TransactionID = a_TransactionID 
 		--AND ChartID IN (SELECT ChartID FROM Finance.charts a WHERE a.Account = 'Inventory'); 
 
                 UPDATE Finance.journals
                 SET 
-                  Amount = a_Quantity * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
+                  Amount = tities * (SELECT Productcost FROM Finance.products d WHERE d.ProductID = a_ProductID)
                 WHERE TransactionID = a_TransactionID 
 		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('inventory_account','inventory_account'));--SELECT ChartID FROM Finance.charts c WHERE c.Account = 'Inventory'); 
                 

@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS Finance.transactions (
     TransactionID SERIAL PRIMARY KEY,
     Description TEXT NOT NULL,
     idempotencyKey VARCHAR(255) UNIQUE NOT NULL,
+    clientId INT REFERENCES Finance.clients(clientId) ON DELETE NO ACTION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -97,8 +98,8 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
     ChartID INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
     Date DATE NOT NULL,
     Journal BOOLEAN NOT NULL CHECK (Journal IN (TRUE,FALSE)),  -- TRUE = Debit, FALSE = Credit
-    Amount DECIMAL(12,2) NOT NULL CHECK  (Amount >= 0),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    Amount DECIMAL(12,2) NOT NULL CHECK  (Amount >= 0)
+  --  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (JournalID,Date)
 );--PARTITION BY RANGE(Date);
 
@@ -156,9 +157,9 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 DROP TABLE IF EXISTS Finance.accountreceivables CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.accountreceivables (
     ReceivableID SERIAL PRIMARY KEY,
-    CustomerID INT NOT NULL REFERENCES Finance.customers(CustomerID) ON DELETE CASCADE,
     TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    CustomerID INT NOT NULL REFERENCES Finance.customers(CustomerID) ON DELETE CASCADE
+   -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -171,8 +172,8 @@ CREATE TABLE IF NOT EXISTS Finance.ar_ext (
     DueDate DATE NOT NULL,
     InvoiceDate DATE NOT NULL,
     Status VARCHAR(20) NOT NULL,
-    ReceivableID INT NOT NULL REFERENCES Finance.accountreceivables(ReceivableID) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ReceivableID INT NOT NULL REFERENCES Finance.accountreceivables(ReceivableID) ON DELETE CASCADE
+   -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ar_ext_id,InvoiceDate)
 );  --PARTITION BY RANGE(InvoiceDate);
 
@@ -182,9 +183,9 @@ CREATE TABLE IF NOT EXISTS Finance.ar_ext (
 DROP TABLE IF EXISTS Finance.accountpayables CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.accountpayables (
     PayableID SERIAL PRIMARY KEY,
-    supplierID INT NOT NULL REFERENCES Finance.suppliers(SupplierID) ON DELETE CASCADE,
     TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    supplierID INT NOT NULL REFERENCES Finance.suppliers(SupplierID) ON DELETE CASCADE
+    --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -197,8 +198,8 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     DueDate DATE NOT NULL,
     InvoiceDate DATE NOT NULL,
     Status VARCHAR(20) NOT NULL,
-    PayableID INT NOT NULL REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    PayableID INT NOT NULL REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE
+    --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ap_ext_id,InvoiceDate)
 );    
     
