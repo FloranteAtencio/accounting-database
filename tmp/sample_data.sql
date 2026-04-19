@@ -1,3 +1,4 @@
+BEGIN;
 INSERT INTO Finance.suppliers (SupplierName, ContactInfo, Email, Address) VALUES ('Kelly LLC', '777.300.6115x', 'joy32@example.com', '188 Soto Fields Amandamouth, WI 07931');
 INSERT INTO Finance.customers (CustomerName, ContactInfo, Email, Address) VALUES ('Nicholas Lane', '777.300.6115x', 'joy32@example.com', '188 Soto Fields Amandamouth, WI 07931');
 INSERT INTO Finance.products (ProductName, Description, ProductUnit, ProductCost, ProductPrice) VALUES ('economy', 'Way station manage budget organization daughter scientist.', 'unit', 65, 78);
@@ -73,8 +74,8 @@ VALUES ('Main Warehouse', '123 Main St, Cityville'),
 
 -- Insert template header first
 INSERT INTO Finance.coatemplates (templatename, description)
-VALUES ('Default Accounts', 'Standard COA for small businesses')
-RETURNING templateid;
+VALUES ('Default Accounts', 'Standard COA for small businesses');
+--RETURNING templateid;
 -- Returns template_id = 1
 
 -- Then insert template accounts
@@ -158,7 +159,8 @@ VALUES
 (1, 7100, 'Taxes & Licenses', 'Expense'),
 (1, 7200, 'Miscellaneous Expense', 'Expense'),
 (1, 7300, 'Inventory Expense','Expense');
-
+COMMIT;
+BEGIN;
 call finance.apply_coa_template (1,1);
 call finance.assign_account_role ('Cash on Hand','cash_account_ar');
 call finance.assign_account_role ('Accounts Receivable','ar_account');
@@ -297,3 +299,4 @@ VALUES (
     )
     ,'sale-2026-0003'
 );
+COMMIT;

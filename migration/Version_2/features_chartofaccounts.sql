@@ -1,3 +1,15 @@
+
+-- -- INSERT INTO ... SELECT (no VALUES keyword)
+-- INSERT INTO Finance.charts (clientId, account, accountCode, type, is_active)
+-- SELECT 
+--     1,                  -- clientId
+--     accountname,       -- account
+--     accountcode,       -- accountCode
+--     accounttype,       -- type
+--     TRUE                -- is_active
+-- FROM Finance.coatemplateaccounts
+-- WHERE templateid = 1;
+
 CREATE OR REPLACE PROCEDURE Finance.assign_account_role(
     IN p_account_description TEXT,
     IN p_role_name TEXT
@@ -26,3 +38,4 @@ EXCEPTION
         RAISE EXCEPTION 'Failed to apply role: %', SQLERRM;
 END;
 $$;
+
