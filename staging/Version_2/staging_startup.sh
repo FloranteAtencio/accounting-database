@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="./tmp"
 SCRIPT_DIR_SCHEMA="./schema/Version_2_Flexible_Charts"
-SCRIPT_DIR_STAGING="./staging/Version_2"
+SCRIPT_DIR_STAGING="./migration/Version_2"
 DB_NAME="erp_staging"
 DB_USER="staging_user"
 CONTAINER_NAME="staging_env"

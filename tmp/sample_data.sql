@@ -130,7 +130,7 @@ VALUES
 (1, 4600, 'Interest Income', 'Revenue'),
 (1, 4700, 'Rental Income', 'Revenue'),
 (1, 4800, 'Other Income', 'Revenue'),
-(1, 4900, 'Sales Revenue', 'Revenue'),
+--(1, 4900, 'Sales Revenue', 'Revenue'),
 -- Cost of Goods Sold
 (1, 5000, 'Cost of Goods Sold', 'Expense'),
 (1, 5010, 'Purchase Returns & Allowances', 'Expense'),
@@ -171,6 +171,7 @@ call finance.assign_account_role ('Cash in Bank','cash_account_ap');
 call finance.assign_account_role ('Inventory','inventory_account');
 CALL Finance.assign_account_role ('Cost of Goods Sold','COGS');
 CALL Finance.assign_account_role ('Sales Returns & Allowances','SR&Allowances');
+CALL Finance.assign_account_role ('Purchase Returns & Allowances','PR&Allowances');
 
 CALL Finance.ar_transaction(
     1,                              -- clientId

@@ -529,7 +529,7 @@ BEGIN
             
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ap_account', TRUE, p_quantity * v_cost, p_date);
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost, p_date);
-            
+        CALL Finance.insert_journal(p_clientId, p_transaction_id, 'PR&Allowances', FALSE, p_quantity * v_cost, p_date);    
     ELSE
         RAISE EXCEPTION 'Unsupported action type';
     END IF;
