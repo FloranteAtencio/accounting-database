@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
         customerID SERIAL PRIMARY KEY,
         customerName VARCHAR(50) NOT NULL,
         contactInfo VARCHAR(15) NOT NULL,
-        email VARCHAR(50) NOT NULL CHECK (email LIKE '%@%'),
+        email VARCHAR(50) NOT NULL CHECK, --  LIKE '%@%'),
         address VARCHAR(100) NOT NULL
     );
 
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
         supplierID SERIAL PRIMARY KEY,
         supplierName VARCHAR(50) NOT NULL,
         contactInfo VARCHAR(15) NOT NULL,
-        email VARCHAR(50) NOT NULL CHECK (email LIKE '%@%'),
+        email VARCHAR(50) NOT NULL CHECK, --  LIKE '%@%'),
         address VARCHAR(100) NOT NULL
     );
 
