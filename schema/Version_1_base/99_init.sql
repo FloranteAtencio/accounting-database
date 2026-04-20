@@ -16,6 +16,8 @@ SELECT finance.partition_monthly_basis('inventoryaudits','finance');
 SELECT finance.partition_monthly_basis('ar_ext','finance');
 SELECT finance.partition_monthly_basis('ap_ext','finance');
 
+
+
 BEGIN;
 INSERT INTO Finance.products (Productname, Description, Productunit, Productcost, Productprice)
 VALUES  ('Laptop', 'High-performance laptop', 'Unit', 800.00, 1200.00),

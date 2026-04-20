@@ -5,5 +5,6 @@ CREATE TABLE Finance.event_log (
     Status VARCHAR(20) DEFAULT 'PENDING',
     IdempotencyKey TEXT UNIQUE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ProcessedAt TIMESTAMP
+    ProcessedAt TIMESTAMP,
+    RetryCount INT DEFAULT 0
 );
