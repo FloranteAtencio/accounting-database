@@ -57,13 +57,11 @@ DECLARE
     v_retry_count INT := 0;
     v_max_retries INT := 3;
 BEGIN
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
     LOOP
-    
+        BEGIN
         
-        
-          
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
             -- Find AR cash account (client-specific)
             SELECT c.chartId INTO v_cash_chart
             FROM Finance.charts c
@@ -154,7 +152,7 @@ BEGIN
                     WHEN OTHERS THEN
                         -- ❌ Real error → stop immediately
                         RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-    
+        END;
     END LOOP;
 END;
 $$;
@@ -182,12 +180,11 @@ DECLARE
     v_max_retries INT := 3;
     --v_product_name VARCHAR(255);
 BEGIN
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-        
     LOOP
-        
+        BEGIN
             
-        
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
             -- Find AP cash account (client-specific)
             SELECT c.chartId INTO v_cash_chart
             FROM Finance.charts c
@@ -267,7 +264,7 @@ BEGIN
                 WHEN OTHERS THEN
                     -- ❌ Real error → stop immediately
                     RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        
+        END;
     END LOOP;
 END;
 $$;
@@ -688,11 +685,11 @@ DECLARE
     v_max_retries INT := 3;
     v_product_name VARCHAR(255);
 BEGIN
-    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-        -- 🔁 Retry loop for serialization / deadlocks
+    -- 🔁 Retry loop for serialization / deadlocks
     LOOP
-        
+        BEGIN                   
 
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             IF p_quantity <= 0 OR p_quantity IS NULL THEN
                 RAISE EXCEPTION 'Quantity must be greater than 0';
@@ -799,7 +796,7 @@ BEGIN
                 WHEN OTHERS THEN
                     -- ❌ Real error → stop immediately
                     RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        
+        END;
    END LOOP;
 END;
 $$;
