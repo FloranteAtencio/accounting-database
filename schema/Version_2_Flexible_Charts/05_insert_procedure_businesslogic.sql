@@ -60,7 +60,7 @@ BEGIN
     LOOP
         BEGIN
         
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             -- Find AR cash account (client-specific)
             SELECT c.chartId INTO v_cash_chart
@@ -183,7 +183,7 @@ BEGIN
     LOOP
         BEGIN
             
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             -- Find AP cash account (client-specific)
             SELECT c.chartId INTO v_cash_chart
@@ -689,7 +689,7 @@ BEGIN
     LOOP
         BEGIN                   
 
-            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             IF p_quantity <= 0 OR p_quantity IS NULL THEN
                 RAISE EXCEPTION 'Quantity must be greater than 0';
