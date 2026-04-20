@@ -13,7 +13,7 @@ LOG_FILE="/var/log/erp-staging.log"
 echo "[$(date)] V2_staging_tablespace_testing" >> "$LOG_FILE"
 
 # Run Startup SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/01_Startup_staging.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/Staging_Startup_configuration.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Staging Startup SQL alright!" >> "$LOG_FILE"
 else
