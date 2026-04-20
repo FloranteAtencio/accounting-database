@@ -61,7 +61,7 @@ BEGIN
 
     LOOP
     
-        BEGIN
+        
         
           
             -- Find AR cash account (client-specific)
@@ -154,7 +154,7 @@ BEGIN
                     WHEN OTHERS THEN
                         -- ❌ Real error → stop immediately
                         RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        END;
+    
     END LOOP;
 END;
 $$;
@@ -185,7 +185,7 @@ BEGIN
     SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
         
     LOOP
-        BEGIN
+        
             
         
             -- Find AP cash account (client-specific)
@@ -267,7 +267,7 @@ BEGIN
                 WHEN OTHERS THEN
                     -- ❌ Real error → stop immediately
                     RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        END;
+        
     END LOOP;
 END;
 $$;
@@ -691,7 +691,7 @@ BEGIN
     SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
         -- 🔁 Retry loop for serialization / deadlocks
     LOOP
-        BEGIN                   
+        
 
 
             IF p_quantity <= 0 OR p_quantity IS NULL THEN
@@ -799,7 +799,7 @@ BEGIN
                 WHEN OTHERS THEN
                     -- ❌ Real error → stop immediately
                     RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        END;
+        
    END LOOP;
 END;
 $$;
