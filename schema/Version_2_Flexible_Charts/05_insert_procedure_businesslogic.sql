@@ -687,99 +687,100 @@ DECLARE
 BEGIN
     -- 🔁 Retry loop for serialization / deadlocks
     LOOP
-        BEGIN                     
+        BEGIN                   
+
             SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-                IF p_quantity <= 0 OR p_quantity IS NULL THEN
-                    RAISE EXCEPTION 'Quantity must be greater than 0';
-                END IF;
+            IF p_quantity <= 0 OR p_quantity IS NULL THEN
+                RAISE EXCEPTION 'Quantity must be greater than 0';
+            END IF;
 
-                IF p_date IS NULL THEN
-                    RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
-                END IF;
+            IF p_date IS NULL THEN
+                RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
+            END IF;
 
-                IF p_action_type IS NULL OR p_action_type = '' THEN
-                    RAISE EXCEPTION 'Action Type is empty %', SQLERRM;
-                END IF;
+            IF p_action_type IS NULL OR p_action_type = '' THEN
+                RAISE EXCEPTION 'Action Type is empty %', SQLERRM;
+            END IF;
 
-                IF p_product_id IS NULL OR p_product_id <= 0 THEN
-                    RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
-                END IF;
+            IF p_product_id IS NULL OR p_product_id <= 0 THEN
+                RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
+            END IF;
 
-                IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
-                    RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
-                END IF;
-                
-                -- 🧠 Isolation level (strong consistency)
+            IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+                RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
+            END IF;
+            
+            -- 🧠 Isolation level (strong consistency)
 
             SELECT productName INTO v_product_name
-                FROM Finance.products
-                WHERE ProductId = p_product_id;
+            FROM Finance.products
+            WHERE ProductId = p_product_id;
 
 
-                -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
-                PERFORM 1
-                FROM Finance.products
-                WHERE productId = p_product_id
-                FOR UPDATE;
+            -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
+            PERFORM 1
+            FROM Finance.products
+            WHERE productId = p_product_id
+            FOR UPDATE;
 
-                -- 🔒 Lock warehouse SECOND
-                PERFORM 1
-                FROM Finance.warehouses
-                WHERE warehouseId = p_warehouse_id
-                FOR UPDATE;
+            -- 🔒 Lock warehouse SECOND
+            PERFORM 1
+            FROM Finance.warehouses
+            WHERE warehouseId = p_warehouse_id
+            FOR UPDATE;
 
-                INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
-                VALUES (
-                    CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
-                            ' Date on ',p_Date, 
-                            ' Product name ', v_product_name),
-                    p_idempotency_key, p_clientId
-                    )
-                ON CONFLICT(idempotencyKey) DO NOTHING
-                RETURNING TransactionID INTO new_transaction_id;
+            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            VALUES (
+                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                        ' Date on ',p_Date, 
+                        ' Product name ', v_product_name),
+                p_idempotency_key, p_clientId
+                )
+            ON CONFLICT(idempotencyKey) DO NOTHING
+            RETURNING TransactionID INTO new_transaction_id;
 
-                IF new_transaction_id IS NULL THEN
-                    SELECT TransactionID INTO new_transaction_id
-                    FROM Finance.transactions
-                    WHERE idempotencyKey = p_idempotency_key;
-                    
-                    RETURN;
-                END IF;
-                -- 📦 Inventory
-                CALL Finance.inventory_module(
-                    p_product_id,
-                    p_warehouse_id,
-                    new_transaction_id,
-                    p_action_type,
-                    p_quantity,
-                    p_date
+            IF new_transaction_id IS NULL THEN
+                SELECT TransactionID INTO new_transaction_id
+                FROM Finance.transactions
+                WHERE idempotencyKey = p_idempotency_key;
+                
+                RETURN;
+            END IF;
+            -- 📦 Inventory
+            CALL Finance.inventory_module(
+                p_product_id,
+                p_warehouse_id,
+                new_transaction_id,
+                p_action_type,
+                p_quantity,
+                p_date
+            );
+
+            -- 💰 Accounting / Returns / Transfer
+            IF p_action_type IN ('Sale', 'Purchase') THEN
+                CALL Finance.accounting_module(
+                p_clientId, new_transaction_id, p_product_id, p_action_type,
+                    p_quantity, p_date, p_reference_id
                 );
 
-                -- 💰 Accounting / Returns / Transfer
-                IF p_action_type IN ('Sale', 'Purchase') THEN
-                    CALL Finance.accounting_module(
+            ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
+                CALL Finance.return_module(
+                p_clientId, new_transaction_id, p_product_id, p_action_type,
+                    p_quantity, p_date, p_reference_id
+                );
+
+            ELSIF p_action_type = 'Transfer' THEN
+                CALL Finance.transfer_module(
                     p_clientId, new_transaction_id, p_product_id, p_action_type,
-                        p_quantity, p_date, p_reference_id
-                    );
+                    p_quantity, p_date, p_reference_id
+                );
+            ELSE
+                RAISE EXCEPTION 'Unsupported action type';
+            END IF;
 
-                ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
-                    CALL Finance.return_module(
-                    p_clientId, new_transaction_id, p_product_id, p_action_type,
-                        p_quantity, p_date, p_reference_id
-                    );
-
-                ELSIF p_action_type = 'Transfer' THEN
-                    CALL Finance.transfer_module(
-                        p_clientId, new_transaction_id, p_product_id, p_action_type,
-                        p_quantity, p_date, p_reference_id
-                    );
-                ELSE
-                    RAISE EXCEPTION 'Unsupported action type';
-                END IF;
-
-                -- ✅ SUCCESS → exit retry loop
-                EXIT;
+            -- ✅ SUCCESS → exit retry loop
+            EXIT;
 
             EXCEPTION
                 WHEN serialization_failure OR deadlock_detected THEN
@@ -789,7 +790,7 @@ BEGIN
                         RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
                     END IF;
 
-                   -- ⏳ Small delay before retry (helps contention)
+                    -- ⏳ Small delay before retry (helps contention)
                     PERFORM pg_sleep(0.1);
 
                 WHEN OTHERS THEN
