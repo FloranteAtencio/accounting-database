@@ -146,7 +146,7 @@ BEGIN
                             RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
                         END IF;
 
-                        ⏳ Small delay before retry (helps contention)
+                      --  ⏳ Small delay before retry (helps contention)
                         PERFORM pg_sleep(0.1);
 
                     WHEN OTHERS THEN
@@ -258,7 +258,7 @@ BEGIN
                         RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
                     END IF;
 
-                    ⏳ Small delay before retry (helps contention)
+                 --   ⏳ Small delay before retry (helps contention)
                     PERFORM pg_sleep(0.1);
 
                 WHEN OTHERS THEN
@@ -789,7 +789,7 @@ BEGIN
                         RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
                     END IF;
 
-                    ⏳ Small delay before retry (helps contention)
+                   -- ⏳ Small delay before retry (helps contention)
                     PERFORM pg_sleep(0.1);
 
                 WHEN OTHERS THEN
