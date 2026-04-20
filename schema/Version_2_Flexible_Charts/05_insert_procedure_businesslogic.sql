@@ -57,9 +57,10 @@ DECLARE
     v_retry_count INT := 0;
     v_max_retries INT := 3;
 BEGIN
-    LOOP
-        SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
+    LOOP
+    
         BEGIN
         
           
@@ -181,8 +182,9 @@ DECLARE
     v_max_retries INT := 3;
     --v_product_name VARCHAR(255);
 BEGIN
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+        
     LOOP
-        SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
         BEGIN
             
         
@@ -686,9 +688,9 @@ DECLARE
     v_max_retries INT := 3;
     v_product_name VARCHAR(255);
 BEGIN
-    -- 🔁 Retry loop for serialization / deadlocks
+    SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+        -- 🔁 Retry loop for serialization / deadlocks
     LOOP
-        SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
         BEGIN                   
 
 
