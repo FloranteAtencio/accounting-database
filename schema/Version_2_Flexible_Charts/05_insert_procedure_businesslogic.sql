@@ -18,7 +18,7 @@ BEGIN
     FROM Finance.charts c
     INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
     WHERE c.clientId = p_clientId 
-      AND ar.rolename = p_account_role
+      AND ar.roleName = p_account_role
       AND c.is_active = TRUE
     LIMIT 1;
 
@@ -26,7 +26,7 @@ BEGIN
         RAISE EXCEPTION 'Account role % not found for client %', p_account_role, p_clientId;
     END IF;
 
-    INSERT INTO Finance.journals (TransactionID, ChartID, Date, Journal, Amount)
+    INSERT INTO Finance.journals (transactionId, chartId, date, journal, amount)
     VALUES (p_transaction_id, v_chart_id, p_date, p_is_debit, p_amount);
 
 EXCEPTION
@@ -54,76 +54,106 @@ DECLARE
     v_cash_chart INT;
     v_ar_chart INT;
     v_balance DECIMAL(12,2);
+    v_retry_count INT := 0;
+    v_max_retries INT := 3;
 BEGIN
-    BEGIN
-        -- Find AR cash account (client-specific)
-        SELECT c.chartId INTO v_cash_chart
-        FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'cash_account_ar'
-          AND c.is_active = TRUE
-        LIMIT 1;
+    LOOP
+        BEGIN
+        
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-        -- Find AR account
-        SELECT c.chartId INTO v_ar_chart
-        FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'ar_account'
-          AND c.is_active = TRUE
-        LIMIT 1;
+            -- Find AR cash account (client-specific)
+            SELECT c.chartId INTO v_cash_chart
+            FROM Finance.charts c
+            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
+            WHERE c.clientId = p_clientId 
+            AND ar.roleName = 'cash_account_ar'
+            AND c.is_active = TRUE
+            LIMIT 1;
 
-        IF v_cash_chart IS NULL OR v_ar_chart IS NULL THEN
-            RAISE EXCEPTION 'Required accounts (cash_account_ar/ar_account) not found for client %', p_clientId;
-        END IF;
+            -- Find AR account
+            SELECT c.chartId INTO v_ar_chart
+            FROM Finance.charts c
+            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
+            WHERE c.clientId = p_clientId 
+            AND ar.roleName = 'ar_account'
+            AND c.is_active = TRUE
+            LIMIT 1;
 
-        -- Balance check
-        SELECT SUM(
-            CASE WHEN Journal THEN Amount ELSE -Amount END
-        ) INTO v_balance
-        FROM Finance.journals
-        WHERE ChartID = v_cash_chart;
+            IF v_cash_chart IS NULL OR v_ar_chart IS NULL THEN
+                RAISE EXCEPTION 'Required accounts (cash_account_ar/ar_account) not found for client %', p_clientId;
+            END IF;
 
-        IF p_Amount < COALESCE(v_balance, 0) THEN
-            RAISE EXCEPTION 'Insufficient Funds. Available: %, Required: %', COALESCE(v_balance, 0), p_Amount;
-        END IF;
+            PERFORM 1
+            FROM Finance.clientId
+            WHERE clientId = p_clientId
+            FOR UPDATE;
 
-        -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
-        VALUES (
-            CONCAT('Account Receivable With Amount of ', p_Amount, 
-                   ' Due Date on ', p_DueDate, 
-                   ' Status ', p_Status),
-            p_idempotency_key, p_clientId
-        )
-        ON CONFLICT (idempotencyKey) DO NOTHING
-        RETURNING TransactionID INTO new_transaction_id;
+            PERFORM 1
+            FROM Finance.customers
+            WHERE customerId = p_CustomersID
+            FOR UPDATE;
 
-        IF new_transaction_id IS NULL THEN
-            SELECT TransactionID INTO new_transaction_id
-            FROM Finance.transactions
-            WHERE idempotencyKey = p_idempotency_key;
-            RETURN;
-        END IF;
+            -- Balance check
+            SELECT SUM(
+                CASE WHEN journal THEN amount ELSE -amount END
+            ) INTO v_balance
+            FROM Finance.journals
+            WHERE chartId = v_cash_chart;
 
-        -- Insert AR record
-        INSERT INTO Finance.accountreceivables (CustomerID, TransactionID)
-        VALUES (p_CustomersID, new_transaction_id)
-        RETURNING ReceivableID INTO new_returning_id;
+            IF p_Amount < COALESCE(v_balance, 0) THEN
+                RAISE EXCEPTION 'Insufficient Funds. Available: %, Required: %', COALESCE(v_balance, 0), p_Amount;
+            END IF;
 
-        -- Insert AR extension
-        INSERT INTO Finance.ar_ext (Amount, DueDate, InvoiceDate, Status, ReceivableID)
-        VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
+            -- Insert transaction
+            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            VALUES (
+                CONCAT('Account Receivable With Amount of ', p_Amount, 
+                    ' Due Date on ', p_DueDate, 
+                    ' Status ', p_Status),
+                p_idempotency_key, p_clientId
+            )
+            ON CONFLICT (idempotencyKey) DO NOTHING
+            RETURNING TransactionID INTO new_transaction_id;
 
-        -- Journal entries
-        CALL Finance.insert_journal(p_clientId, new_transaction_id, 'cash_account_ar', FALSE, p_Amount, p_InvoiceDate);
-        CALL Finance.insert_journal(p_clientId, new_transaction_id, 'ar_account', TRUE, p_Amount, p_InvoiceDate);
+            IF new_transaction_id IS NULL THEN
+                SELECT transactionId INTO new_transaction_id
+                FROM Finance.transactions
+                WHERE idempotencyKey = p_idempotency_key;
+                RETURN;
+            END IF;
 
-    EXCEPTION
-        WHEN OTHERS THEN
-            RAISE EXCEPTION 'AR Transaction failed: %', SQLERRM;
-    END;
+            -- Insert AR record
+            INSERT INTO Finance.accountreceivables (customerId, transactionId)
+            VALUES (p_CustomersID, new_transaction_id)
+            RETURNING receivableId INTO new_returning_id;
+
+            -- Insert AR extension
+            INSERT INTO Finance.ar_ext (amount, dueDate, invoiceDate, status, receivableId)
+            VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
+
+            -- Journal entries
+            CALL Finance.insert_journal(p_clientId, new_transaction_id, 'cash_account_ar', FALSE, p_Amount, p_InvoiceDate);
+            CALL Finance.insert_journal(p_clientId, new_transaction_id, 'ar_account', TRUE, p_Amount, p_InvoiceDate);
+
+            EXIT;
+            
+            EXCEPTION
+                    WHEN serialization_failure OR deadlock_detected THEN
+                        v_retry_count := v_retry_count + 1;
+
+                        IF v_retry_count >= v_max_retries THEN
+                            RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
+                        END IF;
+
+                        ⏳ Small delay before retry (helps contention)
+                        PERFORM pg_sleep(0.1);
+
+                    WHEN OTHERS THEN
+                        -- ❌ Real error → stop immediately
+                        RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
+        END;
+    END LOOP;
 END;
 $$;
 
@@ -145,65 +175,97 @@ DECLARE
     new_returning_id INT;
     v_cash_chart INT;
     v_ap_chart INT;
+    --new_transaction_id INT;
+    v_retry_count INT := 0;
+    v_max_retries INT := 3;
+    --v_product_name VARCHAR(255);
 BEGIN
-    BEGIN
-        -- Find AP cash account (client-specific)
-        SELECT c.chartId INTO v_cash_chart
-        FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'cash_account_ap'
-          AND c.is_active = TRUE
-        LIMIT 1;
+    LOOP
+        BEGIN
+            
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-        -- Find AP account
-        SELECT c.chartId INTO v_ap_chart
-        FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'ap_account'
-          AND c.is_active = TRUE
-        LIMIT 1;
+            -- Find AP cash account (client-specific)
+            SELECT c.chartId INTO v_cash_chart
+            FROM Finance.charts c
+            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
+            WHERE c.clientId = p_clientId 
+            AND ar.rolename = 'cash_account_ap'
+            AND c.is_active = TRUE
+            LIMIT 1;
 
-        IF v_cash_chart IS NULL OR v_ap_chart IS NULL THEN
-            RAISE EXCEPTION 'Required accounts (cash_account_ap/ap_account) not found for client %', p_clientId;
-        END IF;
+            -- Find AP account
+            SELECT c.chartId INTO v_ap_chart
+            FROM Finance.charts c
+            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
+            WHERE c.clientId = p_clientId 
+            AND ar.roleName = 'ap_account'
+            AND c.is_active = TRUE
+            LIMIT 1;
 
-        -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
-        VALUES (
-            CONCAT('Account Payable With Amount of ', p_Amount, 
-                   ' Due Date on ', p_DueDate, 
-                   ' Status ', p_Status),
-            p_idempotency_key, p_clientId
-        )
-        ON CONFLICT (idempotencyKey) DO NOTHING
-        RETURNING TransactionID INTO new_transaction_id;
+            IF v_cash_chart IS NULL OR v_ap_chart IS NULL THEN
+                RAISE EXCEPTION 'Required accounts (cash_account_ap/ap_account) not found for client %', p_clientId;
+            END IF;
 
-        IF new_transaction_id IS NULL THEN
-            SELECT TransactionID INTO new_transaction_id
-            FROM Finance.transactions
-            WHERE idempotencyKey = p_idempotency_key;
-            RETURN;
-        END IF;
+            PERFORM 1
+            FROM Finance.clients
+            WHERE clientId = p_clientId
+            FOR UPDATE;
 
-        -- Insert AP record
-        INSERT INTO Finance.accountpayables (supplierID, TransactionID)
-        VALUES (p_VendorID, new_transaction_id)
-        RETURNING PayableID INTO new_returning_id;
+            PERFORM 1
+            FROM Finance.suppliers
+            WHERE supplierID = p_VendorID
+            FOR UPDATE;
 
-        -- Insert AP extension
-        INSERT INTO Finance.ap_ext (Amount, DueDate, InvoiceDate, Status, PayableID)
-        VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
+            -- Insert transaction
+            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            VALUES (
+                CONCAT('Account Payable With Amount of ', p_Amount, 
+                    ' Due Date on ', p_DueDate, 
+                    ' Status ', p_Status),
+                p_idempotency_key, p_clientId
+            )
+            ON CONFLICT (idempotencyKey) DO NOTHING
+            RETURNING TransactionID INTO new_transaction_id;
 
-        -- Journal entries
-        CALL Finance.insert_journal(p_clientId, new_transaction_id, 'cash_account_ap', TRUE, p_Amount, p_InvoiceDate);
-        CALL Finance.insert_journal(p_clientId, new_transaction_id, 'ap_account', FALSE, p_Amount, p_InvoiceDate);
+            IF new_transaction_id IS NULL THEN
+                SELECT transactionId INTO new_transaction_id
+                FROM Finance.transactions
+                WHERE idempotencyKey = p_idempotency_key;
+                RETURN;
+            END IF;
 
-    EXCEPTION
-        WHEN OTHERS THEN
-            RAISE EXCEPTION 'AP Transaction failed: %', SQLERRM;
-    END;
+            -- Insert AP record
+            INSERT INTO Finance.accountpayables (supplierId, transactionId)
+            VALUES (p_VendorID, new_transaction_id)
+            RETURNING PayableID INTO new_returning_id;
+
+            -- Insert AP extension
+            INSERT INTO Finance.ap_ext (amount, dueDate, invoiceDate, status, payableId)
+            VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
+
+            -- Journal entries
+            CALL Finance.insert_journal(p_clientId, new_transaction_id, 'cash_account_ap', TRUE, p_Amount, p_InvoiceDate);
+            CALL Finance.insert_journal(p_clientId, new_transaction_id, 'ap_account', FALSE, p_Amount, p_InvoiceDate);
+
+            EXIT;
+        
+            EXCEPTION
+                WHEN serialization_failure OR deadlock_detected THEN
+                    v_retry_count := v_retry_count + 1;
+
+                    IF v_retry_count >= v_max_retries THEN
+                        RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
+                    END IF;
+
+                    ⏳ Small delay before retry (helps contention)
+                    PERFORM pg_sleep(0.1);
+
+                WHEN OTHERS THEN
+                    -- ❌ Real error → stop immediately
+                    RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
+        END;
+    END LOOP;
 END;
 $$;
 
@@ -229,7 +291,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'cash_account_ar'
+          AND ar.roleName = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -238,7 +300,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'expense_account'
+          AND ar.roleName = 'expense_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -246,14 +308,19 @@ BEGIN
             RAISE EXCEPTION 'Required accounts (cash/expense) not found for client %', p_clientId;
         END IF;
 
+        PERFORM 1  
+        FROM Finance.clients
+        WHERE clientId = p_clientId
+        FOR UPDATE;
+
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
+        INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
         VALUES (p_Description, p_idempotency_key,p_clientId)
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
 
         IF new_transaction_id IS NULL THEN
-            SELECT TransactionID INTO new_transaction_id
+            SELECT transactionId INTO new_transaction_id
             FROM Finance.transactions
             WHERE idempotencyKey = p_idempotency_key;
             RETURN;
@@ -292,7 +359,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'cash_account_ar'
+          AND ar.roleName = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -301,7 +368,7 @@ BEGIN
         FROM Finance.charts c
         INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
         WHERE c.clientId = p_clientId 
-          AND ar.rolename = 'revenue_account'
+          AND ar.roleName = 'revenue_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -309,8 +376,13 @@ BEGIN
             RAISE EXCEPTION 'Required accounts (cash/revenue) not found for client %', p_clientId;
         END IF;
 
+        PERFORM 1
+        FROM Finance.clients
+        WHERE clientId = p_clientId
+        FOR UPDATE;
+
         -- Insert transaction
-        INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
+        INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
         VALUES (p_Description, p_idempotency_key, p_clientId)
         ON CONFLICT (idempotencyKey) DO NOTHING
         RETURNING TransactionID INTO new_transaction_id;
@@ -342,13 +414,19 @@ CREATE OR REPLACE PROCEDURE Finance.apply_coa_template(
 )
 LANGUAGE plpgsql AS $$
 BEGIN
+
+    PERFORM 1
+    FROM Finance.clients
+    WHERE clientId = p_clientId
+    FOR UPDATE;
+
     -- Copy template accounts into client's COA
     INSERT INTO Finance.charts (clientId, account, accountCode, type, is_active)
     SELECT 
         p_clientId,
-        accountname,
-        accountcode,
-        accounttype,
+        accountName,
+        accountCode,
+        accountType,
         TRUE
     FROM Finance.coatemplateaccounts
     WHERE templateid = p_template_id
@@ -383,7 +461,7 @@ BEGIN
     END IF;
 
     INSERT INTO Finance.inventoryaudits
-    (ProductID, WarehouseID, TransactionID, ActionType, Quantity, MovementDate)
+    (productId, warehouseId, transactionId, ActionType, quantity, movementDate)
     VALUES
     (p_product_id, p_warehouse_id, p_transaction_id, p_action_type, p_quantity, p_date);
  
@@ -417,22 +495,22 @@ DECLARE
 BEGIN
 
 
-    SELECT Productcost, Productprice
+    SELECT productCost, productPrice
     INTO v_cost, v_price
     FROM Finance.products
-    WHERE ProductID = p_product_id;
+    WHERE productId = p_product_id;
 
     IF LOWER(p_action_type) = 'purchase' THEN
 
         -- Accounts Payable
         INSERT INTO Finance.accountpayables 
-		(SupplierID, TransactionID)
+		(supplierId, transactionId)
         VALUES
 		(p_reference_id, p_transaction_id)
 	RETURNING PayableID INTO new_returning_id;
 
 	INSERT INTO Finance.ap_ext
-		(Amount, DueDate, InvoiceDate, Status,PayableID)
+		(amount, dueDate, invoiceDate, status, payableId)
         VALUES
 		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 	-- Journal
@@ -445,13 +523,13 @@ BEGIN
 
         -- Accounts Receivable
         INSERT INTO Finance.accountreceivables
-        	(CustomerID, TransactionID)
+        	(customerId, transactionId)
         VALUES
         	(p_reference_id, p_transaction_id)
 	RETURNING ReceivableID INTO new_returning_id;
         -- Journal
 	INSERT INTO Finance.ar_ext
-		(Amount, DueDate, InvoiceDate, Status, ReceivableID)
+		(amount, dueDate, invoiceDate, status, receivableId)
         VALUES
 		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 
@@ -491,15 +569,15 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT Productcost, Productprice
+    SELECT productCost, productPrice
     INTO v_cost, v_price
     FROM Finance.products
-    WHERE ProductID = p_product_id;
+    WHERE productId = p_product_id;
 
     IF LOWER(p_action_type) = 'sale return' THEN
             -- Journal entry for inventory movement
             INSERT INTO Finance.salereturns
-		(ReceivableID,  ReturnAmount, ReturnDate)
+		(receivableId,  returnAmount, returnDate)
             VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
@@ -517,7 +595,7 @@ BEGIN
     ELSIF p_action_type = 'Purchase Return' THEN
         -- Journal entry for inventory movement
         INSERT INTO Finance.purchasereturns
-		(PayableID,  ReturnAmount, ReturnDate)
+		(payableId,  returnAmount, returnDate)
         VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
@@ -564,7 +642,7 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT Productcost, Productprice
+    SELECT productCost, productPrice
     INTO v_cost, v_price
     FROM Finance.products
     WHERE ProductID = p_product_id;
@@ -608,101 +686,116 @@ DECLARE
     v_product_name VARCHAR(255);
 BEGIN
     -- 🔁 Retry loop for serialization / deadlocks
-    --LOOP
-        BEGIN
-	    -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    LOOP
+        BEGIN                     
+            SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-            IF p_quantity <= 0 OR p_quantity IS NULL THEN
-                RAISE EXCEPTION 'Quantity must be greater than 0';
-            END IF;
-            
+                IF p_quantity <= 0 OR p_quantity IS NULL THEN
+                    RAISE EXCEPTION 'Quantity must be greater than 0';
+                END IF;
 
-            -- 🧠 Isolation level (strong consistency)
+                IF p_date IS NULL THEN
+                    RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
+                END IF;
 
-	    SELECT ProductName INTO v_product_name
-            FROM Finance.products
-            WHERE ProductID = p_product_id;
+                IF p_action_type IS NULL OR p_action_type = '' THEN
+                    RAISE EXCEPTION 'Action Type is empty %', SQLERRM;
+                END IF;
 
+                IF p_product_id IS NULL OR p_product_id <= 0 THEN
+                    RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
+                END IF;
 
-            -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
-            PERFORM 1
-            FROM Finance.products
-            WHERE ProductID = p_product_id
-            FOR UPDATE;
-
-            -- 🔒 Lock warehouse SECOND
-            PERFORM 1
-            FROM Finance.warehouses
-            WHERE WarehouseID = p_warehouse_id
-            FOR UPDATE;
-
-            INSERT INTO Finance.transactions (Description, idempotencyKey)
-            VALUES (
-                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
-                        ' Date on ',p_Date, 
-                        ' Product name ', v_product_name),
-                p_idempotency_key
-                )
-            ON CONFLICT(idempotencyKey) DO NOTHING
-            RETURNING TransactionID INTO new_transaction_id;
-
-            IF new_transaction_id IS NULL THEN
-                SELECT TransactionID INTO new_transaction_id
-                FROM Finance.transactions
-                WHERE idempotencyKey = p_idempotency_key;
+                IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+                    RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
+                END IF;
                 
-                RETURN;
-            END IF;
-            -- 📦 Inventory
-            CALL Finance.inventory_module(
-                p_product_id,
-                p_warehouse_id,
-                new_transaction_id,
-                p_action_type,
-                p_quantity,
-                p_date
-            );
+                -- 🧠 Isolation level (strong consistency)
 
-            -- 💰 Accounting / Returns / Transfer
-            IF p_action_type IN ('Sale', 'Purchase') THEN
-                CALL Finance.accounting_module(
-                   p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
+            SELECT productName INTO v_product_name
+                FROM Finance.products
+                WHERE ProductId = p_product_id;
+
+
+                -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
+                PERFORM 1
+                FROM Finance.products
+                WHERE productId = p_product_id
+                FOR UPDATE;
+
+                -- 🔒 Lock warehouse SECOND
+                PERFORM 1
+                FROM Finance.warehouses
+                WHERE warehouseId = p_warehouse_id
+                FOR UPDATE;
+
+                INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+                VALUES (
+                    CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                            ' Date on ',p_Date, 
+                            ' Product name ', v_product_name),
+                    p_idempotency_key, p_clientId
+                    )
+                ON CONFLICT(idempotencyKey) DO NOTHING
+                RETURNING TransactionID INTO new_transaction_id;
+
+                IF new_transaction_id IS NULL THEN
+                    SELECT TransactionID INTO new_transaction_id
+                    FROM Finance.transactions
+                    WHERE idempotencyKey = p_idempotency_key;
+                    
+                    RETURN;
+                END IF;
+                -- 📦 Inventory
+                CALL Finance.inventory_module(
+                    p_product_id,
+                    p_warehouse_id,
+                    new_transaction_id,
+                    p_action_type,
+                    p_quantity,
+                    p_date
                 );
 
-            ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
-                CALL Finance.return_module(
-                   p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
-                );
-
-            ELSIF p_action_type = 'Transfer' THEN
-                CALL Finance.transfer_module(
+                -- 💰 Accounting / Returns / Transfer
+                IF p_action_type IN ('Sale', 'Purchase') THEN
+                    CALL Finance.accounting_module(
                     p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
-                );
-            ELSE
-                RAISE EXCEPTION 'Unsupported action type';
-            END IF;
+                        p_quantity, p_date, p_reference_id
+                    );
 
-            -- ✅ SUCCESS → exit retry loop
-     --       EXIT;
+                ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
+                    CALL Finance.return_module(
+                    p_clientId, new_transaction_id, p_product_id, p_action_type,
+                        p_quantity, p_date, p_reference_id
+                    );
 
-        EXCEPTION
-      --      WHEN serialization_failure OR deadlock_detected THEN
-        --        v_retry_count := v_retry_count + 1;
+                ELSIF p_action_type = 'Transfer' THEN
+                    CALL Finance.transfer_module(
+                        p_clientId, new_transaction_id, p_product_id, p_action_type,
+                        p_quantity, p_date, p_reference_id
+                    );
+                ELSE
+                    RAISE EXCEPTION 'Unsupported action type';
+                END IF;
 
-          --      IF v_retry_count >= v_max_retries THEN
-            --        RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
-              --  END IF;
+                -- ✅ SUCCESS → exit retry loop
+                EXIT;
 
-                -- ⏳ Small delay before retry (helps contention)
-               -- PERFORM pg_sleep(0.1);
+            EXCEPTION
+                WHEN serialization_failure OR deadlock_detected THEN
+                    v_retry_count := v_retry_count + 1;
 
-            WHEN OTHERS THEN
-                -- ❌ Real error → stop immediately
-                RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
+                    IF v_retry_count >= v_max_retries THEN
+                        RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
+                    END IF;
+
+                    ⏳ Small delay before retry (helps contention)
+                    PERFORM pg_sleep(0.1);
+
+                WHEN OTHERS THEN
+                    -- ❌ Real error → stop immediately
+                    RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
         END;
-   -- END LOOP;
+   END LOOP;
 END;
 $$;

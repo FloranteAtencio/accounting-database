@@ -43,65 +43,65 @@ BEGIN
                 RAISE EXCEPTION 'Vendor ID cannot be Null';
             END IF;
 
-	    SELECT ChartID INTO v_cash_chart
+	    SELECT chartId INTO v_cash_chart
             FROM Finance.charts
-            JOIN Finance.accountroles USING (chartId)
-            WHERE rolename LIKE 'cash_account_ar%'
-                  AND clientid = a_clientID
+            JOIN Finance.accountRoles USING (chartId)
+            WHERE roleName LIKE 'cash_account_ar%'
+                  AND clientId = a_clientID
                   AND is_active = TRUE
 	    LIMIT 1;
  -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
             FROM Finance.customers 
-            WHERE CustomerID = a_CustomerID
+            WHERE customerId = a_CustomerID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.accountreceivables
-            WHERE ReceivableID = a_ReceivableID
+            WHERE receivableId = a_ReceivableID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
-            WHERE TransactionID = a_TransactionID
+            WHERE transactionId = a_TransactionID
             FOR UPDATE;
 
             UPDATE Finance.accountreceivables
             SET
-                CustomerID = a_CustomerID
+                customerId = a_CustomerID
              --   DueDate = a_Duedate,
              --   InvoiceDate = a_Invoicedate,
              --   Amount = a_Amount
             WHERE 
-                ReceivableID = a_ReceivableID AND TransactionID = a_TransactionID;
+                receivableId = a_ReceivableID AND transactionId = a_TransactionID;
 
             UPDATE Finance.ar_ext
             SET
-                DueDate = a_DueDate,
-                InvoiceDate = a_Invoicedate,
-                Amount = a_Amount,
+                dueDate = a_DueDate,
+                invoiceDate = a_Invoicedate,
+                amount = a_Amount,
 		Status = a_Status
             WHERE
-                ReceivableID = a_ReceivableID;
+                receivableId = a_ReceivableID;
 
             UPDATE Finance.transactions
             SET
                 Description = CONCAT('Account Receivable With Amount of ', a_Amount, 'Due Date on ', a_DueDate, 'Status ',  a_Status , 'This had been Updated')
-            WHERE TransactionID = a_TransactionID;
+            WHERE transactionId = a_TransactionID;
 
             UPDATE Finance.journals
             SET
-                Date = a_Invoicedate,
-                Amount = a_Amount
-            WHERE TransactionID = a_TransactionID 
-	    AND ChartID IN (SELECT chartid FROM finance.accountroles WHERE rolename IN ('cash_account_ar','ar_account'));
+                date = a_Invoicedate,
+                amount = a_Amount
+            WHERE transactionId = a_TransactionID 
+	    AND chartId IN (SELECT chartId FROM finance.accountroles WHERE roleName IN ('cash_account_ar','ar_account'));
 
             SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
+                CASE WHEN journal THEN amount ELSE -amount END
                 ) INTO v_balance
             FROM Finance.journals
-            WHERE ChartID = v_cash_chart;
+            WHERE chartId = v_cash_chart;
 --            FOR UPDATE;
 
             IF a_Amount < v_balance THEN
@@ -174,9 +174,9 @@ BEGIN
 
 	    SELECT ChartID INTO v_cash_chart
             FROM Finance.charts
-            JOIN Finance.accountroles USING (chartId)
-            WHERE rolename LIKE 'cash_account_ar%'
-                  AND clientid = a_clientID
+            JOIN Finance.accountRoles USING (chartId)
+            WHERE roleName LIKE 'cash_account_ar%'
+                  AND clientId = a_clientID
                   AND is_active = TRUE
             LIMIT 1;
 
@@ -184,54 +184,54 @@ BEGIN
 
             PERFORM 1
             FROM Finance.suppliers
-            WHERE SupplierId = a_SupplierID
+            WHERE supplierId = a_SupplierID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.accountpayables
-            WHERE PayableID = a_PayableID
+            WHERE payableId = a_PayableID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.transactions
-            WHERE TransactionID = a_TransactionID
+            WHERE transactionId = a_TransactionID
             FOR UPDATE;
 
             UPDATE Finance.accountpayables
             SET
-                PayableID = a_PayableID
+                payableId = a_PayableID
              --   DueDate = a_Duedate,
              --   InvoiceDate = a_Invoicedate,
              --   Amount = a_Amount
             WHERE 
-                PayableID = a_PayableID AND TransactionID = a_TransactionID;
+                payableId = a_PayableID AND transactionId = a_TransactionID;
 
             UPDATE Finance.ap_ext
             SET
-                DueDate = a_DueDate,
-                Invoicedate = a_billdate,
-                Amount = a_Amount,
+                dueDate = a_DueDate,
+                invoicedate = a_billdate,
+                amount = a_Amount,
 		Status = a_Status
             WHERE
-                PayableID = a_PayableID;
+                payableID = a_PayableID;
 
             UPDATE Finance.transactions
             SET
                 Description = CONCAT('Account Receivable With Amount of ', a_Amount, 'Due Date on ', a_DueDate, 'Status ',  a_Status , 'This had been Updated')
-            WHERE TransactionID = a_TransactionID;
+            WHERE transactionId = a_TransactionID;
 
             UPDATE Finance.journals
             SET
-                Date = a_billdate,
-                Amount = a_Amount
-            WHERE TransactionID = a_TransactionID 
-	    AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('cash_account_ap', 'ap_account'));
+                date = a_billdate,
+                amount = a_Amount
+            WHERE transactionId = a_TransactionID 
+	    AND chartId IN (SELECT chartId FROM Finance.accountroles a WHERE a.roleName IN ('cash_account_ap', 'ap_account'));
 
             SELECT SUM(
-                CASE WHEN Journal THEN Amount ELSE -Amount END
+                CASE WHEN journal THEN amount ELSE -amount END
                 ) INTO v_balance
             FROM Finance.journals
-            WHERE ChartID = v_cash_chart;
+            WHERE chartId = v_cash_chart;
 --            FOR UPDATE;
 
             IF a_Amount < v_balance THEN
@@ -297,24 +297,24 @@ BEGIN
 
             PERFORM 1
             FROM Finance.products
-            WHERE ProductID = a_ProductID
+            WHERE productId = a_ProductID
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.warehouses
-            WHERE WarehouseID = a_WarehouseID
+            WHERE warehouseId = a_WarehouseID
             FOR UPDATE;
 
             -- Insert into Transactions and capture ID
             UPDATE Finance.inventoryaudits
             SET 
-                ProductID= a_ProductID,
-                WarehouseID= a_WarehouseID,
-                MovementDate= a_MovementDate,
-		Quantity= tities
+                productID= a_ProductID,
+                warehouseID= a_WarehouseID,
+                movementDate= a_MovementDate,
+		        quantity= tities
 
             WHERE
-                ManagementID = a_ManagementID AND TransactionID = a_TransactionID;
+                managementId = a_ManagementID AND transactionId = a_TransactionID;
 
             UPDATE Finance.transactions
             SET
@@ -324,38 +324,38 @@ BEGIN
             IF a_ActionType = 'Purchase' THEN
                 -- Update Accounts Payable
                 UPDATE Finance.ap_ext
-                SET Amount = tities * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = a_ProductID),
-                    DueDate = a_MovementDate + INTERVAL '30 days',
-                    Invoicedate = a_MovementDate,
-                    Status = a_status
-                WHERE PayableID = (SELECT PayableID FROM Finance.accountpayables WHERE TransactionID = a_TransactionID);
+                SET amount = tities * (SELECT Productcost FROM Finance.products a WHERE a.ProductID = a_ProductID),
+                    dueDate = a_MovementDate + INTERVAL '30 days',
+                    invoicedate = a_MovementDate,
+                    status = a_status
+                WHERE payableId = (SELECT PayableID FROM Finance.accountpayables WHERE TransactionID = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET 
-                    Amount = tities * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
-                WHERE TransactionID = a_TransactionID 
-		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('inventory_account', 'ap_account'));
+                    amount = tities * (SELECT Productcost FROM Finance.products b WHERE b.ProductID = a_ProductID)
+                WHERE transactionId = a_TransactionID 
+		AND chartId IN (SELECT chartId FROM Finance.accountroles a WHERE a.roleName IN ('inventory_account', 'ap_account'));
 
             ELSIF a_ActionType = 'Sale' THEN
                     -- Update Accounts Receivable
                 UPDATE Finance.ar_ext
-                SET Amount = tities * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = a_ProductID),
-                    DueDate = a_MovementDate + INTERVAL '30 days',
-                    InvoiceDate = a_MovementDate,
-                    Status = a_status
-                WHERE ReceivableID = (SELECT ReceivableID FROM Finance.accountreceivables WHERE TransactionID = a_TransactionID);
+                SET amount = tities * (SELECT Productprice FROM Finance.products a WHERE a.ProductID = a_ProductID),
+                    dueDate = a_MovementDate + INTERVAL '30 days',
+                    invoiceDate = a_MovementDate,
+                    status = a_status
+                WHERE receivableId = (SELECT receivableId FROM Finance.accountreceivables WHERE transactionId = a_TransactionID);
 
                     -- Update Journal entry for inventory movement
                 UPDATE Finance.journals
                 SET Amount = tities * (SELECT Productprice FROM Finance.products z WHERE z.ProductID = a_ProductID)
-                WHERE TransactionID = a_TransactionID 
-		AND ChartID IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('ar_account', 'revenue_account'));--SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Account Receivable', 'Revenue'));
+                WHERE transactionId = a_TransactionID 
+		AND chartId IN (SELECT ChartID FROM Finance.accountroles a WHERE a.rolename IN ('ar_account', 'revenue_account'));--SELECT ChartID FROM Finance.charts a WHERE a.Account IN ('Account Receivable', 'Revenue'));
 
                 UPDATE Finance.journals
-                SET Amount = tities * (SELECT Productcost FROM Finance.products c WHERE c.ProductID = a_ProductID)
-                WHERE TransactionID = a_TransactionID 
-		AND ChartID IN (SELECT ChartID FROM Finance.charts b WHERE b.Account IN ('Cost of Goods Sold', 'Inventory'));
+                SET amount = tities * (SELECT Productcost FROM Finance.products c WHERE c.ProductID = a_ProductID)
+                WHERE transactionId = a_TransactionID 
+		AND chartId IN (SELECT ChartID FROM Finance.charts b WHERE b.Account IN ('Cost of Goods Sold', 'Inventory'));
         
             ELSIF a_ActionType = 'Sale Return' THEN
                 UPDATE Finance.salereturns
@@ -430,219 +430,3 @@ BEGIN
   --  END LOOP;            
 END;
 $$;
-
-
-
--- -------------------- 5️⃣ Update Stored Procedure ----------------
--- ----- Simplle CRUD can be ignore -------
--- CREATE OR REPLACE PROCEDURE Finance.product_update_transaction
--- (
---     IN a_ProductID INT,
---     IN a_ProductName VARCHAR(100),
---     IN a_Description VARCHAR(200),
---     IN a_Productunit VARCHAR(20),
---     IN a_Productcost DECIMAL(12,2),
---     IN a_Productprice DECIMAL (12,2)
--- ) LANGUAGE plpgsql AS $$
--- BEGIN
-
-
---     IF a_Productcost < 0 THEN
---         RAISE EXCEPTION 'Product cost cannot be negative';
---     END IF;
-    
---     IF a_Productprice < 0 THEN
---         RAISE  EXCEPTION 'Product price cannot be negative';
---     END IF;
-
---     IF a_ProductID IS NULL THEN
---         RAISE EXCEPTION 'Product ID cannot be Null';
---     END IF;    
-
---     IF a_ProductName IS NULL THEN
---         RAISE EXCEPTION 'Product Name cannot be Null';
---     END IF;
-
---     IF a_Description IS NULL THEN
---         RAISE EXCEPTION 'Description cannot be Null';
---     END IF;
-
-    
-
---     UPDATE Finance.products
---         SET 
---         ProductName = a_ProductName, 
---         Description = a_Description, 
---         ProductUnit = a_ProductUnit,
---         ProductCost = a_Productcost,
---         ProductPrice = a_Productprice
---     WHERE
---         ProductID = a_ProductID;
-  
-
-    
--- END;
--- $$;
-
--- ----- Simplle CRUD can be ignore -------
--- CREATE OR REPLACE PROCEDURE Finance.warehouse_update_transaction(
---     IN a_WarehouseID INT,
---     IN a_WarehouseName VARCHAR(100),
---     IN a_Location VARCHAR(100)
--- ) LANGUAGE plpgsql AS $$
--- BEGIN
---     -- Validation checks
---     IF a_WarehouseName IS NULL OR a_WarehouseName = '' THEN
---         RAISE EXCEPTION 'Warehouse name cannot be empty';
---     END IF;
-
---     IF a_Location IS NULL OR a_Location = '' THEN
---         RAISE EXCEPTION 'Location cannot be empty';
---     END IF;
-
---     UPDATE Finance.warehouses
---     SET 
---         WarehouseName = a_WarehouseName,
---         Location = a_Location
---     WHERE
---         WarehouseID = a_WarehouseID;
-
---     EXCEPTION
---         WHEN OTHERS THEN
---             RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
-
-
-    
--- END;
--- $$;
-
--- ----- Simplle CRUD can be ignore -------
-
--- CREATE OR REPLACE PROCEDURE Finance.charts_update_transaction(
---     IN a_ChartID INT,
---     IN a_Account VARCHAR(30),
---     IN a_Type VARCHAR(30)
--- ) LANGUAGE plpgsql AS $$
--- BEGIN
---     -- Validation checks
---     IF a_Account IS NULL or a_Account = '' THEN
---         RAISE EXCEPTION 'Account name cannot be empty';
---     END IF;
-
---     IF a_Type NOT IN ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense') THEN
---         RAISE EXCEPTION 'Invalid account type';
---     END IF;
-
---     UPDATE Finance.charts
---     SET     
---         Account = a_Account,
---         Type = a_Type
---     WHERE
---         ChartID = a_ChartID;
-
-
---     EXCEPTION
---         WHEN OTHERS THEN
---             RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
-
-    
--- END;
--- $$;
-
--- ----- Simplle CRUD can be ignore -------
-
--- CREATE OR REPLACE PROCEDURE Finance.customer_update_transaction(
---     IN a_CustomerID INT,
---     IN a_CustomerName VARCHAR(100),
---     IN a_ContactInfo VARCHAR(15),
---     IN a_Email VARCHAR(50),
---     IN a_Address VARCHAR(100)
--- )
--- LANGUAGE plpgsql AS $$
--- BEGIN
---     -- Validation checks
---     IF a_CustomerName IS NULL OR a_CustomerName = '' THEN 
---         RAISE EXCEPTION 'Customer name cannot be empty';
---     END IF;
-
---     IF a_ContactInfo IS NULL OR a_ContactInfo = '' THEN
---         RAISE EXCEPTION 'Contact information cannot be empty';
---     END IF;
-
---     IF a_Email IS NULL OR a_Email = '' OR NOT a_Email LIKE '%@%' THEN
---         RAISE EXCEPTION 'Invalid email address';
---     END IF;
-
---     IF a_Address IS NULL OR a_Address = '' THEN 
---         RAISE EXCEPTION 'Address cannot be empty';
---     END IF;
-
---     IF a_CustomerID IS NULL THEN
---         RAISE EXCEPTION 'Customer ID cannot be NULL';
---     END IF;
-
---     UPDATE Finance.customers
---     SET CustomerName = a_CustomerName,
---         ContactInfo = a_ContactInfo,
---         Email = a_Email,
---         Address = a_Address
---     WHERE CustomerID = a_CustomerID;
-    
---     EXCEPTION
---         WHEN OTHERS THEN
---             RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
-
--- END;
--- $$;
-
--- ----- Simplle CRUD can be ignore -------
-
--- CREATE OR REPLACE PROCEDURE Finance.Vendor_update_transaction(
---     IN a_VendorID INT,
---     IN a_VendorName VARCHAR(100),
---     IN a_ContactInfo VARCHAR(15),
---     IN a_Email VARCHAR(50),
---     IN a_Address VARCHAR(100)
--- )
-
--- LANGUAGE plpgsql AS $$
--- BEGIN
---     -- Validation checks
---     IF a_VendorName IS NULL OR a_VendorName = '' THEN 
---         RAISE EXCEPTION 'Vendor name cannot be empty';
---     END IF;
-
---     IF a_ContactInfo IS NULL OR a_ContactInfo = '' THEN
---         RAISE EXCEPTION 'Contact information cannot be empty';
---     END IF;
-
---     IF a_Email IS NULL OR a_Email = '' OR NOT a_Email LIKE '%@%' THEN
---         RAISE EXCEPTION 'Invalid email address';
---     END IF;
-
---     IF a_Address IS NULL OR a_Address = '' THEN 
---         RAISE EXCEPTION 'Address cannot be empty';
---     END IF;
-
---     IF a_VendorID IS NULL THEN
---         RAISE EXCEPTION 'Vendor ID cannot be Null';
---     END IF;
-
---     UPDATE Finance.VendorsTransaction
---     SET
---         VendorName = a_VendorName,
---         ContactInfo = a_ContactInfo,
---         Email = a_Email,
---         Address = a_Address
---     WHERE
---         VendorID = a_VendorID;
-
---     EXCEPTION
---         WHEN OTHERS THEN
---             RAISE EXCEPTION 'Transaction failed: %', SQLERRM;
-
-    
--- END;
--- $$;
-
-

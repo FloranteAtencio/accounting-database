@@ -75,23 +75,23 @@ BEGIN
     -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     PERFORM 1
     FROM Finance.products
-    WHERE ProductID = (p_payload->>'product_id')::INT
+    WHERE productId = (p_payload->>'product_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.warehouses
-    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    WHERE warehouseId = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.customers
-    WHERE CustomerID = (p_payload->>'customer_id')::INT
+    WHERE customerId = (p_payload->>'customer_id')::INT
     FOR UPDATE;
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description,idempotencyKey)
+    INSERT INTO Finance.transactions (Description,idempotencyKey,clientId)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,(p_payload->>'idempotency_key')::TEXT)
+    ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
     ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
@@ -167,9 +167,9 @@ BEGIN
     FOR UPDATE;
     
     -- create transaction
-    INSERT INTO Finance.transactions (Description, idempotencyKey)
+    INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,(p_payload->>'idempotency_key')::TEXT)
+    ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
     ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 
@@ -246,9 +246,9 @@ BEGIN
 
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description , idempotencyKey)
+    INSERT INTO Finance.transactions (Description , idempotencyKey, clientId)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
-    ,(p_payload->>'idempotency_key')::TEXT)
+    ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
     ON CONFLICT (idempotencyKey) DO NOTHING
     RETURNING TransactionID INTO v_transaction_id;
 

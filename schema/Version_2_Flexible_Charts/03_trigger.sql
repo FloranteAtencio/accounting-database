@@ -13,10 +13,10 @@ BEGIN
     FOR UPDATE;
 
     INSERT INTO Finance.auditlogs (
-        TableName,
-        RecTransact,
-        Operation,
-        ChangedBy,
+        tableName,
+        recTransact,
+        operation,
+        changedBy,
         prev_hash,
         row_hash
     )
@@ -104,4 +104,16 @@ FOR  EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 
 CREATE TRIGGER account_properties_changes 
 AFTER INSERT OR UPDATE OR DELETE ON Finance.accountproperties
+FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
+
+CREATE TRIGGER account_receivables_ext_changes
+AFTER INSERT OR UPDATE OR DELETE ON Finance.ar_ext
+FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
+
+CREATE TRIGGER account_payables_ext_changes
+AFTER INSERT OR UPDATE OR DELETE ON Finance.ap_ext
+FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
+
+CREATE TRIGGER coa_templates_account_changes
+AFTER INSERT OR UPDATE OR DELETE ON Finance.coatemplateaccounts
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();

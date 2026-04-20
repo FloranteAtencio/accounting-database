@@ -7,7 +7,7 @@ DECLARE
     v_rows_affected INT;
 BEGIN
     -- Insert roles for matching accounts
-    INSERT INTO Finance.accountroles (chartId, rolename)
+    INSERT INTO Finance.accountroles (chartId, roleName)
     SELECT
         chartId,
         p_role_name
