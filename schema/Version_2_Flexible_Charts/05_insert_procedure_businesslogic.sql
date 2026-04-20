@@ -85,7 +85,7 @@ BEGIN
             END IF;
 
             PERFORM 1
-            FROM Finance.clientId
+            FROM Finance.clients
             WHERE clientId = p_clientId
             FOR UPDATE;
 
