@@ -252,7 +252,7 @@ CALL Finance.process_inventory_transaction(
     1, -- receivable_id
     'Sales-2026-01-01-Mr.Atencio-0002'
 );
-INSERT INTO Finance.event_log (EventType, Payload,idempotencyKey)
+INSERT INTO Finance.event_log (event_type, Payload,idempotency_key)
 VALUES (
     'SALE',
     jsonb_build_object(
@@ -269,7 +269,7 @@ VALUES (
     ,'sale-2026-0001'
 );
 
-INSERT INTO Finance.event_log (EventType, Payload,idempotencyKey)
+INSERT INTO Finance.event_log (event_type, Payload,idempotency_key)
 VALUES (
     'PURCHASE',
     jsonb_build_object(
@@ -285,7 +285,7 @@ VALUES (
     ,'sale-2026-0002'
 );
 
-INSERT INTO Finance.event_log (EventType, Payload,idempotencyKey)
+INSERT INTO Finance.event_log (event_type, Payload,idempotency_key)
 VALUES (
     'RETURN',
     jsonb_build_object(
