@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
         quantity INT NOT NULL CHECK (quantity > 0),
         transfer_date DATE NOT NULL DEFAULT CURRENT_DATE,
         Notes TEXT,
-        FOREIGN KEY (from_location_idocationID) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
+        FOREIGN KEY (from_location_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
         FOREIGN KEY (to_location_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
         FOREIGN KEY (product_id) REFERENCES Finance.products(product_id) ON DELETE NO ACTION
     );
