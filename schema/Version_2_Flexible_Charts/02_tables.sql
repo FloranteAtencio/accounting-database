@@ -4,7 +4,7 @@ BEGIN;
 -- ============================================
 DROP TABLE IF EXISTS Finance.clients CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.clients (
-    clientId SERIAL PRIMARY KEY,
+    client_id SERIAL PRIMARY KEY,
     info JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
