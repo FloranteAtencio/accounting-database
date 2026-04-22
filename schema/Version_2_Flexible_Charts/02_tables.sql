@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Finance.coa_templates (
 -- ============================================
 -- 2.1 COA TEMPLATES (for reference/defaults)
 -- ============================================
-DROP TABLE IF EXISTS Finance.coa_templa_teaccounts CASCADE;
+DROP TABLE IF EXISTS Finance.coa_template_teaccounts CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.coa_template_accounts (
     template_account_Id BIGSERIAL PRIMARY KEY,
     template_id INT NOT NULL REFERENCES Finance.coa_templates(template_id) ON DELETE NO ACTION,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Finance.charts (
     type VARCHAR(50) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(client_Id, account_code)
+    UNIQUE(client_id, account_code)
 );
 
 -- ============================================
@@ -68,11 +68,11 @@ DROP TABLE IF EXISTS Finance.account_properties CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.account_properties (
     property_id SERIAL PRIMARY KEY,
     chart_id INT NOT NULL REFERENCES Finance.charts(chart_id) ON DELETE NO ACTION,
-    is_payable BOOLEAN,
-    is_debt BOOLEAN,
-    is_bank_account BOOLEAN,
-    is_credit_card BOOLEAN,
-    requires_reconciliation BOOLEAN,
+    is_payable BOOLEAN DEFAULT FALSE,
+    is_debt BOOLEAN DEFAULT FALSE,
+    is_bank_account BOOLEAN DEFAULT FALSE,
+    is_credit_card BOOLEAN DEFAULT FALSE,
+    requires_reconciliation BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS Finance.transactions (
 DROP TABLE IF EXISTS Finance.journals CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.journals (
     journal_id BIGSERIAL PRIMARY KEY,
-    transaction_id INT NOT NULL REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION,
+    transaction_id INT NOT NULL REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION,
     chart_id INT NOT NULL REFERENCES Finance.charts(chart_id) ON DELETE NO ACTION,
     date DATE NOT NULL,
     journal BOOLEAN NOT NULL CHECK (journal IN (TRUE,FALSE)),
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
     CREATE TABLE Finance.customers (
         customer_id SERIAL PRIMARY KEY,
         customer_name VARCHAR(255) NOT NULL,
-        contact_Info VARCHAR(25) NOT NULL,
-        email VARCHAR(50) NOT NULL,
+        contact_info VARCHAR(50) NOT NULL,
+        email VARCHAR(255) NOT NULL,
         address VARCHAR(100) NOT NULL
     );
 
@@ -122,8 +122,8 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
     CREATE TABLE IF NOT EXISTS Finance.suppliers (
         supplier_id SERIAL PRIMARY KEY,
         supplier_name VARCHAR(255) NOT NULL,
-        contact_info VARCHAR(25) NOT NULL,
-        email VARCHAR(50) NOT NULL,
+        contact_info VARCHAR(50) NOT NULL,
+        email VARCHAR(255) NOT NULL,
         address VARCHAR(100) NOT NULL
     );
 
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 DROP TABLE IF EXISTS Finance.account_receivables CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.account_receivables (
     receivable_id SERIAL PRIMARY KEY,
-    transaction_id INT NOT NULL REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION,
+    transaction_id INT NOT NULL REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION,
     customer_id INT NOT NULL REFERENCES Finance.customers(Customer_id) ON DELETE NO ACTION
    -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -215,9 +215,9 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
         action_type VARCHAR(50) NOT NULL, 
         quantity INT NOT NULL CHECK (quantity > 0),
         movement_date DATE NOT NULL,
-        FOREIGN KEY (product_id) REFERENCES Finance.products(Product_id) ON DELETE NO ACTION,
-        FOREIGN KEY (warehouse_id) REFERENCES Finance.warehouses(Warehouse_id) ON DELETE NO ACTION,
-        FOREIGN KEY (transaction_id) REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION
+        FOREIGN KEY (product_id) REFERENCES Finance.products(product_id) ON DELETE NO ACTION,
+        FOREIGN KEY (warehouse_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
+        FOREIGN KEY (transaction_id) REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION
         --PRIMARY KEY (ManagementID,MovementDate)
     ); --PARTITION BY RANGE(MovementDate);
 
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
 -- ============================================
     DROP TABLE IF EXISTS Finance.sale_returns CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.sale_returns  (
-        returnId SERIAL PRIMARY KEY,
+        return_id SERIAL PRIMARY KEY,
         receivable_id INT NOT NULL,
         return_amount DECIMAL(15, 2) NOT NULL CHECK (return_amount >= 0),
         return_date DATE NOT NULL,
