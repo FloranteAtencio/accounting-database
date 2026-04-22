@@ -428,7 +428,7 @@ BEGIN
         account_code,
         account_type,
         TRUE
-    FROM Finance.coa_templat_eaccounts
+    FROM Finance.coa_template_accounts
     WHERE template_id = p_template_id
     ON CONFLICT (client_id, account_code) DO NOTHING;  -- Skip duplicates
 
