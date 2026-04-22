@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     CREATE TABLE IF NOT EXISTS Finance.purchase_returns  (
         return_id SERIAL PRIMARY KEY,
         payable_id INT NOT NULL,
-        return_amount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
+        return_amount DECIMAL(15, 2) NOT NULL CHECK (return_amount >= 0),
         return_date DATE NOT NULL,
 	FOREIGN KEY (payable_id) REFERENCES Finance.account_payables(payable_id) ON DELETE NO ACTION
         );
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     CREATE TABLE IF NOT EXISTS Finance.sale_returns  (
         returnId SERIAL PRIMARY KEY,
         receivable_id INT NOT NULL,
-        return_amount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
+        return_amount DECIMAL(15, 2) NOT NULL CHECK (return_amount >= 0),
         return_date DATE NOT NULL,
         FOREIGN KEY (receivable_id) REFERENCES Finance.account_receivables(receivable_id) ON DELETE NO ACTION
         );
