@@ -460,7 +460,7 @@ BEGIN
         RAISE EXCEPTION 'Invalid quantity';
     END IF;
 
-    INSERT INTO Finance.inventoryaudits
+    INSERT INTO Finance.inventory_audits
     (product_id, warehouse_id, transaction_id, action_type, quantity, movement_date)
     VALUES
     (p_product_id, p_warehouse_id, p_transaction_id, p_action_type, p_quantity, p_date);
