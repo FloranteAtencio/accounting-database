@@ -154,8 +154,8 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
 -- 12. ACCOUNTS RECEIVABLE
 -- ============================================
-DROP TABLE IF EXISTS Finance.accountreceivables CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.accountreceivables (
+DROP TABLE IF EXISTS Finance.account_receivables CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.account_receivables (
     receivable_id SERIAL PRIMARY KEY,
     transaction_id INT NOT NULL REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION,
     customer_id INT NOT NULL REFERENCES Finance.customers(Customer_id) ON DELETE NO ACTION
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS Finance.ar_ext (
     due_date DATE NOT NULL,
     invoice_date DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
-    receivable_id INT NOT NULL REFERENCES Finance.accountreceivables(receivable_id) ON DELETE NO ACTION
+    receivable_id INT NOT NULL REFERENCES Finance.account_receivables(receivable_id) ON DELETE NO ACTION
    -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ar_ext_id,InvoiceDate)
 );  --PARTITION BY RANGE(InvoiceDate);
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     due_date DATE NOT NULL,
     invoice_date DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
-    payable_id INT NOT NULL REFERENCES Finance.accountpayables(payable_id) ON DELETE NO ACTION
+    payable_id INT NOT NULL REFERENCES Finance.account_payables(payable_id) ON DELETE NO ACTION
     --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ap_ext_id,InvoiceDate)
 );    
@@ -230,7 +230,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
         payable_id INT NOT NULL,
         return_amount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
         return_date DATE NOT NULL,
-	FOREIGN KEY (payable_id) REFERENCES Finance.accountpayables(payable_id) ON DELETE NO ACTION
+	FOREIGN KEY (payable_id) REFERENCES Finance.account_payables(payable_id) ON DELETE NO ACTION
         );
 	
 -- ============================================
@@ -242,7 +242,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
         receivable_id INT NOT NULL,
         return_amount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
         return_date DATE NOT NULL,
-        FOREIGN KEY (receivable_id) REFERENCES Finance.accountreceivables(receivable_id) ON DELETE NO ACTION
+        FOREIGN KEY (receivable_id) REFERENCES Finance.account_receivables(receivable_id) ON DELETE NO ACTION
         );
 
 -- ============================================
