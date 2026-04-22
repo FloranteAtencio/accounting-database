@@ -79,7 +79,7 @@ This project demonstrates real-world database engineering concepts including **d
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/FloranteAtencio/ERP-Database.git
+ git clone https://github.com/FloranteAtencio/bookkeeping-database.git
    ```
 
 2. Open PostgreSQL (pgAdmin, DBeaver, or CLI)
