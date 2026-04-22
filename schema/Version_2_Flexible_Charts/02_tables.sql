@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS Finance.transactions (
     transactionID BIGSERIAL PRIMARY KEY,
     description TEXT NOT NULL,
     idempotencyKey TEXT UNIQUE NOT NULL,
-    clientId INT REFERENCES Finance.clients(clientId) ON DELETE NO ACTION,
+    clientId INT REFERENCES Finance.clients(clientId) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
     chartID INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
     date DATE NOT NULL,
     journal BOOLEAN NOT NULL CHECK (journal IN (TRUE,FALSE)),  -- TRUE = Debit, FALSE = Credit
-    amount DECIMAL(12,2) NOT NULL CHECK  (Amount >= 0)
+    amount DECIMAL(15,2) NOT NULL CHECK  (Amount >= 0)
   --  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (JournalID,Date)
 );--PARTITION BY RANGE(Date);
@@ -136,8 +136,8 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
         productName VARCHAR(50) NOT NULL,
         description VARCHAR(200),
         productUnit VARCHAR(20) NOT NULL,
-        productCost DECIMAL(10, 2) NOT NULL CHECK (productCost >= 0),
-        productPrice DECIMAL(10, 2) NOT NULL CHECK (productPrice >= 0)
+        productCost DECIMAL(15, 2) NOT NULL CHECK (productCost >= 0),
+        productPrice DECIMAL(15, 2) NOT NULL CHECK (productPrice >= 0)
     );
 
 -- ============================================
@@ -167,8 +167,8 @@ CREATE TABLE IF NOT EXISTS Finance.accountreceivables (
 -- ============================================
 DROP TABLE IF EXISTS Finance.ar_ext CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.ar_ext (
-    ar_ext_id SERIAL PRIMARY KEY,
-    amount DECIMAL(12,2) NOT NULL,
+    ar_ext_id BIGSERIAL PRIMARY KEY,
+    amount DECIMAL(15,2) NOT NULL,
     dueDate DATE NOT NULL,
     invoiceDate DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -193,8 +193,8 @@ CREATE TABLE IF NOT EXISTS Finance.accountpayables (
 -- ============================================
 DROP TABLE IF EXISTS Finance.ap_ext CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.ap_ext (
-    ap_ext_id SERIAL PRIMARY KEY,
-    amount DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
+    ap_ext_id BIGSERIAL PRIMARY KEY,
+    amount DECIMAL(15,2) NOT NULL CHECK (amount >= 0),
     dueDate DATE NOT NULL,
     invoiceDate DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     CREATE TABLE IF NOT EXISTS Finance.purchasereturns  (
         returnId SERIAL PRIMARY KEY,
         payableId INT NOT NULL,
-        returnAmount DECIMAL(10, 2) NOT NULL CHECK (returnAmount >= 0),
+        returnAmount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
         returnDate DATE NOT NULL,
 	FOREIGN KEY (PayableID) REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE
         );
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
     CREATE TABLE IF NOT EXISTS Finance.salereturns  (
         returnId SERIAL PRIMARY KEY,
         receivableId INT NOT NULL,
-        returnAmount DECIMAL(10, 2) NOT NULL CHECK (returnAmount >= 0),
+        returnAmount DECIMAL(15, 2) NOT NULL CHECK (returnAmount >= 0),
         returnDate DATE NOT NULL,
         FOREIGN KEY (ReceivableID) REFERENCES Finance.accountreceivables(ReceivableID) ON DELETE CASCADE
         );
