@@ -99,7 +99,7 @@ else
         echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/sample_data.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/data_sample.sql"
 if [ $? -eq 0 ]; then
 	echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else

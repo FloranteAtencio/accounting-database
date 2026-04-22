@@ -4,7 +4,7 @@ BEGIN;
 -- ============================================
 DROP TABLE IF EXISTS Finance.clients CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.clients (
-    clientId SERIAL PRIMARY KEY,
+    client_id SERIAL PRIMARY KEY,
     info JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -12,10 +12,10 @@ CREATE TABLE IF NOT EXISTS Finance.clients (
 -- ============================================
 -- 2. COA TEMPLATES (for reference/defaults)
 -- ============================================
-DROP TABLE IF EXISTS Finance.coatemplates CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.coatemplates (
-    templateid SERIAL PRIMARY KEY,
-    templatename VARCHAR(100) NOT NULL,
+DROP TABLE IF EXISTS Finance.coa_templates CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.coa_templates (
+    template_id SERIAL PRIMARY KEY,
+    template_name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -23,14 +23,14 @@ CREATE TABLE IF NOT EXISTS Finance.coatemplates (
 -- ============================================
 -- 2.1 COA TEMPLATES (for reference/defaults)
 -- ============================================
-DROP TABLE IF EXISTS Finance.coatemplateaccounts CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.coatemplateaccounts (
-    templateaccountid SERIAL PRIMARY KEY,
-    templateid INT NOT NULL REFERENCES Finance.coatemplates(templateid) ON DELETE CASCADE,
-    accountcode INT NOT NULL,
-    accountname VARCHAR(100) NOT NULL,
-    accounttype VARCHAR(50) NOT NULL,
-    UNIQUE(templateid, accountcode)
+DROP TABLE IF EXISTS Finance.coa_templa_teaccounts CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.coa_template_accounts (
+    template_account_Id BIGSERIAL PRIMARY KEY,
+    template_id INT NOT NULL REFERENCES Finance.coa_templates(template_id) ON DELETE NO ACTION,
+    account_code INT NOT NULL,
+    account_name VARCHAR(255) NOT NULL,
+    account_type VARCHAR(50) NOT NULL,
+    UNIQUE(template_id, account_code)
 );
 
 
@@ -39,35 +39,35 @@ CREATE TABLE IF NOT EXISTS Finance.coatemplateaccounts (
 -- ============================================
 DROP TABLE IF EXISTS Finance.charts CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.charts (
-    chartId SERIAL PRIMARY KEY,
-    clientId INT NOT NULL REFERENCES Finance.clients(clientId) ON DELETE CASCADE,
+    chart_id BIGSERIAL PRIMARY KEY,
+    client_id INT NOT NULL REFERENCES Finance.clients(client_id) ON DELETE NO ACTION,
     account VARCHAR(100) NOT NULL,
-    accountCode INT NOT NULL,
+    account_code INT NOT NULL,
     type VARCHAR(50) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(clientId, accountCode)
+    UNIQUE(client_Id, account_code)
 );
 
 -- ============================================
 -- 4. ACCOUNT ROLES (flexible, multiple roles per account)
 -- ============================================
-DROP TABLE IF EXISTS Finance.accountroles CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.accountroles (
-    roleId SERIAL PRIMARY KEY,
-    chartId INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
-    roleName VARCHAR(50) NOT NULL,
+DROP TABLE IF EXISTS Finance.account_roles CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.account_roles (
+    role_id SERIAL PRIMARY KEY,
+    chart_id INT NOT NULL REFERENCES Finance.charts(chart_id) ON DELETE NO ACTION,
+    role_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(chartId, roleName)
+    UNIQUE(chart_id, role_name)
 );
 
 -- ============================================
 -- 5. ACCOUNT PROPERTIES
 -- ============================================
-DROP TABLE IF EXISTS Finance.accountproperties CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.accountproperties (
-    propertyId SERIAL PRIMARY KEY,
-    chartId INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
+DROP TABLE IF EXISTS Finance.account_properties CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.account_properties (
+    property_id SERIAL PRIMARY KEY,
+    chart_id INT NOT NULL REFERENCES Finance.charts(chart_id) ON DELETE NO ACTION,
     is_payable BOOLEAN,
     is_debt BOOLEAN,
     is_bank_account BOOLEAN,
@@ -81,10 +81,10 @@ CREATE TABLE IF NOT EXISTS Finance.accountproperties (
 -- ============================================
 DROP TABLE IF EXISTS Finance.transactions CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.transactions (
-    TransactionID SERIAL PRIMARY KEY,
-    Description TEXT NOT NULL,
-    idempotencyKey VARCHAR(255) UNIQUE NOT NULL,
-    clientId INT REFERENCES Finance.clients(clientId) ON DELETE NO ACTION,
+    transaction_id BIGSERIAL PRIMARY KEY,
+    description TEXT NOT NULL,
+    idempotency_key TEXT UNIQUE NOT NULL,
+    client_id INT REFERENCES Finance.clients(client_id) ON DELETE NO ACTION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -93,12 +93,12 @@ CREATE TABLE IF NOT EXISTS Finance.transactions (
 -- ============================================
 DROP TABLE IF EXISTS Finance.journals CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.journals (
-    JournalID SERIAL PRIMARY KEY,
-    TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
-    ChartID INT NOT NULL REFERENCES Finance.charts(chartId) ON DELETE CASCADE,
-    Date DATE NOT NULL,
-    Journal BOOLEAN NOT NULL CHECK (Journal IN (TRUE,FALSE)),  -- TRUE = Debit, FALSE = Credit
-    Amount DECIMAL(12,2) NOT NULL CHECK  (Amount >= 0)
+    journal_id BIGSERIAL PRIMARY KEY,
+    transaction_id INT NOT NULL REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION,
+    chart_id INT NOT NULL REFERENCES Finance.charts(chart_id) ON DELETE NO ACTION,
+    date DATE NOT NULL,
+    journal BOOLEAN NOT NULL CHECK (journal IN (TRUE,FALSE)),
+    amount DECIMAL(15,2) NOT NULL CHECK  (Amount >= 0)
   --  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (JournalID,Date)
 );--PARTITION BY RANGE(Date);
@@ -108,11 +108,11 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
     DROP TABLE IF EXISTS Finance.customers CASCADE;
     CREATE TABLE Finance.customers (
-        CustomerID SERIAL PRIMARY KEY,
-        CustomerName VARCHAR(50) NOT NULL,
-        ContactInfo VARCHAR(15) NOT NULL,
-        Email VARCHAR(50) NOT NULL CHECK (Email LIKE '%@%'),
-        Address VARCHAR(100) NOT NULL
+        customer_id SERIAL PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        contact_Info VARCHAR(25) NOT NULL,
+        email VARCHAR(50) NOT NULL,
+        address VARCHAR(100) NOT NULL
     );
 
 -- ============================================
@@ -120,11 +120,11 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
     DROP TABLE IF EXISTS Finance.suppliers CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.suppliers (
-        SupplierID SERIAL PRIMARY KEY,
-        SupplierName VARCHAR(50) NOT NULL,
-        ContactInfo VARCHAR(15) NOT NULL,
-        Email VARCHAR(50) NOT NULL CHECK (Email LIKE '%@%'),
-        Address VARCHAR(100) NOT NULL
+        supplier_id SERIAL PRIMARY KEY,
+        supplier_name VARCHAR(255) NOT NULL,
+        contact_info VARCHAR(25) NOT NULL,
+        email VARCHAR(50) NOT NULL,
+        address VARCHAR(100) NOT NULL
     );
 
 -- ============================================
@@ -132,12 +132,12 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
     DROP TABLE IF EXISTS Finance.products CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.products (
-        ProductID SERIAL PRIMARY KEY,
-        ProductName VARCHAR(50) NOT NULL,
-        Description VARCHAR(200),
-        ProductUnit VARCHAR(20) NOT NULL,
-        ProductCost DECIMAL(10, 2) NOT NULL CHECK (Productcost >= 0),
-        ProductPrice DECIMAL(10, 2) NOT NULL CHECK (Productprice >= 0)
+        product_id SERIAL PRIMARY KEY,
+        product_name VARCHAR(255) NOT NULL,
+        description VARCHAR(200),
+        product_unit VARCHAR(20) NOT NULL,
+        product_cost DECIMAL(15, 2) NOT NULL CHECK (product_cost >= 0),
+        product_price DECIMAL(15, 2) NOT NULL CHECK (product_price >= 0)
     );
 
 -- ============================================
@@ -145,20 +145,20 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
     DROP TABLE IF EXISTS Finance.warehouses CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.warehouses (
-        WarehouseID SERIAL PRIMARY KEY,
-        WarehouseName VARCHAR(50) NOT NULL,
-        Location VARCHAR(100) NOT NULL
+        warehouse_id SERIAL PRIMARY KEY,
+        warehouse_name VARCHAR(255) NOT NULL,
+        location VARCHAR(100) NOT NULL
     );
 
 
 -- ============================================
 -- 12. ACCOUNTS RECEIVABLE
 -- ============================================
-DROP TABLE IF EXISTS Finance.accountreceivables CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.accountreceivables (
-    ReceivableID SERIAL PRIMARY KEY,
-    TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
-    CustomerID INT NOT NULL REFERENCES Finance.customers(CustomerID) ON DELETE CASCADE
+DROP TABLE IF EXISTS Finance.account_receivables CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.account_receivables (
+    receivable_id SERIAL PRIMARY KEY,
+    transaction_id INT NOT NULL REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION,
+    customer_id INT NOT NULL REFERENCES Finance.customers(Customer_id) ON DELETE NO ACTION
    -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -167,12 +167,12 @@ CREATE TABLE IF NOT EXISTS Finance.accountreceivables (
 -- ============================================
 DROP TABLE IF EXISTS Finance.ar_ext CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.ar_ext (
-    ar_ext_id SERIAL PRIMARY KEY,
-    Amount DECIMAL(12,2) NOT NULL,
-    DueDate DATE NOT NULL,
-    InvoiceDate DATE NOT NULL,
-    Status VARCHAR(20) NOT NULL,
-    ReceivableID INT NOT NULL REFERENCES Finance.accountreceivables(ReceivableID) ON DELETE CASCADE
+    ar_ext_id BIGSERIAL PRIMARY KEY,
+    amount DECIMAL(15,2) NOT NULL,
+    due_date DATE NOT NULL,
+    invoice_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    receivable_id INT NOT NULL REFERENCES Finance.account_receivables(receivable_id) ON DELETE NO ACTION
    -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ar_ext_id,InvoiceDate)
 );  --PARTITION BY RANGE(InvoiceDate);
@@ -180,11 +180,11 @@ CREATE TABLE IF NOT EXISTS Finance.ar_ext (
 -- ============================================
 -- 14. ACCOUNTS PAYABLE
 -- ============================================
-DROP TABLE IF EXISTS Finance.accountpayables CASCADE;
-CREATE TABLE IF NOT EXISTS Finance.accountpayables (
-    PayableID SERIAL PRIMARY KEY,
-    TransactionID INT NOT NULL REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE,
-    supplierID INT NOT NULL REFERENCES Finance.suppliers(SupplierID) ON DELETE CASCADE
+DROP TABLE IF EXISTS Finance.account_payables CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.account_payables (
+    payable_id SERIAL PRIMARY KEY,
+    transaction_id INT NOT NULL REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION,
+    supplier_id INT NOT NULL REFERENCES Finance.suppliers(supplier_id) ON DELETE NO ACTION
     --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -193,12 +193,12 @@ CREATE TABLE IF NOT EXISTS Finance.accountpayables (
 -- ============================================
 DROP TABLE IF EXISTS Finance.ap_ext CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.ap_ext (
-    ap_ext_id SERIAL PRIMARY KEY,
-    Amount DECIMAL(12,2) NOT NULL CHECK (Amount >= 0),
-    DueDate DATE NOT NULL,
-    InvoiceDate DATE NOT NULL,
-    Status VARCHAR(20) NOT NULL,
-    PayableID INT NOT NULL REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE
+    ap_ext_id BIGSERIAL PRIMARY KEY,
+    amount DECIMAL(15,2) NOT NULL CHECK (amount >= 0),
+    due_date DATE NOT NULL,
+    invoice_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    payable_id INT NOT NULL REFERENCES Finance.account_payables(payable_id) ON DELETE NO ACTION
     --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     --PRIMARY KEY (ap_ext_id,InvoiceDate)
 );    
@@ -206,73 +206,73 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
 -- ============================================
 -- 16. INVENTORY AUDIT
 -- ============================================
-    DROP TABLE IF EXISTS Finance.inventoryaudits CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.inventoryaudits (
-        ManagementID SERIAL PRIMARY KEY, 
-        ProductID INT NOT NULL,
-        WarehouseID INT NOT NULL,
-        TransactionID INT NOT NULL,
-        ActionType VARCHAR(50) NOT NULL, -- CHECK (ActionType IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer')),
-        Quantity INT NOT NULL CHECK (Quantity > 0),
-        MovementDate DATE NOT NULL,
-        FOREIGN KEY (ProductID) REFERENCES Finance.products(ProductID) ON DELETE CASCADE,
-        FOREIGN KEY (WarehouseID) REFERENCES Finance.warehouses(WarehouseID) ON DELETE CASCADE,
-        FOREIGN KEY (TransactionID) REFERENCES Finance.transactions(TransactionID) ON DELETE CASCADE
+    DROP TABLE IF EXISTS Finance.inventory_audits CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.inventory_audits (
+        management_id SERIAL PRIMARY KEY, 
+        product_id INT NOT NULL,
+        warehouse_id INT NOT NULL,
+        transaction_id INT NOT NULL,
+        action_type VARCHAR(50) NOT NULL, 
+        quantity INT NOT NULL CHECK (quantity > 0),
+        movement_date DATE NOT NULL,
+        FOREIGN KEY (product_id) REFERENCES Finance.products(Product_id) ON DELETE NO ACTION,
+        FOREIGN KEY (warehouse_id) REFERENCES Finance.warehouses(Warehouse_id) ON DELETE NO ACTION,
+        FOREIGN KEY (transaction_id) REFERENCES Finance.transactions(Transaction_id) ON DELETE NO ACTION
         --PRIMARY KEY (ManagementID,MovementDate)
     ); --PARTITION BY RANGE(MovementDate);
 
 -- ============================================
 -- 17. PURCHASE RETURNS
 -- ============================================
-    DROP TABLE IF EXISTS Finance.purchasereturns CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.purchasereturns  (
-        ReturnID SERIAL PRIMARY KEY,
-        PayableID INT NOT NULL,
-        ReturnAmount DECIMAL(10, 2) NOT NULL CHECK (ReturnAmount >= 0),
-        ReturnDate DATE NOT NULL,
-	FOREIGN KEY (PayableID) REFERENCES Finance.accountpayables(PayableID) ON DELETE CASCADE
+    DROP TABLE IF EXISTS Finance.purchase_returns CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.purchase_returns  (
+        return_id SERIAL PRIMARY KEY,
+        payable_id INT NOT NULL,
+        return_amount DECIMAL(15, 2) NOT NULL CHECK (return_amount >= 0),
+        return_date DATE NOT NULL,
+	FOREIGN KEY (payable_id) REFERENCES Finance.account_payables(payable_id) ON DELETE NO ACTION
         );
 	
 -- ============================================
 -- 18. SALES  RETURNS
 -- ============================================
-    DROP TABLE IF EXISTS Finance.salereturns CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.salereturns  (
-        ReturnID SERIAL PRIMARY KEY,
-        ReceivableID INT NOT NULL,
-        ReturnAmount DECIMAL(10, 2) NOT NULL CHECK (ReturnAmount >= 0),
-        ReturnDate DATE NOT NULL,
-        FOREIGN KEY (ReceivableID) REFERENCES Finance.accountreceivables(ReceivableID) ON DELETE CASCADE
+    DROP TABLE IF EXISTS Finance.sale_returns CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.sale_returns  (
+        returnId SERIAL PRIMARY KEY,
+        receivable_id INT NOT NULL,
+        return_amount DECIMAL(15, 2) NOT NULL CHECK (return_amount >= 0),
+        return_date DATE NOT NULL,
+        FOREIGN KEY (receivable_id) REFERENCES Finance.account_receivables(receivable_id) ON DELETE NO ACTION
         );
 
 -- ============================================
 -- 19. INVENTORY TRANSFER
 -- ============================================
-    DROP TABLE IF EXISTS Finance.inventorytransfers CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.inventorytransfers (
-        TransferID SERIAL PRIMARY KEY,
-        FromLocationID INT NOT NULL,
-        ToLocationID INT NOT NULL,
-        ProductID INT NOT NULL,
-        Quantity INT NOT NULL CHECK (Quantity > 0),
-        TransferDate DATE NOT NULL DEFAULT CURRENT_DATE,
+    DROP TABLE IF EXISTS Finance.inventory_transfers CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.inventory_transfers (
+        transfer_id SERIAL PRIMARY KEY,
+        from_location_id INT NOT NULL,
+        to_location_id INT NOT NULL,
+        product_id INT NOT NULL,
+        quantity INT NOT NULL CHECK (quantity > 0),
+        transfer_date DATE NOT NULL DEFAULT CURRENT_DATE,
         Notes TEXT,
-        FOREIGN KEY (FromLocationID) REFERENCES Finance.warehouses(WarehouseID) ON DELETE CASCADE,
-        FOREIGN KEY (ToLocationID) REFERENCES Finance.warehouses(WarehouseID) ON DELETE CASCADE,
-        FOREIGN KEY (ProductID) REFERENCES Finance.products(ProductID) ON DELETE CASCADE
+        FOREIGN KEY (from_location_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
+        FOREIGN KEY (to_location_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
+        FOREIGN KEY (product_id) REFERENCES Finance.products(product_id) ON DELETE NO ACTION
     );
 
 -- ============================================
 -- 20. AUDIT LOGS
 -- ============================================
-    DROP TABLE IF EXISTS Finance.auditlogs CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.auditlogs (
-        AuditID SERIAL PRIMARY KEY,
-        TableName VARCHAR(50) NOT NULL,
-        RecTransact TEXT NOT NULL,
-        Operation VARCHAR(20) NOT NULL,  -- CHECK (Operation IN ('INSERT', 'UPDATE', 'DELETE')),
-        LogTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        ChangedBy VARCHAR(50) NOT NULL,
+    DROP TABLE IF EXISTS Finance.audit_logs CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.audit_logs (
+        audit_id SERIAL PRIMARY KEY,
+        table_name VARCHAR(255) NOT NULL,
+        rec_transact TEXT NOT NULL,
+        operation VARCHAR(20) NOT NULL, 
+        log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        changed_by VARCHAR(50) NOT NULL,
         prev_hash TEXT,
         row_hash TEXT
     );
@@ -282,12 +282,12 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
 -- ============================================    
 DROP TABLE IF  EXISTS Finance.event_log CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.event_log (
-    EventID SERIAL PRIMARY KEY,
-    EventType VARCHAR(50) NOT NULL,
-    Payload JSONB NOT NULL,
-    Status VARCHAR(20) DEFAULT 'PENDING',
-    IdempotencyKey TEXT UNIQUE,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ProcessedAt TIMESTAMP
+    event_id SERIAL PRIMARY KEY,
+    event_type VARCHAR(50) NOT NULL,
+    payload JSONB NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    idempotency_key TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP
 );    
 COMMIT;

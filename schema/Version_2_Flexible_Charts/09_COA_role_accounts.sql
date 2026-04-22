@@ -7,13 +7,13 @@ DECLARE
     v_rows_affected INT;
 BEGIN
     -- Insert roles for matching accounts
-    INSERT INTO Finance.accountroles (chartId, rolename)
+    INSERT INTO Finance.account_roles (chart_id, role_name)
     SELECT
-        chartId,
+        chart_id,
         p_role_name
     FROM Finance.charts
     WHERE account LIKE p_account_description || '%'  -- Concatenate % inside string
-    ON CONFLICT (chartId, rolename) DO NOTHING;
+    ON CONFLICT (chart_id, role_name) DO NOTHING;
 
     -- Get number of rows affected
     GET DIAGNOSTICS v_rows_affected = ROW_COUNT;
