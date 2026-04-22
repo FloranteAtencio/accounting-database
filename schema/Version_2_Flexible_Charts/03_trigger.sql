@@ -8,12 +8,12 @@ BEGIN
 
     SELECT row_hash INTO v_prev_hash
     FROM Finance.audit_logs
-    ORDER BY AuditID DESC
+    ORDER BY audit_id DESC
     LIMIT 1
     FOR UPDATE;
 
     INSERT INTO Finance.audit_logs (
-        table_Name,
+        table_name,
         rec_transact,
         operation,
         changed_by,
