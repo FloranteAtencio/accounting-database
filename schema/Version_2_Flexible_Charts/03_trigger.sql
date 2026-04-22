@@ -7,12 +7,12 @@ BEGIN
     v_record_id := COALESCE(NEW::text, OLD::text);
 
     SELECT row_hash INTO v_prev_hash
-    FROM Finance.auditlogs
+    FROM Finance.audit_logs
     ORDER BY AuditID DESC
     LIMIT 1
     FOR UPDATE;
 
-    INSERT INTO Finance.auditlogs (
+    INSERT INTO Finance.audit_logs (
         table_Name,
         rec_transact,
         operation,
