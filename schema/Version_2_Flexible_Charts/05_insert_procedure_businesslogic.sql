@@ -236,7 +236,7 @@ BEGIN
             END IF;
 
             -- Insert AP record
-            INSERT INTO Finance.accountpayables (supplier_id, transaction_id)
+            INSERT INTO Finance.account_payables (supplier_id, transaction_id)
             VALUES (p_VendorID, new_transaction_id)
             RETURNING Payable_id INTO new_returning_id;
 
@@ -503,7 +503,7 @@ BEGIN
     IF LOWER(p_action_type) = 'purchase' THEN
 
         -- Accounts Payable
-        INSERT INTO Finance.accountpayables 
+        INSERT INTO Finance.account_payables 
 		(supplier_id, transaction_id)
         VALUES
 		(p_reference_id, p_transaction_id)
