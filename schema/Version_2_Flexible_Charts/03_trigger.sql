@@ -13,12 +13,13 @@ BEGIN
     FOR UPDATE;
 
     INSERT INTO Finance.auditlogs (
-        tableName,
-        recTransact,
+        table_Name,
+        rec_transact,
         operation,
-        changedBy,
+        changed_by,
         prev_hash,
         row_hash
+        
     )
     VALUES (
         TG_TABLE_NAME,
@@ -32,6 +33,7 @@ BEGIN
             TG_OP ||
             v_record_id
         )
+        
     );
 
     IF TG_OP = 'DELETE' THEN
@@ -47,7 +49,7 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.transactions
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 2
 CREATE TRIGGER audit_inventory
-AFTER INSERT OR UPDATE OR DELETE ON Finance.inventoryaudits
+AFTER INSERT OR UPDATE OR DELETE ON Finance.inventory_audits
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 3
 CREATE TRIGGER audit_journals
@@ -55,11 +57,11 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.journals
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 4
 CREATE TRIGGER audit_ap
-AFTER INSERT OR UPDATE OR DELETE ON Finance.accountpayables
+AFTER INSERT OR UPDATE OR DELETE ON Finance.account_payables
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 5
 CREATE TRIGGER audit_ar
-AFTER INSERT OR UPDATE OR DELETE ON Finance.accountreceivables
+AFTER INSERT OR UPDATE OR DELETE ON Finance.account_receivables
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 6
 CREATE TRIGGER customer_changes 
@@ -75,11 +77,11 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.products
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 9
 CREATE TRIGGER inventory_transfers_changes 
-AFTER INSERT OR UPDATE OR DELETE ON Finance.inventorytransfers 
+AFTER INSERT OR UPDATE OR DELETE ON Finance.inventory_transfers 
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 10
 CREATE TRIGGER purchase_returns_changes 
-AFTER INSERT OR UPDATE OR DELETE ON Finance.purchasereturns 
+AFTER INSERT OR UPDATE OR DELETE ON Finance.purchase_returns 
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 11
 CREATE TRIGGER warehouse_changes 
@@ -87,7 +89,7 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.warehouses
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 12
 CREATE TRIGGER sale_returns_changes 
-AFTER INSERT OR UPDATE OR DELETE ON Finance.salereturns 
+AFTER INSERT OR UPDATE OR DELETE ON Finance.sale_returns 
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 13
 CREATE TRIGGER clients_changes 
@@ -95,15 +97,15 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.clients
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 14
 CREATE TRIGGER coatemplates_changes
-AFTER INSERT OR UPDATE OR DELETE ON Finance.coatemplates
+AFTER INSERT OR UPDATE OR DELETE ON Finance.coa_templates
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 15
 CREATE TRIGGER account_roles_changes
-AFTER INSERT OR UPDATE OR DELETE ON Finance.accountroles
+AFTER INSERT OR UPDATE OR DELETE ON Finance.account_roles
 FOR  EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 16
 CREATE TRIGGER account_properties_changes 
-AFTER INSERT OR UPDATE OR DELETE ON Finance.accountproperties
+AFTER INSERT OR UPDATE OR DELETE ON Finance.account_properties
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 17
 CREATE TRIGGER account_receivables_ext_changes
@@ -115,5 +117,5 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.ap_ext
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 19
 CREATE TRIGGER coa_templates_account_changes
-AFTER INSERT OR UPDATE OR DELETE ON Finance.coatemplateaccounts
+AFTER INSERT OR UPDATE OR DELETE ON Finance.coa_template_accounts
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();

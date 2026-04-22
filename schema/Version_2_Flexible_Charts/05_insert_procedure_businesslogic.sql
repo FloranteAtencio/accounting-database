@@ -14,11 +14,11 @@ DECLARE
     v_chart_id INT;
 BEGIN
     -- Find account by role (can be multiple matches, takes first)
-    SELECT c.chartId INTO v_chart_id
+    SELECT c.chart_id INTO v_chart_id
     FROM Finance.charts c
-    INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-    WHERE c.clientId = p_clientId 
-      AND ar.roleName = p_account_role
+    INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+    WHERE c.client_id = p_clientId 
+      AND ar.role_name = p_account_role
       AND c.is_active = TRUE
     LIMIT 1;
 
@@ -26,7 +26,7 @@ BEGIN
         RAISE EXCEPTION 'Account role % not found for client %', p_account_role, p_clientId;
     END IF;
 
-    INSERT INTO Finance.journals (transactionId, chartId, date, journal, amount)
+    INSERT INTO Finance.journals (transaction_id, chart_id, date, journal, amount)
     VALUES (p_transaction_id, v_chart_id, p_date, p_is_debit, p_amount);
 
 EXCEPTION
@@ -63,20 +63,20 @@ BEGIN
             --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             -- Find AR cash account (client-specific)
-            SELECT c.chartId INTO v_cash_chart
+            SELECT c.chart_id INTO v_cash_chart
             FROM Finance.charts c
-            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-            WHERE c.clientId = p_clientId 
-            AND ar.roleName = 'cash_account_ar'
+            INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+            WHERE c.client_id = p_clientId 
+            AND ar.role_name = 'cash_account_ar'
             AND c.is_active = TRUE
             LIMIT 1;
 
             -- Find AR account
-            SELECT c.chartId INTO v_ar_chart
+            SELECT c.chart_id INTO v_ar_chart
             FROM Finance.charts c
-            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-            WHERE c.clientId = p_clientId 
-            AND ar.roleName = 'ar_account'
+            INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+            WHERE c.client_id = p_clientId 
+            AND ar.role_name = 'ar_account'
             AND c.is_active = TRUE
             LIMIT 1;
 
@@ -86,12 +86,12 @@ BEGIN
 
             PERFORM 1
             FROM Finance.clients
-            WHERE clientId = p_clientId
+            WHERE client_id = p_clientId
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.customers
-            WHERE customerId = p_CustomersID
+            WHERE customer_id = p_CustomersID
             FOR UPDATE;
 
             -- Balance check
@@ -99,37 +99,37 @@ BEGIN
                 CASE WHEN journal THEN amount ELSE -amount END
             ) INTO v_balance
             FROM Finance.journals
-            WHERE chartId = v_cash_chart;
+            WHERE chart_id = v_cash_chart;
 
             IF p_Amount < COALESCE(v_balance, 0) THEN
                 RAISE EXCEPTION 'Insufficient Funds. Available: %, Required: %', COALESCE(v_balance, 0), p_Amount;
             END IF;
 
             -- Insert transaction
-            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
             VALUES (
                 CONCAT('Account Receivable With Amount of ', p_Amount, 
                     ' Due Date on ', p_DueDate, 
                     ' Status ', p_Status),
                 p_idempotency_key, p_clientId
             )
-            ON CONFLICT (idempotencyKey) DO NOTHING
-            RETURNING TransactionID INTO new_transaction_id;
+            ON CONFLICT (idempotency_key) DO NOTHING
+            RETURNING Transaction_id INTO new_transaction_id;
 
             IF new_transaction_id IS NULL THEN
-                SELECT transactionId INTO new_transaction_id
+                SELECT transaction_id INTO new_transaction_id
                 FROM Finance.transactions
-                WHERE idempotencyKey = p_idempotency_key;
+                WHERE idempotency_key = p_idempotency_key;
                 RETURN;
             END IF;
 
             -- Insert AR record
-            INSERT INTO Finance.accountreceivables (customerId, transactionId)
+            INSERT INTO Finance.account_receivables (customer_id, transaction_id)
             VALUES (p_CustomersID, new_transaction_id)
-            RETURNING receivableId INTO new_returning_id;
+            RETURNING receivable_id INTO new_returning_id;
 
             -- Insert AR extension
-            INSERT INTO Finance.ar_ext (amount, dueDate, invoiceDate, status, receivableId)
+            INSERT INTO Finance.ar_ext (amount, due_date, invoice_date, status, receivable_id)
             VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
 
             -- Journal entries
@@ -186,20 +186,20 @@ BEGIN
             --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             -- Find AP cash account (client-specific)
-            SELECT c.chartId INTO v_cash_chart
+            SELECT c.chart_id INTO v_cash_chart
             FROM Finance.charts c
-            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-            WHERE c.clientId = p_clientId 
-            AND ar.rolename = 'cash_account_ap'
+            INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+            WHERE c.client_id = p_clientId 
+            AND ar.role_name = 'cash_account_ap'
             AND c.is_active = TRUE
             LIMIT 1;
 
             -- Find AP account
-            SELECT c.chartId INTO v_ap_chart
+            SELECT c.chart_id INTO v_ap_chart
             FROM Finance.charts c
-            INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-            WHERE c.clientId = p_clientId 
-            AND ar.roleName = 'ap_account'
+            INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+            WHERE c.client_id = p_clientId 
+            AND ar.role_name = 'ap_account'
             AND c.is_active = TRUE
             LIMIT 1;
 
@@ -209,39 +209,39 @@ BEGIN
 
             PERFORM 1
             FROM Finance.clients
-            WHERE clientId = p_clientId
+            WHERE client_id = p_clientId
             FOR UPDATE;
 
             PERFORM 1
             FROM Finance.suppliers
-            WHERE supplierID = p_VendorID
+            WHERE supplier_id = p_VendorID
             FOR UPDATE;
 
             -- Insert transaction
-            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
             VALUES (
                 CONCAT('Account Payable With Amount of ', p_Amount, 
                     ' Due Date on ', p_DueDate, 
                     ' Status ', p_Status),
                 p_idempotency_key, p_clientId
             )
-            ON CONFLICT (idempotencyKey) DO NOTHING
-            RETURNING TransactionID INTO new_transaction_id;
+            ON CONFLICT (idempotency_key) DO NOTHING
+            RETURNING Transaction_id INTO new_transaction_id;
 
             IF new_transaction_id IS NULL THEN
-                SELECT transactionId INTO new_transaction_id
+                SELECT transaction_id INTO new_transaction_id
                 FROM Finance.transactions
-                WHERE idempotencyKey = p_idempotency_key;
+                WHERE idempotency_key = p_idempotency_key;
                 RETURN;
             END IF;
 
             -- Insert AP record
-            INSERT INTO Finance.accountpayables (supplierId, transactionId)
+            INSERT INTO Finance.accountpayables (supplier_id, transaction_id)
             VALUES (p_VendorID, new_transaction_id)
-            RETURNING PayableID INTO new_returning_id;
+            RETURNING Payable_id INTO new_returning_id;
 
             -- Insert AP extension
-            INSERT INTO Finance.ap_ext (amount, dueDate, invoiceDate, status, payableId)
+            INSERT INTO Finance.ap_ext (amount, due_date, invoice_date, status, payable_id)
             VALUES (p_Amount, p_DueDate, p_InvoiceDate, p_Status, new_returning_id);
 
             -- Journal entries
@@ -287,20 +287,20 @@ DECLARE
 BEGIN
     BEGIN
         -- Find cash account
-        SELECT c.chartId INTO v_cash_chart
+        SELECT c.chart_id INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.roleName = 'cash_account_ar'
+        INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+        WHERE c.client_id = p_clientId 
+          AND ar.role_name = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
         -- Find expense account
-        SELECT c.chartId INTO v_expense_chart
+        SELECT c.chart_id INTO v_expense_chart
         FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.roleName = 'expense_account'
+        INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+        WHERE c.client_id = p_clientId 
+          AND ar.role_name = 'expense_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -310,19 +310,19 @@ BEGIN
 
         PERFORM 1  
         FROM Finance.clients
-        WHERE clientId = p_clientId
+        WHERE client_id = p_clientId
         FOR UPDATE;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+        INSERT INTO Finance.transactions (description, idempotency_key, client_id)
         VALUES (p_Description, p_idempotency_key,p_clientId)
-        ON CONFLICT (idempotencyKey) DO NOTHING
-        RETURNING TransactionID INTO new_transaction_id;
+        ON CONFLICT (idempotency_key) DO NOTHING
+        RETURNING Transaction_id INTO new_transaction_id;
 
         IF new_transaction_id IS NULL THEN
-            SELECT transactionId INTO new_transaction_id
+            SELECT transaction_id INTO new_transaction_id
             FROM Finance.transactions
-            WHERE idempotencyKey = p_idempotency_key;
+            WHERE idempotency_key = p_idempotency_key;
             RETURN;
         END IF;
 
@@ -355,20 +355,20 @@ DECLARE
 BEGIN
     BEGIN
         -- Find cash account
-        SELECT c.chartId INTO v_cash_chart
+        SELECT c.chart_id INTO v_cash_chart
         FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.roleName = 'cash_account_ar'
+        INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+        WHERE c.client_id = p_clientId 
+          AND ar.role_name = 'cash_account_ar'
           AND c.is_active = TRUE
         LIMIT 1;
 
         -- Find revenue account
-        SELECT c.chartId INTO v_revenue_chart
+        SELECT c.chart_id INTO v_revenue_chart
         FROM Finance.charts c
-        INNER JOIN Finance.accountroles ar ON c.chartId = ar.chartId
-        WHERE c.clientId = p_clientId 
-          AND ar.roleName = 'revenue_account'
+        INNER JOIN Finance.account_roles ar ON c.chart_id = ar.chart_id
+        WHERE c.client_id = p_clientId 
+          AND ar.role_name = 'revenue_account'
           AND c.is_active = TRUE
         LIMIT 1;
 
@@ -378,19 +378,19 @@ BEGIN
 
         PERFORM 1
         FROM Finance.clients
-        WHERE clientId = p_clientId
+        WHERE client_id = p_clientId
         FOR UPDATE;
 
         -- Insert transaction
-        INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+        INSERT INTO Finance.transactions (description, idempotency_key, client_id)
         VALUES (p_Description, p_idempotency_key, p_clientId)
-        ON CONFLICT (idempotencyKey) DO NOTHING
-        RETURNING TransactionID INTO new_transaction_id;
+        ON CONFLICT (idempotency_key) DO NOTHING
+        RETURNING Transaction_id INTO new_transaction_id;
 
         IF new_transaction_id IS NULL THEN
-            SELECT TransactionID INTO new_transaction_id
+            SELECT Transaction_id INTO new_transaction_id
             FROM Finance.transactions
-            WHERE idempotencyKey = p_idempotency_key;
+            WHERE idempotency_key = p_idempotency_key;
             RETURN;
         END IF;
 
@@ -417,20 +417,20 @@ BEGIN
 
     PERFORM 1
     FROM Finance.clients
-    WHERE clientId = p_clientId
+    WHERE client_id = p_clientId
     FOR UPDATE;
 
     -- Copy template accounts into client's COA
-    INSERT INTO Finance.charts (clientId, account, accountCode, type, is_active)
+    INSERT INTO Finance.charts (client_id, account, account_code, type, is_active)
     SELECT 
         p_clientId,
-        accountName,
-        accountCode,
-        accountType,
+        account_name,
+        account_code,
+        account_type,
         TRUE
     FROM Finance.coatemplateaccounts
-    WHERE templateid = p_template_id
-    ON CONFLICT (clientId, accountCode) DO NOTHING;  -- Skip duplicates
+    WHERE template_id = p_template_id
+    ON CONFLICT (client_id, account_code) DO NOTHING;  -- Skip duplicates
 
     RAISE NOTICE 'Template % applied to client %', p_template_id, p_clientId;
 
@@ -461,7 +461,7 @@ BEGIN
     END IF;
 
     INSERT INTO Finance.inventoryaudits
-    (productId, warehouseId, transactionId, ActionType, quantity, movementDate)
+    (product_id, warehouse_id, transaction_id, action_type, quantity, movement_date)
     VALUES
     (p_product_id, p_warehouse_id, p_transaction_id, p_action_type, p_quantity, p_date);
  
@@ -495,22 +495,22 @@ DECLARE
 BEGIN
 
 
-    SELECT productCost, productPrice
+    SELECT produc_cost, produc_price
     INTO v_cost, v_price
     FROM Finance.products
-    WHERE productId = p_product_id;
+    WHERE product_id = p_product_id;
 
     IF LOWER(p_action_type) = 'purchase' THEN
 
         -- Accounts Payable
         INSERT INTO Finance.accountpayables 
-		(supplierId, transactionId)
+		(supplier_id, transaction_id)
         VALUES
 		(p_reference_id, p_transaction_id)
-	RETURNING PayableID INTO new_returning_id;
+	RETURNING Payable_id INTO new_returning_id;
 
 	INSERT INTO Finance.ap_ext
-		(amount, dueDate, invoiceDate, status, payableId)
+		(amount, due_date, invoice_date, status, payable_id)
         VALUES
 		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 	-- Journal
@@ -522,14 +522,14 @@ BEGIN
     ELSIF LOWER(p_action_type) = 'sale' THEN
 
         -- Accounts Receivable
-        INSERT INTO Finance.accountreceivables
-        	(customerId, transactionId)
+        INSERT INTO Finance.account_receivables
+        	(customer_id, transaction_id)
         VALUES
         	(p_reference_id, p_transaction_id)
-	RETURNING ReceivableID INTO new_returning_id;
+	RETURNING Receivable_id INTO new_returning_id;
         -- Journal
 	INSERT INTO Finance.ar_ext
-		(amount, dueDate, invoiceDate, status, receivableId)
+		(amount, due_date, invoice_date, status, receivable_id)
         VALUES
 		(p_quantity * v_cost, p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 
@@ -569,15 +569,15 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT productCost, productPrice
+    SELECT produc_cost, produc_price
     INTO v_cost, v_price
     FROM Finance.products
-    WHERE productId = p_product_id;
+    WHERE product_id = p_product_id;
 
     IF LOWER(p_action_type) = 'sale return' THEN
             -- Journal entry for inventory movement
-            INSERT INTO Finance.salereturns
-		(receivableId,  returnAmount, returnDate)
+            INSERT INTO Finance.sale_returns
+		(receivable_id,  returnAmount, return_date)
             VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
@@ -585,7 +585,7 @@ BEGIN
         SET
         Status = 'Returned'
         WHERE 
-           ReceivableID = p_reference_id;
+           Receivable_id = p_reference_id;
 
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'SR&Allowances', TRUE, p_quantity * v_price, p_date);
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ar_account', FALSE, p_quantity * v_price, p_date);
@@ -594,8 +594,8 @@ BEGIN
 
     ELSIF p_action_type = 'Purchase Return' THEN
         -- Journal entry for inventory movement
-        INSERT INTO Finance.purchasereturns
-		(payableId,  returnAmount, returnDate)
+        INSERT INTO Finance.purchase_returns
+		(payable_id,  returnAmount, return_date)
         VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
@@ -603,7 +603,7 @@ BEGIN
         SET
         Status = 'Returned'
         WHERE 
-        PayableID = p_reference_id;
+        Payable_id = p_reference_id;
             
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ap_account', TRUE, p_quantity * v_cost, p_date);
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost, p_date);
@@ -642,10 +642,10 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT productCost, productPrice
+    SELECT produc_cost, produc_price
     INTO v_cost, v_price
     FROM Finance.products
-    WHERE ProductID = p_product_id;
+    WHERE Product_id = p_product_id;
 
     IF p_action_type = 'Transfer' THEN
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', TRUE, p_quantity * v_cost, p_date);
@@ -713,37 +713,37 @@ BEGIN
             
             -- 🧠 Isolation level (strong consistency)
 
-            SELECT productName INTO v_product_name
+            SELECT product_name INTO v_product_name
             FROM Finance.products
-            WHERE ProductId = p_product_id;
+            WHERE Product_id = p_product_id;
 
 
             -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
             PERFORM 1
             FROM Finance.products
-            WHERE productId = p_product_id
+            WHERE product_id = p_product_id
             FOR UPDATE;
 
             -- 🔒 Lock warehouse SECOND
             PERFORM 1
             FROM Finance.warehouses
-            WHERE warehouseId = p_warehouse_id
+            WHERE warehouse_id = p_warehouse_id
             FOR UPDATE;
 
-            INSERT INTO Finance.transactions (description, idempotencyKey, clientId)
+            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
             VALUES (
                 CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
                         ' Date on ',p_Date, 
                         ' Product name ', v_product_name),
                 p_idempotency_key, p_clientId
                 )
-            ON CONFLICT(idempotencyKey) DO NOTHING
-            RETURNING TransactionID INTO new_transaction_id;
+            ON CONFLICT(idempotency_key) DO NOTHING
+            RETURNING Transaction_id INTO new_transaction_id;
 
             IF new_transaction_id IS NULL THEN
-                SELECT TransactionID INTO new_transaction_id
+                SELECT Transaction_id INTO new_transaction_id
                 FROM Finance.transactions
-                WHERE idempotencyKey = p_idempotency_key;
+                WHERE idempotency_key = p_idempotency_key;
                 
                 RETURN;
             END IF;

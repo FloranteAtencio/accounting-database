@@ -9,24 +9,24 @@ BEGIN
     SELECT *
     FROM Finance.event_log
     WHERE Status = 'PENDING'
-    ORDER BY EventID
+    ORDER BY event_id
     FOR UPDATE SKIP LOCKED
     LOOP
         BEGIN
             -- route based on event type
-            IF rec.EventType = 'SALE' THEN
+            IF rec.event_type = 'SALE' THEN
                 CALL Finance.handle_sale(rec.Payload);
 
-            ELSIF rec.EventType = 'PURCHASE' THEN
+            ELSIF rec.event_type = 'PURCHASE' THEN
                 CALL Finance.handle_purchase(rec.Payload);
 
-            ELSIF rec.EventType = 'RETURN' THEN
+            ELSIF rec.event_type = 'RETURN' THEN
                 CALL Finance.handle_return(rec.Payload);
 
-            ELSIF rec.EventType = 'RECEIVABLE' THEN
+            ELSIF rec.event_type = 'RECEIVABLE' THEN
                 CALL Finance.handle_receivable(rec.Payload);
             
-            ELSIF rec.EventType = 'PAYABLE' THEN
+            ELSIF rec.event_type = 'PAYABLE' THEN
                 CALL Finance.handle_payable(rec.Payload);
             
             ELSE
@@ -36,24 +36,24 @@ BEGIN
             -- mark success
             UPDATE Finance.event_log
             SET Status = 'PROCESSED',
-                ProcessedAt = CURRENT_TIMESTAMP
-            WHERE EventID = rec.EventID;
+                process_at = CURRENT_TIMESTAMP
+            WHERE Event_id = rec.event_id;
 
         EXCEPTION
             WHEN OTHERS THEN
                 UPDATE Finance.event_log
-                SET RetryCount = RetryCount + 1
-                WHERE EventID = rec.EventID
-                RETURNING RetryCount INTO retry_count;
+                SET retry_count = retry_count + 1
+                WHERE Event_id = rec.event_id
+                RETURNING retry_count INTO retry_count;
 
                 IF retry_count >= 3 THEN
                     UPDATE Finance.event_log
                     SET Status = 'FAILED'
-                    WHERE EventID = rec.EventID;
+                    WHERE Event_id = rec.event_id;
                 ELSE
                     UPDATE Finance.event_log
                     SET Status = 'PENDING'
-                    WHERE EventID = rec.EventID;
+                    WHERE Event_id = rec.event_id;
                 END IF;
                 RAISE EXCEPTION 'Stop immediately %', SQLERRM;
         END;
@@ -75,30 +75,30 @@ BEGIN
     -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     PERFORM 1
     FROM Finance.products
-    WHERE productId = (p_payload->>'product_id')::INT
+    WHERE product_id = (p_payload->>'product_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.warehouses
-    WHERE warehouseId = (p_payload->>'warehouse_id')::INT
+    WHERE warehouse_id = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.customers
-    WHERE customerId = (p_payload->>'customer_id')::INT
+    WHERE customer_id = (p_payload->>'customer_id')::INT
     FOR UPDATE;
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description,idempotencyKey,clientId)
+    INSERT INTO Finance.transactions (Description,Idempotency_key,client_id)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
     ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
-    ON CONFLICT (idempotencyKey) DO NOTHING
-    RETURNING TransactionID INTO v_transaction_id;
+    ON CONFLICT (Idempotency_key) DO NOTHING
+    RETURNING Transaction_id INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
-        SELECT TransactionID INTO v_transaction_id
+        SELECT Transaction_id INTO v_transaction_id
         FROM Finance.transactions 
-        WHERE idempotencyKey = p_payload->>'idempotency_key';
+        WHERE Idempotency_key = p_payload->>'idempotency_key';
                 
         RETURN;
     END IF;
@@ -153,30 +153,30 @@ BEGIN
 
     PERFORM 1
     FROM Finance.products
-    WHERE ProductID = (p_payload->>'product_id')::INT
+    WHERE Product_id = (p_payload->>'product_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.warehouses
-    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    WHERE Warehouse_id = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.suppliers
-    WHERE SupplierID = (p_payload->>'supplier_id')::INT
+    WHERE Supplier_id = (p_payload->>'supplier_id')::INT
     FOR UPDATE;
     
     -- create transaction
-    INSERT INTO Finance.transactions (Description, idempotencyKey, clientId)
+    INSERT INTO Finance.transactions (Description, Idempotency_key, client_id)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
     ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
-    ON CONFLICT (idempotencyKey) DO NOTHING
-    RETURNING TransactionID INTO v_transaction_id;
+    ON CONFLICT (Idempotency_key) DO NOTHING
+    RETURNING Transaction_id INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
-        SELECT TransactionID INTO v_transaction_id
+        SELECT Transaction_id INTO v_transaction_id
         FROM Finance.transactions 
-        WHERE idempotencyKey = p_payload->>'idempotency_key';
+        WHERE Idempotency_key = p_payload->>'idempotency_key';
                 
         RETURN;
     END IF;
@@ -230,12 +230,12 @@ BEGIN
 
     PERFORM 1
     FROM Finance.products
-    WHERE ProductID = (p_payload->>'product_id')::INT
+    WHERE Product_id = (p_payload->>'product_id')::INT
     FOR UPDATE;
 
     PERFORM 1
     FROM Finance.warehouses
-    WHERE WarehouseID = (p_payload->>'warehouse_id')::INT
+    WHERE Warehouse_id = (p_payload->>'warehouse_id')::INT
     FOR UPDATE;
 
     -- PERFORM 1
@@ -246,16 +246,16 @@ BEGIN
 
 
     -- create transaction
-    INSERT INTO Finance.transactions (Description , idempotencyKey, clientId)
+    INSERT INTO Finance.transactions (Description , Idempotency_key, client_id)
     VALUES (CONCAT('Product ID : ',p_payload->>'product_id', 'Warehouse ID:',p_payload->>'warehouse_id', 'Action Type : ',p_payload->>'action_type','Quantity : ',p_payload->>'quantity','Date : ',p_payload->>'date')
     ,(p_payload->>'idempotency_key')::TEXT,(p_payload->>'client_id')::INT)
-    ON CONFLICT (idempotencyKey) DO NOTHING
-    RETURNING TransactionID INTO v_transaction_id;
+    ON CONFLICT (Idempotency_key) DO NOTHING
+    RETURNING Transaction_id INTO v_transaction_id;
 
      IF v_transaction_id IS NULL THEN
-        SELECT TransactionID INTO v_transaction_id
+        SELECT Transaction_id INTO v_transaction_id
         FROM Finance.transactions 
-        WHERE idempotencyKey = p_payload->>'idempotency_key';
+        WHERE Idempotency_key = p_payload->>'idempotency_key';
                 
         RETURN;
     END IF;
