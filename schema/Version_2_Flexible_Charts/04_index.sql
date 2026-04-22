@@ -6,7 +6,7 @@ BEGIN;
     CREATE INDEX idx_charts_active ON Finance.charts(client_id, is_active);
 
     CREATE INDEX idx_account_roles_chart ON Finance.account_roles(chart_id);
-    CREATE INDEX idx_account_roles_name ON Finance.accountroles(role_name);
+    CREATE INDEX idx_account_roles_name ON Finance.account_roles(role_name);
 
     CREATE INDEX idx_inventory_product ON Finance.inventory_audits(product_id);
     CREATE INDEX idx_inventory_warehouse ON Finance.inventory_audits(warehouse_id);
