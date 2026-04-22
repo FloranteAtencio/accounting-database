@@ -3,7 +3,7 @@ BEGIN;
     ADD CONSTRAINT charts_chk_type CHECK (Type IN ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense','Contra Revenue','Contra Asset','Contra Liability','Contra Equity','Contra Expense'));
 
     ALTER TABLE Finance.inventory_audits 
-    ADD CONSTRAINT inventoryaudits_chk_actiontype CHECK (ActionType IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
+    ADD CONSTRAINT inventoryaudits_chk_actiontype CHECK (Action_type IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
 
     ALTER TABLE Finance.ap_ext 
     ADD CONSTRAINT accountpayable_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
