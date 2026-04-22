@@ -1,4 +1,4 @@
-DROP PROCEDURE Finance.ar_update_transaction;
+DROP PROCEDURE IF EXISTS Finance.ar_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.ar_update_transaction(
     IN a_clientID INT,
     IN a_ReceivableID INT,
@@ -127,7 +127,7 @@ BEGIN
 END;
 $$;
 
-DROP PROCEDURE Finance.ap_update_transaction;
+DROP PROCEDURE IF EXISTS Finance.ap_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.ap_update_transaction(
     IN a_clientID INT,
     IN a_PayableID INT,
@@ -257,7 +257,7 @@ BEGIN
 END;
 $$;
 
-DROP PROCEDURE Finance.inventory_audit_update_transaction;
+DROP PROCEDURE IF EXISTS Finance.inventory_audit_update_transaction;
 CREATE OR REPLACE PROCEDURE Finance.inventory_audit_update_Transaction
 (
    -- IN a_clientid INT,
