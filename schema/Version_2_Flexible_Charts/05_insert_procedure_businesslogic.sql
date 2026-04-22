@@ -495,7 +495,7 @@ DECLARE
 BEGIN
 
 
-    SELECT produc_cost, produc_price
+    SELECT product_cost, product_price
     INTO v_cost, v_price
     FROM Finance.products
     WHERE product_id = p_product_id;
@@ -569,7 +569,7 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT produc_cost, produc_price
+    SELECT product_cost, product_price
     INTO v_cost, v_price
     FROM Finance.products
     WHERE product_id = p_product_id;
@@ -642,7 +642,7 @@ DECLARE
     v_price DECIMAL;
 BEGIN
 
-    SELECT produc_cost, produc_price
+    SELECT product_cost, product_price
     INTO v_cost, v_price
     FROM Finance.products
     WHERE Product_id = p_product_id;
