@@ -577,7 +577,7 @@ BEGIN
     IF LOWER(p_action_type) = 'sale return' THEN
             -- Journal entry for inventory movement
             INSERT INTO Finance.sale_returns
-		(receivable_id,  returnAmount, return_date)
+		(receivable_id,  return_Amount, return_date)
             VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
@@ -595,7 +595,7 @@ BEGIN
     ELSIF p_action_type = 'Purchase Return' THEN
         -- Journal entry for inventory movement
         INSERT INTO Finance.purchase_returns
-		(payable_id,  returnAmount, return_date)
+		(payable_id,  return_Amount, return_date)
         VALUES 
 		(p_reference_id, p_quantity * v_price, p_date);
             
