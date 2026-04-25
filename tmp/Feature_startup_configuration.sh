@@ -4,6 +4,7 @@ set -e
 
 SCRIPT_DIR="./tmp"
 SCRIPT_DIR_SCHEMA="./schema/Version_2_Flexible_Charts"
+SCRIPT_DIR_FEATRUE="./migration/Version_2"
 DB_NAME="erp_dev"
 DB_USER="dev_admin"
 CONTAINER_NAME="feature_env"
@@ -14,9 +15,9 @@ echo "[$(date)] V2_staging_tablespace_testing" >> "$LOG_FILE"
 # Run Startup SQL
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/01_Startup_dev.sql"
 if [ $? -eq 0 ]; then
-    echo "[$(date)] Staging Startup SQL alright!" >> "$LOG_FILE"
+    echo "[$(date)] Feature Startup SQL alright!" >> "$LOG_FILE"
 else
-    echo "[$(date)] Staging Startup SQL failed!" >> "$LOG_FILE"
+    echo "[$(date)] Feature Startup SQL failed!" >> "$LOG_FILE"
     exit 1
 fi
 
@@ -90,6 +91,21 @@ if [ $? -eq 0 ]; then
 else
    echo "[$(date)] Sample Data Failed" >> "$LOG_FILE"
 fi
+
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll.sql"
+if [ $? -eq 0 ]; then
+   echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
+else
+   echo "[$(date)] Sample Data Failed" >> "$LOG_FILE"
+fi
+
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_recurring_templates.sql"
+if [ $? -eq 0 ]; then
+   echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
+else
+   echo "[$(date)] Sample Data Failed" >> "$LOG_FILE"
+fi
+
 
 echo "[$(date)] Successful Feature" >> "$LOG_FILE"
 #docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "SELECT 'Successful Query for Feature';"
