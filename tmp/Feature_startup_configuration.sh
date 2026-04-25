@@ -75,6 +75,34 @@ else
     exit 1
 fi
 
+# Run Tables SQL
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/08_Constraint.sql"
+if [ $? -eq 0 ]; then
+    echo "[$(date)] Feature partition tables SQL alright!" >> "$LOG_FILE"
+else
+    echo "[$(date)] Feature partition SQL failed!" >> "$LOG_FILE"
+    exit 1
+fi
+
+# Run Tables SQL
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/09_COA_role_accounts.sql"
+if [ $? -eq 0 ]; then
+    echo "[$(date)] Feature partition tables SQL alright!" >> "$LOG_FILE"
+else
+    echo "[$(date)] Feature partition SQL failed!" >> "$LOG_FILE"
+    exit 1
+fi
+
+# Run Tables SQL
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/10_update_procedure_businesslogic.sql"
+if [ $? -eq 0 ]; then
+    echo "[$(date)] Feature partition tables SQL alright!" >> "$LOG_FILE"
+else
+    echo "[$(date)] Feature partition SQL failed!" >> "$LOG_FILE"
+    exit 1
+fi
+
+
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax.sql"
 if [ $? -eq 0 ]; then
    echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
