@@ -133,6 +133,13 @@ else
    echo "[$(date)] feature payroll Failed" >> "$LOG_FILE"
 fi
 
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax_sample_data.sql"
+if [ $? -eq 0 ]; then
+   echo "[$(date)] Sample tax Data Complete" >> "$LOG_FILE"
+else
+   echo "[$(date)] Sample tax Data Failed" >> "$LOG_FILE"
+fi
+
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll_sample_data.sql"
 if [ $? -eq 0 ]; then
    echo "[$(date)] feature payroll data Complete" >> "$LOG_FILE"
@@ -140,12 +147,6 @@ else
    echo "[$(date)] featuer payroll data Failed" >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax_sample_data.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] Sample tax Data Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] Sample tax Data Failed" >> "$LOG_FILE"
-fi
 
 echo "[$(date)] Successful Feature" >> "$LOG_FILE"
 #docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "SELECT 'Successful Query for Feature';"
