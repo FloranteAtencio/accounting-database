@@ -127,7 +127,7 @@ fi
 
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/data_testing.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/data_testing.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature Constraint SQL alright!" >> "$LOG_FILE"
 else
