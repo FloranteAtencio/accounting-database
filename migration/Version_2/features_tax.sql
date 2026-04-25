@@ -1,5 +1,6 @@
-SELECT 'TAX TABLE';
 BEGIN;
+
+SELECT 'TAX TABLE';
 -- ============================================
 -- 1. TAX CONFIGURATIONS
 -- ============================================
@@ -65,5 +66,6 @@ CREATE TABLE Finance.tax_liabilities (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(client_id, tax_type_id, period_start, period_end)
 );
-COMMIT;
 SELECT 'TAX TABLE COMPLETE';
+
+COMMIT;

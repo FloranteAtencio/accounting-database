@@ -1,6 +1,6 @@
-SELECT 'Payroll table';
 BEGIN;
 
+SELECT 'Payroll table';
 
 -- ============================================
 -- 1. EMPLOYEE MANAGEMENT
@@ -219,5 +219,5 @@ CREATE TABLE Finance.payroll_payables (
     UNIQUE(run_id)
 );
 
-COMMIT;
 SELECT 'Payroll table Complete!';
+COMMIT;

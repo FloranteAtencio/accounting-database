@@ -1,6 +1,5 @@
-SELECT 'TAX DATA';
 BEGIN;
-
+SELECT 'TAX DATA';
 -- ============================================
 -- SAMPLE TAX DATA
 -- Philippines Example (Universal structure works for any country)
@@ -123,6 +122,5 @@ SET total_tax_paid = total_tax_owed,
 WHERE client_id = 1
 AND tax_type_id = (SELECT tax_type_id FROM Finance.tax_types WHERE tax_code = 'VAT' AND client_id = 1)
 AND period_end = '2025-01-31'::DATE;
-
-COMMIT;
 SELECT 'TAX DATA COMPLETE';
+COMMIT;

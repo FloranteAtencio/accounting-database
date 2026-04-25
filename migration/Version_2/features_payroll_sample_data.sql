@@ -1,5 +1,5 @@
-SELECT 'Sample payroll data';
 BEGIN;
+SELECT 'Sample payroll data';
 
 -- ============================================
 -- PROCEDURE 1: Calculate Single Employee Payroll
@@ -381,6 +381,6 @@ INNER JOIN Finance.payroll_component_details pcd ON pd.detail_id = pcd.detail_id
 INNER JOIN Finance.salary_components sc ON pcd.component_id = sc.component_id
 ORDER BY pr.run_id, e.employee_number, sc.component_type;
 
-COMMIT;
 
 SELECT 'PAYROLL SAMPLE DATA COMPLETE';
+COMMIT;
