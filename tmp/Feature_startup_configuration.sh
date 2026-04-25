@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="./tmp"
-SCRIPT_DIR_SCHEMA="./schema/Version_2_Flexible_Charts"
+SCRIPT_DIR_SCHEMA="./schema/Version_2"
 SCRIPT_DIR_FEATURE="./migration/Version_2"
 DB_NAME="erp_dev"
 DB_USER="dev_admin"
