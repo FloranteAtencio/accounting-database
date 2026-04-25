@@ -1,3 +1,4 @@
+SELECT 'Sample payroll data';
 BEGIN;
 
 -- ============================================
@@ -381,3 +382,5 @@ INNER JOIN Finance.salary_components sc ON pcd.component_id = sc.component_id
 ORDER BY pr.run_id, e.employee_number, sc.component_type;
 
 COMMIT;
+
+SELECT 'PAYROLL SAMPLE DATA COMPLETE';

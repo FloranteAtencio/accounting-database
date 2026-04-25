@@ -1,4 +1,6 @@
+SELECT 'Payroll table';
 BEGIN;
+
 
 -- ============================================
 -- 1. EMPLOYEE MANAGEMENT
@@ -218,3 +220,4 @@ CREATE TABLE Finance.payroll_payables (
 );
 
 COMMIT;
+SELECT 'Payroll table Complete!';

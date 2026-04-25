@@ -1,3 +1,4 @@
+SELECT 'TAX DATA';
 BEGIN;
 
 -- ============================================
@@ -124,3 +125,4 @@ AND tax_type_id = (SELECT tax_type_id FROM Finance.tax_types WHERE tax_code = 'V
 AND period_end = '2025-01-31'::DATE;
 
 COMMIT;
+SELECT 'TAX DATA COMPLETE';
