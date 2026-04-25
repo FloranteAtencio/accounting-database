@@ -13,7 +13,7 @@ LOG_FILE="/var/log/erp-staging.log"
 echo "[$(date)] V2_staging_tablespace_testing" >> "$LOG_FILE"
 
 # Run Startup SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/01_Startup_dev.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/Feature_Startup_configuration.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature Startup SQL alright!" >> "$LOG_FILE"
 else
@@ -76,21 +76,21 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/08_Constraint.sql"
-if [ $? -eq 0 ]; then
-    echo "[$(date)] Feature Constraint SQL alright!" >> "$LOG_FILE"
-else
-    echo "[$(date)] Feature Constraint SQL failed!" >> "$LOG_FILE"
-    exit 1
-fi
+#docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/08_Constraint.sql"
+#if [ $? -eq 0 ]; then
+#    echo "[$(date)] Feature Constraint SQL alright!" >> "$LOG_FILE"
+#else
+#    echo "[$(date)] Feature Constraint SQL failed!" >> "$LOG_FILE"
+#    exit 1
+#fi
 
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/sample_data.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] Sample Data Failed" >> "$LOG_FILE"
-fi
+#docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/sample_data.sql"
+#if [ $? -eq 0 ]; then
+#   echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
+#else
+#   echo "[$(date)] Sample Data Failed" >> "$LOG_FILE"
+#fi
 
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll.sql"
 if [ $? -eq 0 ]; then
