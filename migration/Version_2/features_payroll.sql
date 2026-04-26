@@ -7,7 +7,7 @@ SELECT 'Payroll table';
 -- ============================================
 CREATE TABLE Finance.employees (
     employee_id BIGSERIAL PRIMARY KEY,
-    client_id INT NOT NULL REFERENCES Finance.clients(client_id),
+    client_id INT NOT NULL REFERENCES Finance.clients(client_id) ON DELETE NO ACTION,
     employee_number VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -15,11 +15,11 @@ CREATE TABLE Finance.employees (
 );
 
 -- ============================================
--- 1.2 EMPLOYEE ATTENDANCE/TIME TRACKING
+-- 1.2 EMPLOYEE ATTENDANCE/TIME TRACKING (Detailed)
 -- ============================================
 CREATE TABLE Finance.employee_time_records (
     time_record_id BIGSERIAL PRIMARY KEY,
-    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id),
+    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
     time_date DATE NOT NULL,
     time_in TIMESTAMP,
     time_out TIMESTAMP,
@@ -30,6 +30,37 @@ CREATE TABLE Finance.employee_time_records (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(employee_id, time_date)
+);
+
+-- ============================================
+-- 1.2.1 EMPLOYEE DAY/HOUR TRACKING (Summary)
+-- Versatile: Handles both total hours and total days per period
+-- ============================================
+CREATE TABLE Finance.employee_day_or_time (
+    day_time_id BIGSERIAL PRIMARY KEY,
+    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
+    period_id INT NOT NULL REFERENCES Finance.payroll_periods(period_id) ON DELETE NO ACTION,
+    operation DECIMAL(5,2) NOT NULL,  -- Total hours or days
+    operation_type VARCHAR(20) NOT NULL CHECK (operation_type IN ('HOUR', 'DAY')),
+    overtime_hours DECIMAL(5,2),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(employee_id, period_id)
+);
+
+-- ============================================
+-- 1.2.2 EMPLOYEE HOURLY RATE
+-- Supports different rates per designation/job title
+-- ============================================
+CREATE TABLE Finance.employee_hourly_rate (
+    rate_id BIGSERIAL PRIMARY KEY,
+    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
+    designation VARCHAR(100) NOT NULL,
+    rate DECIMAL(10,2) NOT NULL,
+    effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    end_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(employee_id, effective_date)
 );
 
 -- ============================================
@@ -65,6 +96,7 @@ CREATE TABLE Finance.salary_components (
     component_name VARCHAR(100) NOT NULL,
     component_type VARCHAR(20) NOT NULL 
         CHECK (component_type IN ('SALARY', 'ALLOWANCE', 'BONUS', 'DEDUCTION', 'TAX', 'STATUTORY', 'BENEFIT')),
+    component_rate DECIMAL(5,2),  -- For mandatory deductions (SSS 11%, PhilHealth 2.75%, etc)
     is_taxable BOOLEAN DEFAULT TRUE,
     is_mandatory BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,31 +104,17 @@ CREATE TABLE Finance.salary_components (
 );
 
 -- ============================================
--- 2.1 EMPLOYEE SALARY DETAILS
--- Maps components to employees with amounts
+-- 2.2 EMPLOYEE SALARY DETAILS
+-- Maps components to employees (handles earnings + deductions)
 -- ============================================
 CREATE TABLE Finance.employee_salary_details (
     salary_detail_id BIGSERIAL PRIMARY KEY,
-    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id),
+    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
     component_id INT NOT NULL REFERENCES Finance.salary_components(component_id),
     amount DECIMAL(15,2) NOT NULL,
     effective_date DATE NOT NULL,
     end_date DATE,
     is_taxable BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(employee_id, component_id, effective_date)
-);
-
--- ============================================
--- 2.2 EMPLOYEE DEDUCTIONS
--- ============================================
-CREATE TABLE Finance.employee_deductions (
-    deduction_id BIGSERIAL PRIMARY KEY,
-    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id),
-    component_id INT NOT NULL REFERENCES Finance.salary_components(component_id),
-    amount DECIMAL(15,2) NOT NULL,
-    effective_date DATE NOT NULL,
-    end_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(employee_id, component_id, effective_date)
 );
@@ -155,7 +173,7 @@ CREATE TABLE Finance.payroll_details (
 -- ============================================
 CREATE TABLE Finance.payroll_component_details (
     comp_detail_id BIGSERIAL PRIMARY KEY,
-    detail_id INT NOT NULL REFERENCES Finance.payroll_details(detail_id),
+    detail_id INT NOT NULL REFERENCES Finance.payroll_details(detail_id) ON DELETE CASCADE,
     component_id INT NOT NULL REFERENCES Finance.salary_components(component_id),
     amount DECIMAL(15,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -166,7 +184,7 @@ CREATE TABLE Finance.payroll_component_details (
 -- ============================================
 CREATE TABLE Finance.payroll_tax_details (
     tax_detail_id BIGSERIAL PRIMARY KEY,
-    detail_id INT NOT NULL REFERENCES Finance.payroll_details(detail_id),
+    detail_id INT NOT NULL REFERENCES Finance.payroll_details(detail_id) ON DELETE CASCADE,
     tax_type_id INT NOT NULL REFERENCES Finance.tax_types(tax_type_id),
     taxable_amount DECIMAL(15,2),
     tax_amount DECIMAL(15,2),
@@ -198,7 +216,7 @@ CREATE TABLE Finance.statutory_remittances (
 -- ============================================
 CREATE TABLE Finance.payroll_remittance_details (
     remittance_detail_id BIGSERIAL PRIMARY KEY,
-    remittance_id INT NOT NULL REFERENCES Finance.statutory_remittances(remittance_id),
+    remittance_id INT NOT NULL REFERENCES Finance.statutory_remittances(remittance_id) ON DELETE CASCADE,
     payroll_detail_id INT NOT NULL REFERENCES Finance.payroll_details(detail_id),
     employee_contribution DECIMAL(15,2),
     employer_contribution DECIMAL(15,2),
