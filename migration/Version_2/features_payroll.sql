@@ -33,22 +33,6 @@ CREATE TABLE Finance.employee_time_records (
 );
 
 -- ============================================
--- 1.2.1 EMPLOYEE DAY/HOUR TRACKING (Summary)
--- Versatile: Handles both total hours and total days per period
--- ============================================
-CREATE TABLE Finance.employee_day_or_time (
-    day_time_id BIGSERIAL PRIMARY KEY,
-    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
-    period_id INT NOT NULL REFERENCES Finance.payroll_periods(period_id) ON DELETE NO ACTION,
-    operation DECIMAL(5,2) NOT NULL,  -- Total hours or days
-    operation_type VARCHAR(20) NOT NULL CHECK (operation_type IN ('HOUR', 'DAY')),
-    overtime_hours DECIMAL(5,2),
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(employee_id, period_id)
-);
-
--- ============================================
 -- 1.2.2 EMPLOYEE HOURLY RATE
 -- Supports different rates per designation/job title
 -- ============================================
@@ -221,6 +205,22 @@ CREATE TABLE Finance.payroll_remittance_details (
     employee_contribution DECIMAL(15,2),
     employer_contribution DECIMAL(15,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- 1.2.1 EMPLOYEE DAY/HOUR TRACKING (Summary)
+-- Versatile: Handles both total hours and total days per period
+-- ============================================
+CREATE TABLE Finance.employee_day_or_time (
+    day_time_id BIGSERIAL PRIMARY KEY,
+    employee_id INT NOT NULL REFERENCES Finance.employees(employee_id) ON DELETE NO ACTION,
+    period_id INT NOT NULL REFERENCES Finance.payroll_periods(period_id) ON DELETE NO ACTION,
+    operation DECIMAL(5,2) NOT NULL,  -- Total hours or days
+    operation_type VARCHAR(20) NOT NULL CHECK (operation_type IN ('HOUR', 'DAY')),
+    overtime_hours DECIMAL(5,2),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(employee_id, period_id)
 );
 
 -- ============================================
