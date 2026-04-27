@@ -15,6 +15,7 @@ CREATE TABLE Finance.tax_types (
     UNIQUE(client_id, tax_code)
 );
 
+
 -- ============================================
 -- 2. TAX APPLICABILITY RULES
 -- ============================================
@@ -48,6 +49,7 @@ CREATE TABLE Finance.tax_calculations (
     paid_date TIMESTAMP
 );
 
+
 -- ============================================
 -- 4. TAX LIABILITY TRACKING
 -- ============================================
@@ -66,6 +68,7 @@ CREATE TABLE Finance.tax_liabilities (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(client_id, tax_type_id, period_start, period_end)
 );
+
 SELECT 'TAX TABLE COMPLETE';
 
 COMMIT;
