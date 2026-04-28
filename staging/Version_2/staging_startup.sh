@@ -114,21 +114,21 @@ else
 	echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/feature_reconciliation.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/features_reconciliation.sql"
 if [ $? -eq 0 ]; then
         echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else
         echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/feature_reconciliation_procedure.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/features_reconciliation_procedure.sql"
 if [ $? -eq 0 ]; then
         echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else
         echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/feature_recon_sample_data.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/reconcile/features_recon_sample_data.sql"
 if [ $? -eq 0 ]; then
         echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else
@@ -149,14 +149,14 @@ else
         echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/taxations/features_tax.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/taxation/features_tax.sql"
 if [ $? -eq 0 ]; then
         echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else
         echo "[$(date)] Sample Data SQL failed! " >> "$LOG_FILE"
 fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/taxations/features_tax_sample_data.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_STAGING/taxation/features_tax_sample_data.sql"
 if [ $? -eq 0 ]; then
         echo "[$(date)] Sample Data SQL alright! " >> "$LOG_FILE"
 else
