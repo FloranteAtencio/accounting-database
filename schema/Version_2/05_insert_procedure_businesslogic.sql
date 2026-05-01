@@ -496,10 +496,12 @@ DECLARE
     v_quantity INT;
     v_operation_id INT;
     quantity_holder INT;
+
     operation_cursor CURSOR FOR
     SELECT operation_id, product_cost, product_price, quantity
     FROM Finance.operations
     WHERE product_id = p_product_id;
+
 BEGIN    
 
     SELECT rate_percentage 
@@ -509,10 +511,10 @@ BEGIN
 
     IF LOWER(p_action_type) = 'purchase' THEN
 
-        SELECT product_cost, product_price
-        INTO v_cost, v_price
-        FROM Finance.operations
-        WHERE operation_id = p_product_id;
+        -- SELECT product_cost, product_price
+        -- INTO v_cost, v_price
+        -- FROM Finance.operations
+        -- WHERE operation_id = p_product_id;
 
         -- Accounts Payable
         INSERT INTO Finance.account_payables 
@@ -537,7 +539,7 @@ BEGIN
         quantity_holder := p_quantity;
         OPEN operation_cursor
         LOOP
-            FETCH operation_cursor INTO v_operation_id, v_cost_sale, v_price_sale, v_quantity
+            FETCH operation_cursor INTO v_operation_id, v_cost, v_price, v_quantity
             EXIT WHEN NOT FOUND;
 
            IF v_quantity > 0 THEN
@@ -552,19 +554,19 @@ BEGIN
                 INSERT INTO Finance.ar_ext
                 (amount, due_date, invoice_date, status, receivable_id)
                 VALUES
-                (((p_quantity * v_price_sale) * (1 + v_taxrate)) + (p_quantity * v_cost_sale), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+                (((p_quantity * v_price) * (1 + v_taxrate)) + (p_quantity * v_cost), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price_sale) * (1 + v_taxrate), p_date);
+                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price) * (1 + v_taxrate), p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price_sale, p_date);
+                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price_sale) * v_taxrate , p_date);
+                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price) * v_taxrate , p_date);
                 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost_sale, p_date);
+                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost_sale, p_date);
+                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost, p_date);
                 
                 IF quantity_holder <= 0 THEN
                     
@@ -705,7 +707,7 @@ BEGIN
 
     SELECT product_cost, product_price
     INTO v_cost, v_price
-    FROM Finance.products
+    FROM Finance.operations
     WHERE Product_id = p_product_id;
 
     IF p_action_type = 'Transfer' THEN
