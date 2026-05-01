@@ -35,8 +35,8 @@ CREATE TABLE tax_rates (
     rate_percentage DECIMAL(5, 2) NOT NULL,
     effective_date DATE NOT NULL,
     expiry_date DATE,
-    description VARCHAR(255),
-    FOREIGN KEY (tax_type) REFERENCES tax_types(tax_type) -- if you have this table
+    description VARCHAR(255)
+--    FOREIGN KEY (tax_type) REFERENCES tax_types(tax_type) -- if you have this table
 );
 
 CREATE TABLE inventory_settings (

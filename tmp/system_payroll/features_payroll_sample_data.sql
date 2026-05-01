@@ -52,6 +52,7 @@ BEGIN
         
         -- Categorize and accumulate
         IF v_component_type IN ('SALARY', 'ALLOWANCE', 'BONUS', 'BENEFIT') THEN
+
             v_gross := v_gross + v_component_amount;
         ELSIF v_component_type IN ('DEDUCTION', 'TAX', 'STATUTORY') THEN
             v_deductions := v_deductions + v_component_amount;

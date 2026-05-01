@@ -135,10 +135,24 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
         product_id SERIAL PRIMARY KEY,
         product_name VARCHAR(255) NOT NULL,
         description VARCHAR(200),
-        product_unit VARCHAR(20) NOT NULL,
-        product_cost DECIMAL(15, 2) NOT NULL CHECK (product_cost >= 0),
-        product_price DECIMAL(15, 2) NOT NULL CHECK (product_price >= 0)
+        product_unit VARCHAR(20) NOT NULL
+    --  product_cost DECIMAL(15, 2) NOT NULL CHECK (product_cost >= 0),
+    --  product_price DECIMAL(15, 2) NOT NULL CHECK (product_price >= 0)
     );
+
+-- ============================================
+-- 10.1. PRODUCT Operation
+-- ============================================
+DROP TABLE IF EXISTS Finance.operations CASCADE;
+CREATE TABLE IF NOT EXISTS Finance.operations (
+    operation_id SERIAL PRIMARY KEY,
+    product_id INT NOT NULL REFERENCES Finance.products(product_id) ON DELETE NO ACTION,
+    quantity VARCHAR(20) NOT NULL,
+    product_cost DECIMAL(15, 2) NOT NULL CHECK (product_cost >= 0),
+    product_price DECIMAL(15, 2) NOT NULL CHECK (product_price >= 0),
+    purchase_date DATE NOT NULL,
+    created_at DATE DEFAULT CURRENT_DATE
+);
 
 -- ============================================
 -- 11. WAREHOUSES
