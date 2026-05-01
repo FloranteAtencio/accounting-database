@@ -1,19 +1,24 @@
 BEGIN;
 
-SELECT 'Payroll Tables loading';
+SELECT 'Payroll table loading';
 
-CREATE TABLE Finance.payroll_imports (
-    import_id BIGSERIAL PRIMARY KEY,
-    client_id INT NOT NULL,
+-- ============================================
+-- PAYROLL BATCHES (Import Logs Only)
+-- ============================================
+CREATE TABLE Finance.payroll_batches (
+    batch_id BIGSERIAL PRIMARY KEY,
+    client_id INT NOT NULL REFERENCES Finance.clients(client_id),
+    file_name VARCHAR(255),
     period_start DATE,
     period_end DATE,
-    file_name VARCHAR(255),
-    total_gross DECIMAL(15,2),
-    total_net DECIMAL(15,2),
-    status VARCHAR(20) DEFAULT 'UPLOADED', -- UPLOADED, PROCESSED, FAILED
+    -- DONT store totals here. If you need them, make them GENERATED columns based on the journal entry
+    status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PROCESSED', 'FAILED')),
+    journal_entry_id BIGINT REFERENCES Finance.journal_entries(entry_id), -- THE SINGLE SOURCE OF TRUTH
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-SELECT 'Payroll tables loaded complete!';
+-- Note: The 'total_gross' and 'total_net' should be retrieved by summing the journal_entry linked here.
+
+SELECT 'Payroll tabled loaded complete!';
 
 COMMIT;

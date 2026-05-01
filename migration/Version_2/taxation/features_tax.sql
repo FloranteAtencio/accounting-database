@@ -1,39 +1,21 @@
 BEGIN;
 
-SELECT 'TAX TABLE';
+SELECT '';
+
 -- ============================================
--- TAX CONFIGURATIONS
+-- TAX TYPES (Just a lookup for GL mapping)
 -- ============================================
 CREATE TABLE Finance.tax_types (
     tax_type_id BIGSERIAL PRIMARY KEY,
     client_id INT NOT NULL REFERENCES Finance.clients(client_id),
-    tax_name VARCHAR(255) NOT NULL,  -- e.g., "VAT", "Sales Tax", "Income Tax"
-    tax_code VARCHAR(50) NOT NULL,
-    tax_rate DECIMAL(5,2) NOT NULL,   -- e.g., 12.00 for 12%
+    chart_id INT NOT NULL REFERENCES Finance.charts(chart_id), -- The Liability Account (e.g., "VAT Payable")
+    tax_name VARCHAR(100) NOT NULL,
+    tax_code VARCHAR(50) NOT NULL, -- e.g., "VAT_OUT", "VAT_IN"
+    tax_rate DECIMAL(5,4) NOT NULL, -- Just a reference rate, not used for calculation logic
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(client_id, tax_code)
 );
 
-
--- ============================================
--- TAX LIABILITY TRACKING
--- ============================================
-CREATE TABLE Finance.tax_liabilities (
-    liability_id BIGSERIAL PRIMARY KEY,
-    client_id INT NOT NULL REFERENCES Finance.clients(client_id),
-    tax_type_id INT NOT NULL REFERENCES Finance.tax_types(tax_type_id),
-    period_start DATE NOT NULL,
-    period_end DATE NOT NULL,
-    total_taxable_amount DECIMAL(15,2) NOT NULL,
-    total_tax_owed DECIMAL(15,2) NOT NULL,
-    total_tax_paid DECIMAL(15,2) DEFAULT 0,
-    balance_due DECIMAL(15,2) NOT NULL,
-    due_date DATE,
-    status VARCHAR(20) DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'PAID', 'PARTIAL', 'OVERDUE')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(client_id, tax_type_id, period_start, period_end)
-);
-
-SELECT 'Tax tables load complete!';
-COMMIT;
+-- DROP the tax_liabilities table. 
+-- The "Liability" is simply: 
+-- SELECT SUM(credit) - SUM(debit) FROM journal_lines WHERE chart_id = (SELECT chart_id FROM tax_types WHERE tax_code = 'VAT_OUT');
