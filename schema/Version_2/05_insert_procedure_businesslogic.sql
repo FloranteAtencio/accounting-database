@@ -539,7 +539,7 @@ BEGIN
 
     ELSIF LOWER(p_action_type) = 'sale' THEN
         quantity_holder := p_quantity;
-        OPEN operation_cursor
+        OPEN operation_cursor;
         LOOP
             FETCH operation_cursor INTO v_operation_id, v_cost_sales, v_price_sales, v_quantity;
             EXIT WHEN NOT FOUND;
