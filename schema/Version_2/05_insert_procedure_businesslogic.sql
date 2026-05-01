@@ -489,8 +489,10 @@ CREATE OR REPLACE PROCEDURE Finance.accounting_module
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_cost DECIMAL;
-    v_price DECIMAL;
+    v_cost_purchase DECIMAL;
+    v_price_purchase DECIMAL;
+    v_cost_sales DECIMAL;
+    v_price_sales DECIMAL;
     v_taxrate DECIMAL;
     new_returning_id INT;
     v_quantity INT;
@@ -504,18 +506,18 @@ DECLARE
     
 BEGIN    
         
-    SELECT product_cost, product_price
-    INTO v_cost, v_price
-    FROM Finance.operations
-    WHERE operation_id = p_product_id;
-
+    
     SELECT rate_percentage 
     INTO v_taxrate
     FROM finance.tax_rates
     WHERE tax_type = 'VAT'
 
     IF LOWER(p_action_type) = 'purchase' THEN
-
+        
+        SELECT product_cost, product_price
+        INTO v_cost_purchase, v_price_purchase
+        FROM Finance.operations
+        WHERE operation_id = p_product_id;
 
         -- Accounts Payable
         INSERT INTO Finance.account_payables 
@@ -527,20 +529,20 @@ BEGIN
 	    INSERT INTO Finance.ap_ext
 		(amount, due_date, invoice_date, status, payable_id)
         VALUES
-		((p_quantity * v_cost) * (1 + v_taxrate ), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
-	-- Journal
+		((p_quantity * v_cost_purchase) * (1 + v_taxrate ), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+
         CALL Finance.insert_journal
-		(p_clientId, p_transaction_id, 'inventory_account', TRUE, p_quantity * v_cost), p_date);
+		(p_clientId, p_transaction_id, 'inventory_account', TRUE, p_quantity * v_cost_purchase), p_date);
         CALL Finance.insert_journal
-		(p_clientId, p_transaction_id, 'Input VAT Receivable - Asset', TRUE, (p_quantity * v_cost) * v_taxrate, p_date);
+		(p_clientId, p_transaction_id, 'Input VAT Receivable - Asset', TRUE, (p_quantity * v_cost_purchase) * v_taxrate, p_date);
         CALL Finance.insert_journal
-		(p_clientId, p_transaction_id, 'ap_account', FALSE, (p_quantity * v_cost) * (1 + v_taxrate ), p_date);
+		(p_clientId, p_transaction_id, 'ap_account', FALSE, (p_quantity * v_cost_purchase) * (1 + v_taxrate ), p_date);
 
     ELSIF LOWER(p_action_type) = 'sale' THEN
         quantity_holder := p_quantity;
         OPEN operation_cursor
         LOOP
-            FETCH operation_cursor INTO v_operation_id, v_cost, v_price, v_quantity
+            FETCH operation_cursor INTO v_operation_id, v_cost_sales, v_price_sales, v_quantity
             EXIT WHEN NOT FOUND;
 
            IF v_quantity > 0 THEN
@@ -555,19 +557,19 @@ BEGIN
                 INSERT INTO Finance.ar_ext
                 (amount, due_date, invoice_date, status, receivable_id)
                 VALUES
-                (((p_quantity * v_price) * (1 + v_taxrate)) + (p_quantity * v_cost), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+                (((p_quantity * v_price_sales) * (1 + v_taxrate)) + (p_quantity * v_cost_sales), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price) * (1 + v_taxrate), p_date);
+                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price_sales) * (1 + v_taxrate), p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price, p_date);
+                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price_sales, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price) * v_taxrate , p_date);
+                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price_sales) * v_taxrate , p_date);
                 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost, p_date);
+                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost_sales, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost, p_date);
+                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost_sales, p_date);
                 
                 IF quantity_holder <= 0 THEN
                     
