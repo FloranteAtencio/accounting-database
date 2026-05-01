@@ -24,15 +24,15 @@ log_duration = on
 checkpoint_timeout = 15min
 checkpoint_completion_target = 0.9
 
--- Missing for financial data safety:
-synchronous_commit = on              -- Ensure writes to disk before commit
-fsync = on                           -- Mandatory for data integrity
-full_page_writes = on                -- Crash recovery safety
-wal_buffers = 16MB                   -- WAL performance
-random_page_cost = 1.1               -- SSD optimization (if using SSD)
+# -- Missing for financial data safety:
+synchronous_commit = on              #-- Ensure writes to disk before commit
+fsync = on                           #-- Mandatory for data integrity
+full_page_writes = on                #-- Crash recovery safety
+wal_buffers = 16MB                   #-- WAL performance
+random_page_cost = 1.1               #-- SSD optimization (if using SSD)
 
--- Missing for monitoring:
+# -- Missing for monitoring:
 log_connections = on
 log_disconnections = on
 log_lock_waits = on
-log_statement = 'all'                -- Not just 'mod'
+log_statement = 'all'                #-- Not just 'mod'
