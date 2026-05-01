@@ -217,7 +217,8 @@ CREATE TABLE IF NOT EXISTS Finance.ap_ext (
         movement_date DATE NOT NULL,
         FOREIGN KEY (product_id) REFERENCES Finance.products(product_id) ON DELETE NO ACTION,
         FOREIGN KEY (warehouse_id) REFERENCES Finance.warehouses(warehouse_id) ON DELETE NO ACTION,
-        FOREIGN KEY (transaction_id) REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION
+        FOREIGN KEY (transaction_id) REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         --PRIMARY KEY (ManagementID,MovementDate)
     ); --PARTITION BY RANGE(MovementDate);
 
