@@ -612,7 +612,7 @@ BEGIN
 
     SELECT product_cost, product_price
     INTO v_cost, v_price
-    FROM Finance.products
+    FROM Finance.operations
     WHERE product_id = p_product_id;
 
     IF LOWER(p_action_type) = 'sale return' THEN
@@ -727,7 +727,7 @@ $$;
 --===================================
 -- INVENTORY SALE 
 --===================================
-CREATE OR REPLACE Finance.sale_inventory(
+CREATE OR REPLACE PROCEDURE Finance.sale_inventory(
     IN p_clientId INT,
     IN p_product_id INT,
     IN p_warehouse_id INT,
@@ -829,7 +829,7 @@ $$;
 --===================================
 -- INVENTORY PURCHASE 
 --===================================
-CREATE OR REPLACE Finance.purchase_inventory(
+CREATE OR REPLACE PROCEDURE Finance.purchase_inventory(
     IN p_clientId INT,
     IN p_product_id INT,
     IN p_warehouse_id INT,
