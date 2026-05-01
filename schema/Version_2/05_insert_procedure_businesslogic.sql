@@ -501,8 +501,13 @@ DECLARE
     SELECT operation_id, product_cost, product_price, quantity
     FROM Finance.operations
     WHERE product_id = p_product_id;
-
+    
 BEGIN    
+        
+    SELECT product_cost, product_price
+    INTO v_cost, v_price
+    FROM Finance.operations
+    WHERE operation_id = p_product_id;
 
     SELECT rate_percentage 
     INTO v_taxrate
@@ -511,10 +516,6 @@ BEGIN
 
     IF LOWER(p_action_type) = 'purchase' THEN
 
-        -- SELECT product_cost, product_price
-        -- INTO v_cost, v_price
-        -- FROM Finance.operations
-        -- WHERE operation_id = p_product_id;
 
         -- Accounts Payable
         INSERT INTO Finance.account_payables 
@@ -576,7 +577,6 @@ BEGIN
                     WHERE operation_id = v_operation_id;
 
                     EXIT;
-
                 END IF;
             END IF;
         END LOOP;
@@ -584,8 +584,6 @@ BEGIN
     ELSE
         RAISE EXCEPTION 'Unsupported action type';
     END IF;
-  
-
     EXCEPTION
         WHEN OTHERS THEN
             RAISE EXCEPTION 'Accounting Module Transaction failed: %', SQLERRM;
@@ -791,17 +789,17 @@ BEGIN
                 RETURN;
             END IF;
             
-            SELECT
-                SUM( quantity ) 
-            INTO var_total_quantity  -- Add your variable name here
-            FROM Finance.operations
-            WHERE product_id = p_product_id;
+            -- SELECT
+            --     SUM( quantity ) 
+            -- INTO var_total_quantity  -- Add your variable name here
+            -- FROM Finance.operations
+            -- WHERE product_id = p_product_id;
 
-            if var_total_quantity <= 0 THEN
-                RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity %',p_product_id, var_total_quantity;
+            -- if var_total_quantity <= 0 THEN
+            --     RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity %',p_product_id, var_total_quantity;
                 
-            if p_quantity > var_total_quantity THEN
-                RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
+            -- if p_quantity > var_total_quantity THEN
+            --     RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
             -- 📦 Inventory
             CALL Finance.inventory_module(
                 p_product_id,
@@ -850,7 +848,6 @@ DECLARE
     new_transaction_id INT;
     new_operation_id INT;
 BEGIN
-
             IF p_quantity <= 0 OR p_quantity IS NULL THEN
                 RAISE EXCEPTION 'Quantity must be greater than 0';
             END IF;
@@ -917,8 +914,8 @@ BEGIN
                 p_quantity, 
                 p_date, 
                 p_reference_id
-            );
-    
+            );    
+
     EXCEPTION
         WHEN OTHERS THEN
             -- ❌ Real error → stop immediately
