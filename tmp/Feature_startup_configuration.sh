@@ -101,6 +101,7 @@ else
     echo "[$(date)] Feature update procedure SQL failed!" >> "$LOG_FILE"
     exit 1
 fi
+
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR/data_sample.sql"
 if [ $? -eq 0 ]; then
    echo "[$(date)] Sample Data Complete" >> "$LOG_FILE"
@@ -119,40 +120,40 @@ else
 fi
 
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] Feature tax Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] Feature tax Failed" >> "$LOG_FILE"
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax.sql"
+# if [ $? -eq 0 ]; then
+#    echo "[$(date)] Feature tax Complete" >> "$LOG_FILE"
+# else
+#    echo "[$(date)] Feature tax Failed" >> "$LOG_FILE"
+# fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] feature payroll Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] feature payroll Failed" >> "$LOG_FILE"
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll.sql"
+# if [ $? -eq 0 ]; then
+#    echo "[$(date)] feature payroll Complete" >> "$LOG_FILE"
+# else
+#    echo "[$(date)] feature payroll Failed" >> "$LOG_FILE"
+# fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax_sample_data.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] Sample tax Data Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] Sample tax Data Failed" >> "$LOG_FILE"
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_tax_sample_data.sql"
+# if [ $? -eq 0 ]; then
+#    echo "[$(date)] Sample tax Data Complete" >> "$LOG_FILE"
+# else
+#    echo "[$(date)] Sample tax Data Failed" >> "$LOG_FILE"
+# fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll_sample_data.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] feature payroll data Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] featuer payroll data Failed" >> "$LOG_FILE"
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll_sample_data.sql"
+# if [ $? -eq 0 ]; then
+#    echo "[$(date)] feature payroll data Complete" >> "$LOG_FILE"
+# else
+#    echo "[$(date)] featuer payroll data Failed" >> "$LOG_FILE"
+# fi
 
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll_test_data.sql"
-if [ $? -eq 0 ]; then
-   echo "[$(date)] feature payroll data Complete" >> "$LOG_FILE"
-else
-   echo "[$(date)] featuer payroll data Failed" >> "$LOG_FILE"
-fi
+# docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_FEATURE/features_payroll_test_data.sql"
+# if [ $? -eq 0 ]; then
+#    echo "[$(date)] feature payroll data Complete" >> "$LOG_FILE"
+# else
+#    echo "[$(date)] featuer payroll data Failed" >> "$LOG_FILE"
+# fi
 
 
 

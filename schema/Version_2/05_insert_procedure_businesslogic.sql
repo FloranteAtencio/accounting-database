@@ -529,7 +529,7 @@ BEGIN
         CALL Finance.insert_journal
 		(p_clientId, p_transaction_id, 'inventory_account', TRUE, p_quantity * v_cost), p_date);
         CALL Finance.insert_journal
-		(p_clientId, p_transaction_id, 'input_vat_receivable', TRUE, (p_quantity * v_cost) * v_taxrate, p_date);
+		(p_clientId, p_transaction_id, 'Input VAT Receivable - Asset', TRUE, (p_quantity * v_cost) * v_taxrate, p_date);
         CALL Finance.insert_journal
 		(p_clientId, p_transaction_id, 'ap_account', FALSE, (p_quantity * v_cost) * (1 + v_taxrate ), p_date);
 
@@ -559,7 +559,7 @@ BEGIN
                 CALL Finance.insert_journal
                 (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'output_vat_payable', FALSE, (p_quantity * v_price) * v_taxrate , p_date);
+                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price) * v_taxrate , p_date);
                 
                 CALL Finance.insert_journal
                 (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost, p_date);
