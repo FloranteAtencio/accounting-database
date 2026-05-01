@@ -537,7 +537,7 @@ BEGIN
         quantity_holder := p_quantity;
         OPEN operation_cursor
         LOOP
-            FETCH operation_cursor INTO v_operation_id, v_cost, v_price, v_quantity
+            FETCH operation_cursor INTO v_operation_id, v_cost_sale, v_price_sale, v_quantity
             EXIT WHEN NOT FOUND;
 
            IF v_quantity > 0 THEN
@@ -552,19 +552,19 @@ BEGIN
                 INSERT INTO Finance.ar_ext
                 (amount, due_date, invoice_date, status, receivable_id)
                 VALUES
-                (((p_quantity * v_price) * (1 + v_taxrate)) + (p_quantity * v_cost), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
+                (((p_quantity * v_price_sale) * (1 + v_taxrate)) + (p_quantity * v_cost_sale), p_date + INTERVAL '30 days', p_date, 'Pending',new_returning_id);
 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price) * (1 + v_taxrate), p_date);
+                (p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price_sale) * (1 + v_taxrate), p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price, p_date);
+                (p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price_sale, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price) * v_taxrate , p_date);
+                (p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price_sale) * v_taxrate , p_date);
                 
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost, p_date);
+                (p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost_sale, p_date);
                 CALL Finance.insert_journal
-                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost, p_date);
+                (p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost_sale, p_date);
                 
                 IF quantity_holder <= 0 THEN
                     
@@ -785,6 +785,7 @@ BEGIN
                 SELECT Transaction_id INTO new_transaction_id
                 FROM Finance.transactions
                 WHERE idempotency_key = p_idempotency_key;
+
                 RETURN;
             END IF;
             
@@ -795,7 +796,7 @@ BEGIN
             WHERE product_id = p_product_id;
 
             if var_total_quantity <= 0 THEN
-                RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity ',p_product_id, var_total_quantity;
+                RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity %',p_product_id, var_total_quantity;
                 
             if p_quantity > var_total_quantity THEN
                 RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
@@ -903,7 +904,7 @@ BEGIN
             );
 
             INSERT INTO Finance.operations (product_id,quantity,product_cost,product_price,purchase_date)
-            VALUES (p_product_id,p_quantity,p_product_price,p_product_cost,p_date);
+            VALUES (p_product_id,p_quantity,p_product_price,p_product_cost,p_date)
             RETURNING operation_id INTO new_operation_id;
             
             CALL Finance.accounting_module(
@@ -923,155 +924,155 @@ BEGIN
 END;
 $$;
 
--- ====================================================
--- INVENTORY PROCESS
--- ===================================================
-CREATE OR REPLACE PROCEDURE Finance.process_inventory_transaction
-(
-    IN p_clientId INT,
-    IN p_product_id INT,
-    IN p_warehouse_id INT,
-    IN p_action_type VARCHAR(50),
-    IN p_quantity INT,
-    IN p_date DATE,
-    IN p_reference_id INT,
-    IN p_idempotency_key VARCHAR(255)
-)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    new_transaction_id INT;
-    v_retry_count INT := 0;
-    v_max_retries INT := 3;
-    var_total_quantity INT;
-    v_product_name VARCHAR(255);
-BEGIN
-    -- 🔁 Retry loop for serialization / deadlocks
-    LOOP
-        BEGIN                   
-            --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- -- ====================================================
+-- -- INVENTORY PROCESS
+-- -- ===================================================
+-- CREATE OR REPLACE PROCEDURE Finance.process_inventory_transaction
+-- (
+--     IN p_clientId INT,
+--     IN p_product_id INT,
+--     IN p_warehouse_id INT,
+--     IN p_action_type VARCHAR(50),
+--     IN p_quantity INT,
+--     IN p_date DATE,
+--     IN p_reference_id INT,
+--     IN p_idempotency_key VARCHAR(255)
+-- )
+-- LANGUAGE plpgsql
+-- AS $$
+-- DECLARE
+--     new_transaction_id INT;
+--     v_retry_count INT := 0;
+--     v_max_retries INT := 3;
+--     var_total_quantity INT;
+--     v_product_name VARCHAR(255);
+-- BEGIN
+--     -- 🔁 Retry loop for serialization / deadlocks
+--     LOOP
+--         BEGIN                   
+--             --SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-            IF p_quantity <= 0 OR p_quantity IS NULL THEN
-                RAISE EXCEPTION 'Quantity must be greater than 0';
-            END IF;
+--             IF p_quantity <= 0 OR p_quantity IS NULL THEN
+--                 RAISE EXCEPTION 'Quantity must be greater than 0';
+--             END IF;
 
-            IF p_date IS NULL THEN
-                RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
-            END IF;
+--             IF p_date IS NULL THEN
+--                 RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
+--             END IF;
 
-            IF p_action_type IS NULL OR p_action_type = '' THEN
-                RAISE EXCEPTION 'Action Type is empty %', SQLERRM;
-            END IF;
+--             IF p_action_type IS NULL OR p_action_type = '' THEN
+--                 RAISE EXCEPTION 'Action Type is empty %', SQLERRM;
+--             END IF;
 
-            IF p_product_id IS NULL OR p_product_id <= 0 THEN
-                RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
-            END IF;
+--             IF p_product_id IS NULL OR p_product_id <= 0 THEN
+--                 RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
+--             END IF;
 
-            IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
-                RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
-            END IF;
+--             IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+--                 RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
+--             END IF;
             
-            -- 🧠 Isolation level (strong consistency)
-            SELECT product_name INTO v_product_name
-            FROM Finance.products
-            WHERE Product_id = p_product_id;
+--             -- 🧠 Isolation level (strong consistency)
+--             SELECT product_name INTO v_product_name
+--             FROM Finance.products
+--             WHERE Product_id = p_product_id;
 
-            -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
-            PERFORM 1
-            FROM Finance.products
-            WHERE product_id = p_product_id
-            FOR UPDATE;
+--             -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
+--             PERFORM 1
+--             FROM Finance.products
+--             WHERE product_id = p_product_id
+--             FOR UPDATE;
 
-            -- 🔒 Lock warehouse SECOND
-            PERFORM 1
-            FROM Finance.warehouses
-            WHERE warehouse_id = p_warehouse_id
-            FOR UPDATE;
+--             -- 🔒 Lock warehouse SECOND
+--             PERFORM 1
+--             FROM Finance.warehouses
+--             WHERE warehouse_id = p_warehouse_id
+--             FOR UPDATE;
 
-            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
-            VALUES (
-                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
-                        ' Date on ',p_Date, 
-                        ' Product name ', v_product_name),
-                p_idempotency_key, p_clientId
-                )
-            ON CONFLICT(idempotency_key) DO NOTHING
-            RETURNING Transaction_id INTO new_transaction_id;
+--             INSERT INTO Finance.transactions (description, idempotency_key, client_id)
+--             VALUES (
+--                 CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+--                         ' Date on ',p_Date, 
+--                         ' Product name ', v_product_name),
+--                 p_idempotency_key, p_clientId
+--                 )
+--             ON CONFLICT(idempotency_key) DO NOTHING
+--             RETURNING Transaction_id INTO new_transaction_id;
 
-            IF new_transaction_id IS NULL THEN
-                SELECT Transaction_id INTO new_transaction_id
-                FROM Finance.transactions
-                WHERE idempotency_key = p_idempotency_key;
+--             IF new_transaction_id IS NULL THEN
+--                 SELECT Transaction_id INTO new_transaction_id
+--                 FROM Finance.transactions
+--                 WHERE idempotency_key = p_idempotency_key;
                 
-                RETURN;
-            END IF;
+--                 RETURN;
+--             END IF;
 
-            SELECT  SUM(
-                    CASE 
-                        WHEN account_type IN ('Sale', 'Purchase Return') THEN -quantity 
-                        WHEN account_type IN ('Purchase', 'Sale Return') THEN quantity
-                        ELSE 0
-                    END
-                ) 
-                INTO var_total_quantity  -- Add your variable name here
-                FROM Finance.inventory_audits
-                WHERE product_id = p_product_id;
+--             SELECT  SUM(
+--                     CASE 
+--                         WHEN account_type IN ('Sale', 'Purchase Return') THEN -quantity 
+--                         WHEN account_type IN ('Purchase', 'Sale Return') THEN quantity
+--                         ELSE 0
+--                     END
+--                 ) 
+--                 INTO var_total_quantity  -- Add your variable name here
+--                 FROM Finance.inventory_audits
+--                 WHERE product_id = p_product_id;
 
-            if var_total_quantity <= 0 THEN
-                RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity ',p_product_id, var_total_quantity;
+--             if var_total_quantity <= 0 THEN
+--                 RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity ',p_product_id, var_total_quantity;
                 
-            if p_quantity > var_total_quantity THEN
-                RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
-            -- 📦 Inventory
-            CALL Finance.inventory_module(
-                p_product_id,
-                p_warehouse_id,
-                new_transaction_id,
-                p_action_type,
-                p_quantity,
-                p_date
-            );
+--             if p_quantity > var_total_quantity THEN
+--                 RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
+--             -- 📦 Inventory
+--             CALL Finance.inventory_module(
+--                 p_product_id,
+--                 p_warehouse_id,
+--                 new_transaction_id,
+--                 p_action_type,
+--                 p_quantity,
+--                 p_date
+--             );
 
-            -- 💰 Accounting / Returns / Transfer
-            IF p_action_type IN ('Sale', 'Purchase') THEN
-                CALL Finance.accounting_module(
-                p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
-                );
+--             -- 💰 Accounting / Returns / Transfer
+--             IF p_action_type IN ('Sale', 'Purchase') THEN
+--                 CALL Finance.accounting_module(
+--                 p_clientId, new_transaction_id, p_product_id, p_action_type,
+--                     p_quantity, p_date, p_reference_id
+--                 );
 
-            ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
-                CALL Finance.return_module(
-                p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
-                );
+--             ELSIF p_action_type IN ('Sale Return','Purchase Return') THEN
+--                 CALL Finance.return_module(
+--                 p_clientId, new_transaction_id, p_product_id, p_action_type,
+--                     p_quantity, p_date, p_reference_id
+--                 );
 
-            ELSIF p_action_type = 'Transfer' THEN
-                CALL Finance.transfer_module(
-                    p_clientId, new_transaction_id, p_product_id, p_action_type,
-                    p_quantity, p_date, p_reference_id
-                );
-            ELSE
-                RAISE EXCEPTION 'Unsupported action type';
-            END IF;
+--             ELSIF p_action_type = 'Transfer' THEN
+--                 CALL Finance.transfer_module(
+--                     p_clientId, new_transaction_id, p_product_id, p_action_type,
+--                     p_quantity, p_date, p_reference_id
+--                 );
+--             ELSE
+--                 RAISE EXCEPTION 'Unsupported action type';
+--             END IF;
 
-            -- ✅ SUCCESS → exit retry loop
-            EXIT;
+--             -- ✅ SUCCESS → exit retry loop
+--             EXIT;
 
-            EXCEPTION
-                WHEN serialization_failure OR deadlock_detected THEN
-                    v_retry_count := v_retry_count + 1;
+--             EXCEPTION
+--                 WHEN serialization_failure OR deadlock_detected THEN
+--                     v_retry_count := v_retry_count + 1;
 
-                    IF v_retry_count >= v_max_retries THEN
-                        RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
-                    END IF;
+--                     IF v_retry_count >= v_max_retries THEN
+--                         RAISE EXCEPTION 'Transaction failed after % retries', v_retry_count;
+--                     END IF;
 
-                    -- ⏳ Small delay before retry (helps contention)
-                    PERFORM pg_sleep(0.1);
+--                     -- ⏳ Small delay before retry (helps contention)
+--                     PERFORM pg_sleep(0.1);
 
-                WHEN OTHERS THEN
-                    -- ❌ Real error → stop immediately
-                    RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
-        END;
-   END LOOP;
-END;
-$$;
+--                 WHEN OTHERS THEN
+--                     -- ❌ Real error → stop immediately
+--                     RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
+--         END;
+--    END LOOP;
+-- END;
+-- $$;
