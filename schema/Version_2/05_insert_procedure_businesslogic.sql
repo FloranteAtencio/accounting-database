@@ -570,11 +570,14 @@ BEGIN
                 CALL Finance.insert_journal(p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost_sales, p_date);
                 CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost_sales, p_date);
                 
-                IF quantity_holder <= 0 THEN
+                IF quantity_holder >= 0 THEN
                     UPDATE Finance.operations
                     SET quantity = quantity - v_quantity -- Fixed logic: subtract the specific chunk used
                     WHERE operation_id = v_operation_id;
-
+                ELSE
+                    UPDATE Finance.operations
+                    SET quantity = -(quantity_holder) -- Fixed logic: subtract the specific chunk used
+                    WHERE operation_id = v_operation_id;
                     EXIT;
                 END IF;
             END IF;

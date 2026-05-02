@@ -39,6 +39,16 @@ CREATE TABLE tax_rates (
 --    FOREIGN KEY (tax_type) REFERENCES tax_types(tax_type) -- if you have this table
 );
 
+INSERT INTO tax_rates (tax_type, rate_percentage, effective_date) VALUES
+('VAT', 12.00, '2024-01-01');
+
+INSERT INTO account_roles (role_name, description) VALUES
+('input_vat_receivable', 'Input VAT Receivable - Asset'),
+('output_vat_payable', 'Output VAT Payable - Liability'),
+('net_vat_payable', 'Net VAT Payable - Liability'),
+('withholding_tax_credit', 'Withholding Tax Credit - Contra Asset'),
+('income_tax_expense', 'Income Tax Expense - Expense');
+
 -- CREATE TABLE inventory_settings (
 --     setting_id SERIAL PRIMARY KEY,
 --     setting_name VARCHAR(50) NOT NULL,
@@ -51,8 +61,6 @@ CREATE TABLE tax_rates (
 -- ('inventory_method', 'FIFO', 'Inventory valuation method: FIFO, LIFO, or AVCO');
 
 -- Example: 12% VAT
-INSERT INTO tax_rates (tax_type, rate_percentage, effective_date) VALUES
-('VAT', 12.00, '2024-01-01');
 
 -- Indexes for performance
 -- CREATE INDEX idx_inventory_lots_product ON inventory_lots(product_id);
@@ -60,12 +68,6 @@ INSERT INTO tax_rates (tax_type, rate_percentage, effective_date) VALUES
 -- CREATE INDEX idx_inventory_movements_product ON inventory_movements(product_id);
 -- CREATE INDEX idx_inventory_movements_warehouse ON inventory_movements(warehouse_id);
 -- Tax Accounts
-INSERT INTO account_roles (role_name, description) VALUES
-('input_vat_receivable', 'Input VAT Receivable - Asset'),
-('output_vat_payable', 'Output VAT Payable - Liability'),
-('net_vat_payable', 'Net VAT Payable - Liability'),
-('withholding_tax_credit', 'Withholding Tax Credit - Contra Asset'),
-('income_tax_expense', 'Income Tax Expense - Expense');
 
 -- -- Inventory Accounts
 -- INSERT INTO account_roles (role_name, description) VALUES
@@ -77,3 +79,15 @@ INSERT INTO account_roles (role_name, description) VALUES
 -- INSERT INTO account_roles (role_name, description) VALUES
 -- ('sr_allowances', 'Sales Returns and Allowances - Contra Revenue'),
 -- ('pr_allowances', 'Purchase Returns and Allowances - Contra Expense');
+
+ALTER TABLE Finance.warehouses ADD COLUMN client_id INT REFERENCES clients (client_id);
+
+ALTER TABLE Finance.operations ADD COLUMN client_id INT REFERENCES clients (client_id);
+
+ALTER TABLE Finance.suppliers ADD COLUMN client_id INT REFERENCES clients (client_id);
+
+ALTER TABLE Finance.customers ADD COLUMN client_id INT REFERENCES clients (client_id);
+
+ALTER TABLE Finance.clients 
+ADD inventory_method VARCHAR(20) CHECK (inventory_method IN ('Perpertual','Periodic')),
+ADD inventor_transaction VARCHAR(20) DEFAULT 'FIFO' CHECK (inventor_transaction IN ('LIFO','FIFO','AVOC'))
