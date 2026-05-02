@@ -31,7 +31,16 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/03_trigger.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/03_altertables.sql"
+if [ $? -eq 0 ]; then
+    echo "[$(date)] Feature table SQL alright!" >> "$LOG_FILE"
+else
+    echo "[$(date)] Feature tables SQL failed!" >> "$LOG_FILE"
+    exit 1
+fi
+
+# Run Tables SQL
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/04_trigger.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature trigger SQL alright!" >> "$LOG_FILE"
 else
@@ -40,7 +49,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/04_index.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/05_index.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature index SQL alright!" >> "$LOG_FILE"
 else
@@ -49,7 +58,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/05_insert_procedure_businesslogic.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/06_insert_procedure_businesslogic.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature insert procedure SQL alright!" >> "$LOG_FILE"
 else
@@ -58,7 +67,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/06_insert_event_procedure.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/07_insert_event_procedure.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature event log SQL alright!" >> "$LOG_FILE"
 else
@@ -67,7 +76,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/07_partitioning.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/08_partitioning.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature partition tables SQL alright!" >> "$LOG_FILE"
 else
@@ -76,7 +85,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/08_Constraint.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/09_Constraint.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature constraint tables SQL alright!" >> "$LOG_FILE"
 else
@@ -85,7 +94,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/09_COA_role_accounts.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/10_COA_role_accounts.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature role accounts tables SQL alright!" >> "$LOG_FILE"
 else
@@ -94,7 +103,7 @@ else
 fi
 
 # Run Tables SQL
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/10_update_procedure_businesslogic.sql"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$SCRIPT_DIR_SCHEMA/11_update_procedure_businesslogic.sql"
 if [ $? -eq 0 ]; then
     echo "[$(date)] Feature update procedure tables SQL alright!" >> "$LOG_FILE"
 else
