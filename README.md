@@ -1,4 +1,4 @@
-# 🧠 Bookkeeping Database System (PostgreSQL)
+# 🧠 Accounting Database System (PostgreSQL)
 
 A modular **Accounting database system** designed to handle inventory, sales, and financial transactions using PostgreSQL.
 
