@@ -69,7 +69,7 @@ AFTER INSERT OR UPDATE OR DELETE ON Finance.customers
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 7 
 CREATE TRIGGER supplier_changes 
-AFTER INSERT OR UPDATE OR DELETE ON Finance.suppliers 
+AFTER INSERT OR UPDATE OR DELETE ON Finance.vendors 
 FOR EACH ROW EXECUTE FUNCTION Finance.audit_log_chain();
 -- 8
 CREATE TRIGGER product_changes 

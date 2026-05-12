@@ -162,8 +162,8 @@ BEGIN
     FOR UPDATE;
 
     PERFORM 1
-    FROM Finance.suppliers
-    WHERE Supplier_id = (p_payload->>'supplier_id')::INT
+    FROM Finance.vendors
+    WHERE vendor_id = (p_payload->>'vendor_id')::INT
     FOR UPDATE;
     
     -- create transaction
@@ -198,7 +198,7 @@ BEGIN
         (p_payload->>'action_type')::TEXT,
         (p_payload->>'quantity')::INT,
         (p_payload->>'date')::DATE,
-        (p_payload->>'supplier_id')::INT
+        (p_payload->>'vendor_id')::INT
     );
 
     -- EXIT;
@@ -309,7 +309,7 @@ BEGIN
     -- inventory
     CALL Finance.ap_Transaction(
         (p_payload->>'client_id')::INT,
-        (p_payload->>'supplier_id')::INT,
+        (p_payload->>'vendor_id')::INT,
         (p_payload->>'due_date')::DATE,
         -- v_transaction_id,
         (p_payload->>'bill_date')::DATE,

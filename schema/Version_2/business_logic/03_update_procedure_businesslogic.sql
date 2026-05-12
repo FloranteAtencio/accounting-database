@@ -183,8 +183,8 @@ BEGIN
             -- SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
             PERFORM 1
-            FROM Finance.suppliers
-            WHERE supplier_id = a_SupplierID
+            FROM Finance.vendors
+            WHERE vendor_id = a_SupplierID
             FOR UPDATE;
 
             PERFORM 1
