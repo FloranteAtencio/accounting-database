@@ -450,7 +450,8 @@ CREATE OR REPLACE PROCEDURE Finance.inventory_module
     IN p_transaction_id INT,
     IN p_action_type VARCHAR(50),
     IN p_quantity INT,
-    IN p_date DATE
+    IN p_date DATE,
+    IN p_client_id INT
 )
 LANGUAGE plpgsql
 AS $$
@@ -461,9 +462,9 @@ BEGIN
     END IF;
 
     INSERT INTO Finance.inventory_audits
-    (product_id, warehouse_id, transaction_id, action_type, quantity, movement_date)
+    (product_id, warehouse_id, transaction_id, action_type, quantity, movement_date,client_id)
     VALUES
-    (p_product_id, p_warehouse_id, p_transaction_id, p_action_type, p_quantity, p_date);
+    (p_product_id, p_warehouse_id, p_transaction_id, p_action_type, p_quantity, p_date, p_client_id);
  
 
     EXCEPTION
@@ -497,19 +498,47 @@ DECLARE
     new_returning_id INT;
     v_quantity INT;
     v_operation_id INT;
+    v_AVCO DECIMAL;
     quantity_holder INT;
-
-    operation_cursor CURSOR FOR
+    v_inventory_transactions VARCHAR;
+    v_holder INT;
+    batch CURSOR FOR
         SELECT operation_id, product_cost, product_price, quantity
         FROM Finance.operations
-        WHERE product_id = p_product_id;
-    
+        WHERE product_id = p_product_id
+          AND quantity > 0
+        ORDER BY 
+            CASE LOWER(cost_flow)
+                WHEN 'fifo' THEN purchase_date ASC
+                WHEN 'lifo' THEN purchase_date DESC
+                ELSE purchase_date ASC -- AVCO handled separately
+            END;
+
 BEGIN    
-    -- FIX 1: Added semicolon here
+
+    SELECT inventory_transaction 
+    INTO v_inventory_transactions 
+    FROM clients
+    WHERE client_id = p_clientId
+    LIMIT 1;
+
+    SELECT sum(quantity * product_cost) / NULLIF(sum(quantity),0)
+    INTO v_AVCO
+    FROM operations
+    WHERE product_id = p_product_id;
+        AND quantity > 0;
+    
     SELECT rate_percentage 
     INTO v_taxrate
     FROM finance.tax_rates
-    WHERE tax_type = 'VAT';
+    WHERE tax_type = 'VAT'
+    LIMIT 1;
+
+    IF v_taxrate IS NULL THEN 
+        RAISE EXCEPTION 'Tax rate for VAT not found';
+
+    OPEN history_sale;
+
 
     IF LOWER(p_action_type) = 'purchase' THEN
         
@@ -538,12 +567,20 @@ BEGIN
         CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ap_account', FALSE, (p_quantity * v_cost_purchase) * (1 + v_taxrate), p_date);
 
     ELSIF LOWER(p_action_type) = 'sale' THEN
+        
         quantity_holder := p_quantity;
-        OPEN operation_cursor;
+
+        OPEN batch;
         LOOP
-            FETCH operation_cursor INTO v_operation_id, v_cost_sales, v_price_sales, v_quantity;
+            FETCH batch INTO v_operation_id, v_cost_sales, v_price_sales, v_quantity;
+            
             EXIT WHEN NOT FOUND;
 
+            IF LOWER(cost_flow) = 'avco' THEN
+                    v_cost_sales := v_AVCO;
+            END IF;
+            
+            -- check if quantity is greater than 0 if not loop for another 
             IF v_quantity > 0 THEN
                 -- FIX 3: Added semicolon
                 quantity_holder := quantity_holder - v_quantity; 
@@ -555,34 +592,38 @@ BEGIN
                 (p_reference_id, p_transaction_id)
                 RETURNING Receivable_id INTO new_returning_id;
 
-                -- Note: Logic check on this formula: (Price * Tax) + Cost? 
-                -- Usually AR is just Price * (1+Tax). 
-                -- Keeping your logic but fixing syntax.
                 INSERT INTO Finance.ar_ext
                 (amount, due_date, invoice_date, status, receivable_id)
                 VALUES
                 (((p_quantity * v_price_sales) * (1 + v_taxrate)), p_date + INTERVAL '30 days', p_date, 'Pending', new_returning_id);
 
-                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ar_account', TRUE, (p_quantity * v_price_sales) * (1 + v_taxrate), p_date);
-                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'revenue_account', FALSE, p_quantity * v_price_sales, p_date);
-                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (p_quantity * v_price_sales) * v_taxrate, p_date);
                 
-                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'COGS', TRUE, p_quantity * v_cost_sales, p_date);
-                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', FALSE, p_quantity * v_cost_sales, p_date);
+                IF history_quantity - v_quantity  >= 0 THEN
+                    v_holder = v_quantity;
+                ELSE 
+                    v_holder = history_quantity;
+                END IF;
+
+                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'ar_account', TRUE, (v_holder * v_price_sales) * (1 + v_taxrate), p_date);
+                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'revenue_account', FALSE, v_holder * v_price_sales, p_date);
+                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'Output VAT Payable - Liability', FALSE, (v_holder * v_price_sales) * v_taxrate, p_date);
                 
-                IF quantity_holder >= 0 THEN
-                    UPDATE Finance.operations
-                    SET quantity = quantity - v_quantity -- Fixed logic: subtract the specific chunk used
-                    WHERE operation_id = v_operation_id;
-                ELSE
-                    UPDATE Finance.operations
-                    SET quantity = -(quantity_holder) -- Fixed logic: subtract the specific chunk used
-                    WHERE operation_id = v_operation_id;
+                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'COGS', TRUE, v_holder * v_cost_sales, p_date);
+                CALL Finance.insert_journal(p_clientId, p_transaction_id, 'inventory_account', FALSE, v_holder * v_cost_sales, p_date);
+                
+                
+                UPDATE Finance.operations
+                SET quantity = quantity - v_holder
+                WHERE operation_id = v_operation_id;
+                
+
+                IF quantity_holder <= 0 THEN
                     EXIT;
                 END IF;
             END IF;
+        
         END LOOP;
-        CLOSE operation_cursor;        
+        CLOSE batch;
     ELSE
         RAISE EXCEPTION 'Unsupported action type';
     END IF;
@@ -665,7 +706,6 @@ BEGIN
 END;
 $$;
 
-
 CREATE OR REPLACE PROCEDURE Finance.operations_module(
     IN p_product_id INT,
     IN p_product_price DECIMAL,
@@ -686,6 +726,7 @@ BEGIN
             RAISE EXCEPTION 'Journal entry failed: %', SQLERRM;
 END;
 $$;
+
 -- ====================================================
 -- TRANSFER MODULE 
 -- ===================================================
@@ -744,89 +785,226 @@ AS $$
 DECLARE
     new_transaction_id INT;
     var_total_quantity INT;
+    
 BEGIN
 
-            IF p_quantity <= 0 OR p_quantity IS NULL THEN
-                RAISE EXCEPTION 'Quantity must be greater than 0';
-            END IF;
+    IF p_quantity <= 0 OR p_quantity IS NULL THEN
+        RAISE EXCEPTION 'Quantity must be greater than 0';
+    END IF;
 
-            IF p_date IS NULL THEN
-                RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
-            END IF;
+    IF p_date IS NULL THEN
+        RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
+    END IF;
 
-            IF p_product_id IS NULL OR p_product_id <= 0 THEN
-                RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
-            END IF;
+    IF p_product_id IS NULL OR p_product_id <= 0 THEN
+        RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
+    END IF;
 
-            IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
-                RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
-            END IF;
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
+    END IF;
 
-            -- -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
-            PERFORM 1
-            FROM Finance.products
-            WHERE product_id = p_product_id
-            FOR UPDATE;
+    -- -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
+    PERFORM 1
+    FROM Finance.products
+    WHERE product_id = p_product_id
+    FOR UPDATE;
 
-            -- 🔒 Lock warehouse SECOND
-            PERFORM 1
-            FROM Finance.warehouses
-            WHERE warehouse_id = p_warehouse_id
-            FOR UPDATE;
-            
-            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
-            VALUES (
-                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
-                        ' Date on ',p_Date, 
-                        ' Product name ', v_product_name),
-                p_idempotency_key, p_clientId
-                )
-            ON CONFLICT(idempotency_key) DO NOTHING
-            RETURNING Transaction_id INTO new_transaction_id;
-
-            IF new_transaction_id IS NULL THEN
-                SELECT Transaction_id INTO new_transaction_id
-                FROM Finance.transactions
-                WHERE idempotency_key = p_idempotency_key;
-
-                RETURN;
-            END IF;
-            
-            -- SELECT
-            --     SUM( quantity ) 
-            -- INTO var_total_quantity  -- Add your variable name here
-            -- FROM Finance.operations
-            -- WHERE product_id = p_product_id;
-
-            -- if var_total_quantity <= 0 THEN
-            --     RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity %',p_product_id, var_total_quantity;
-                
-            -- if p_quantity > var_total_quantity THEN
-            --     RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
-            -- 📦 Inventory
-            CALL Finance.inventory_module(
-                p_product_id,
-                p_warehouse_id,
-                new_transaction_id,
-                'Sale',
-                p_quantity,
-                p_date
-            );
-
-            CALL Finance.accounting_module(
-                p_clientId, 
-                new_transaction_id, 
-                p_product_id, 
-                'Sale',--p_action_type,
-                p_quantity, 
-                p_date, 
-                p_reference_id
-            );
+    -- 🔒 Lock warehouse SECOND
+    PERFORM 1
+    FROM Finance.warehouses
+    WHERE warehouse_id = p_warehouse_id
+    FOR UPDATE;
     
+    SELECT  SUM(
+        CASE 
+            WHEN account_type IN ('Sale', 'Purchase Return') THEN -quantity 
+            WHEN account_type IN ('Purchase', 'Sale Return') THEN quantity
+            ELSE 0
+        END
+    ) 
+    INTO var_total_quantity  -- Add your variable name here
+    FROM Finance.inventory_audits
+    WHERE product_id = p_product_id;
+
+    if var_total_quantity <= 0 THEN
+        RAISE EXCEPTION 'Insufficient quantity for product ID: % no remainig quantity ',p_product_id, var_total_quantity;
+        
+    if p_quantity < var_total_quantity THEN
+        RAISE EXCEPTION 'Insufficient quantity for product ID: % remainig quantity % at warehouse %',p_product_id, var_total_quantity, p_warehouse_id;
+
+    SELECT COALESCE(inventory_transaction,'None') 
+    INTO v_check
+    FROM Finance.clients
+    WHERE client_id = p_client_id
+    
+    
+        INSERT INTO Finance.transactions (description, idempotency_key, client_id)
+        VALUES (
+            CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                    ' Date on ',p_Date, 
+                    ' Product name ', v_product_name),
+            p_idempotency_key, p_clientId
+            )
+        ON CONFLICT(idempotency_key) DO NOTHING
+        RETURNING Transaction_id INTO new_transaction_id;
+
+        IF new_transaction_id IS NULL THEN
+            SELECT Transaction_id INTO new_transaction_id
+            FROM Finance.transactions
+            WHERE idempotency_key = p_idempotency_key;
+
+            RETURN;
+        END IF;
+
+        CALL Finance.inventory_module(
+            p_product_id,
+            p_warehouse_id,
+            new_transaction_id,
+            'Sale',
+            p_quantity,
+            p_date,
+            p_client_id
+        );
+    
+    IF v_check != 'None' THEN
+
+        CALL Finance.accounting_module(
+            p_clientId, 
+            new_transaction_id, 
+            p_product_id, 
+            'Sale',--p_action_type,
+            p_quantity, 
+            p_date, 
+            p_reference_id
+        );
+    END IF;
+
     EXCEPTION
         WHEN OTHERS THEN
             -- ❌ Real error → stop immediately
             RAISE EXCEPTION 'Inventory Procuess Module Transaction failed %', SQLERRM;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE Finance.cost_inventory_flow(
+    IN p_client_id INT,
+    IN p_product_id INT,
+    IN cost_flow VARCHAR
+)LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_operation_id INT;
+    v_cost_sales DECIMAL; 
+    v_price_sales DECIMAL; 
+    v_quantity INT;
+    v_quantity_holder INT;
+    v_taxrate DECIMAL;
+    v_holder INT;
+    history_transaction INT;
+    history_quantity INT;
+    history_customer INT;
+    history_client INT;
+    history_date INT;
+    v_AVCO DECIMAL(12 ,2);
+    new_returning_id INT;
+
+    history_sale CURSOR FOR
+        SELECT transaction_id, quantity, customer_id, movement_date, client_id
+        FROM Finance.inventory_audits
+        WHERE account_type = 'Sale'
+        ORDER BY movement_date ASC;
+
+    batch CURSOR FOR
+        SELECT operation_id, product_cost, product_price, quantity
+        FROM Finance.operations
+        WHERE product_id = p_product_id
+          AND quantity > 0
+        ORDER BY 
+            CASE LOWER(cost_flow)
+                WHEN 'fifo' THEN purchase_date ASC
+                WHEN 'lifo' THEN purchase_date DESC
+                ELSE purchase_date ASC -- AVCO handled separately
+            END;
+BEGIN
+
+    SELECT sum(quantity * product_cost) / NULLIF(sum(quantity),0)
+    INTO v_AVCO
+    FROM operations
+    WHERE product_id = p_product_id;
+        AND quantity > 0;
+
+    SELECT rate_percentage 
+    INTO v_taxrate
+    FROM finance.tax_rates
+    WHERE tax_type = 'VAT'
+    LIMIT 1;
+
+    IF v_taxrate IS NULL THEN 
+        RAISE EXCEPTION 'Tax rate for VAT not found';
+    END IF;
+
+    OPEN history_sale;
+
+    LOOP 
+
+        FETCH history_sale INTO history_transaction, history_quantity, history_customer, history_date,history_client;
+        EXIT WHEN NOT FOUND;
+
+        OPEN batch;
+
+        LOOP
+
+            FETCH batch INTO v_operation_id, v_cost_sales, v_price_sales, v_quantity;
+            EXIT WHEN NOT FOUND;
+            
+            IF LOWER(cost_flow) = 'avco' THEN
+                    v_cost_sales := v_AVCO;
+            END IF;
+            
+            IF v_quantity > 0 THEN
+
+                -- Accounts Receivable
+                INSERT INTO Finance.account_receivables
+                (customer_id, transaction_id)
+                VALUES
+                (history_customer, history_transaction)
+                RETURNING Receivable_id INTO new_returning_id;
+
+                INSERT INTO Finance.ar_ext
+                (amount, due_date, invoice_date, status, receivable_id)
+                VALUES
+                (((history_quantity * v_price_sales) * (1 + v_taxrate)), history_date + INTERVAL '30 days', history_date, 'Pending', new_returning_id);
+
+                IF history_quantity - v_quantity  >= 0 THEN
+                    v_holder = v_quantity;
+                ELSE 
+                    v_holder = history_quantity;
+                END IF;
+
+                CALL Finance.insert_journal(history_client, history_transaction, 'ar_account', TRUE, (v_holder * v_price_sales) * (1 + v_taxrate), history_date);
+                CALL Finance.insert_journal(history_client, history_transaction, 'revenue_account', FALSE, v_holder * v_price_sales, history_date);
+                CALL Finance.insert_journal(history_client, history_transaction, 'Output VAT Payable - Liability', FALSE, (v_holder * v_price_sales) * v_taxrate, history_date);
+                CALL Finance.insert_journal(history_client, history_transaction, 'COGS', TRUE, v_holder * v_cost_sales, history_date);
+                CALL Finance.insert_journal(history_client, history_transaction,'inventory_account', FALSE, v_holder * v_cost_sales, history_date);
+            
+                UPDATE Finance.operations
+                SET quantity = quantity - v_holder
+                WHERE operation_id = v_operation_id;
+                
+                IF history_quantity - v_quantity <= 0 THEN 
+                    EXIT; 
+                END IF;
+
+            END IF;
+        END LOOP;
+        CLOSE batch;
+    END LOOP;
+    CLOSE history_sale;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Cost flow inventory procedure Transaction failed: %', SQLERRM;
 END;
 $$;
 
@@ -850,74 +1028,76 @@ AS $$
 DECLARE
     new_transaction_id INT;
     new_operation_id INT;
+    v_check VARCHAR;
 BEGIN
-            IF p_quantity <= 0 OR p_quantity IS NULL THEN
-                RAISE EXCEPTION 'Quantity must be greater than 0';
-            END IF;
+    IF p_quantity <= 0 OR p_quantity IS NULL THEN
+        RAISE EXCEPTION 'Quantity must be greater than 0';
+    END IF;
 
-            IF p_date IS NULL THEN
-                RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
-            END IF;
+    IF p_date IS NULL THEN
+        RAISE EXCEPTION 'Date parameter is empty %', SQLERRM;
+    END IF;
 
-            IF p_product_id IS NULL OR p_product_id <= 0 THEN
-                RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
-            END IF;
+    IF p_product_id IS NULL OR p_product_id <= 0 THEN
+        RAISE EXCEPTION 'Producit Id is invalid %', SQLERRM;
+    END IF;
 
-            IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
-                RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
-            END IF;
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'Warehouse Id is invalid %', SQLERRM;
+    END IF;
 
-            -- -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
-            PERFORM 1
-            FROM Finance.products
-            WHERE product_id = p_product_id
-            FOR UPDATE;
+    -- -- 🔒 Lock product FIRST (consistent order = deadlock prevention)
+    PERFORM 1
+    FROM Finance.products
+    WHERE product_id = p_product_id
+    FOR UPDATE;
 
-            -- 🔒 Lock warehouse SECOND
-            PERFORM 1
-            FROM Finance.warehouses
-            WHERE warehouse_id = p_warehouse_id
-            FOR UPDATE;
-            
-            INSERT INTO Finance.transactions (description, idempotency_key, client_id)
-            VALUES (
-                CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
-                        ' Date on ',p_Date, 
-                        ' Product name ', v_product_name),
-                p_idempotency_key, p_clientId
-                )
-            ON CONFLICT(idempotency_key) DO NOTHING
-            RETURNING Transaction_id INTO new_transaction_id;
+    -- 🔒 Lock warehouse SECOND
+    PERFORM 1
+    FROM Finance.warehouses
+    WHERE warehouse_id = p_warehouse_id
+    FOR UPDATE;
+    
+    INSERT INTO Finance.transactions (description, idempotency_key, client_id)
+    VALUES (
+        CONCAT( 'Inventory Transaction With Action Type of ', p_action_type , 
+                ' Date on ',p_Date, 
+                ' Product name ', v_product_name),
+        p_idempotency_key, p_clientId
+        )
+    ON CONFLICT(idempotency_key) DO NOTHING
+    RETURNING Transaction_id INTO new_transaction_id;
 
-            IF new_transaction_id IS NULL THEN
-                SELECT Transaction_id INTO new_transaction_id
-                FROM Finance.transactions
-                WHERE idempotency_key = p_idempotency_key;
-                RETURN;
-            END IF;
+    IF new_transaction_id IS NULL THEN
+        SELECT Transaction_id INTO new_transaction_id
+        FROM Finance.transactions
+        WHERE idempotency_key = p_idempotency_key;
+        RETURN;
+    END IF;
 
-            CALL Finance.inventory_module(
-                p_product_id,
-                p_warehouse_id,
-                new_transaction_id,
-                'Purchase',
-                p_quantity,
-                p_date
-            );
+    CALL Finance.inventory_module(
+        p_product_id,
+        p_warehouse_id,
+        new_transaction_id,
+        'Purchase',
+        p_quantity,
+        p_date,
+        p_client_id
+    );
 
-            INSERT INTO Finance.operations (product_id,quantity,product_cost,product_price,purchase_date)
-            VALUES (p_product_id,p_quantity,p_product_price,p_product_cost,p_date)
-            RETURNING operation_id INTO new_operation_id;
-            
-            CALL Finance.accounting_module(
-                p_clientId, 
-                new_transaction_id, 
-                new_operation_id, 
-                'Purchase',--p_action_type,
-                p_quantity, 
-                p_date, 
-                p_reference_id
-            );    
+    INSERT INTO Finance.operations (product_id,quantity,product_cost,product_price,purchase_date)
+    VALUES (p_product_id,p_quantity,p_product_price,p_product_cost,p_date)
+    RETURNING operation_id INTO new_operation_id;
+
+    CALL Finance.accounting_module(
+        p_clientId, 
+        new_transaction_id, 
+        new_operation_id, 
+        'Purchase',--p_action_type,
+        p_quantity, 
+        p_date, 
+        p_reference_id
+    );    
 
     EXCEPTION
         WHEN OTHERS THEN
