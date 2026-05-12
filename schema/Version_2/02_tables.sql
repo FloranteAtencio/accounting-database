@@ -118,9 +118,9 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
 -- ============================================
 -- 9. SUPPLIER
 -- ============================================
-    DROP TABLE IF EXISTS Finance.suppliers CASCADE;
-    CREATE TABLE IF NOT EXISTS Finance.suppliers (
-        supplier_id SERIAL PRIMARY KEY,
+    DROP TABLE IF EXISTS Finance.vendors CASCADE;
+    CREATE TABLE IF NOT EXISTS Finance.vendors (
+        vendor_id SERIAL PRIMARY KEY,
         supplier_name VARCHAR(255) NOT NULL,
         contact_info VARCHAR(50) NOT NULL,
         email VARCHAR(255) NOT NULL,
@@ -198,7 +198,7 @@ DROP TABLE IF EXISTS Finance.account_payables CASCADE;
 CREATE TABLE IF NOT EXISTS Finance.account_payables (
     payable_id SERIAL PRIMARY KEY,
     transaction_id INT NOT NULL REFERENCES Finance.transactions(transaction_id) ON DELETE NO ACTION,
-    supplier_id INT NOT NULL REFERENCES Finance.suppliers(supplier_id) ON DELETE NO ACTION
+    vendor_id INT NOT NULL REFERENCES Finance.vendors(vendor_id) ON DELETE NO ACTION
     --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

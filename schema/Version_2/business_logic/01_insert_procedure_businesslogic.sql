@@ -213,8 +213,8 @@ BEGIN
             FOR UPDATE;
 
             PERFORM 1
-            FROM Finance.suppliers
-            WHERE supplier_id = p_VendorID
+            FROM Finance.vendors
+            WHERE vendor_id = p_VendorID
             FOR UPDATE;
 
             -- Insert transaction
@@ -236,7 +236,7 @@ BEGIN
             END IF;
 
             -- Insert AP record
-            INSERT INTO Finance.account_payables (supplier_id, transaction_id)
+            INSERT INTO Finance.account_payables (vendor_id, transaction_id)
             VALUES (p_VendorID, new_transaction_id)
             RETURNING Payable_id INTO new_returning_id;
 
@@ -406,41 +406,6 @@ END;
 $$;
 
 -- ====================================================
--- COA TEMPLATE
--- ===================================================
-CREATE OR REPLACE PROCEDURE Finance.apply_coa_template(
-    IN p_clientId INT,
-    IN p_template_id INT
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-
-    PERFORM 1
-    FROM Finance.clients
-    WHERE client_id = p_clientId
-    FOR UPDATE;
-
-    -- Copy template accounts into client's COA
-    INSERT INTO Finance.charts (client_id, account, account_code, type, is_active)
-    SELECT 
-        p_clientId,
-        account_name,
-        account_code,
-        account_type,
-        TRUE
-    FROM Finance.coa_template_accounts
-    WHERE template_id = p_template_id
-    ON CONFLICT (client_id, account_code) DO NOTHING;  -- Skip duplicates
-
-    RAISE NOTICE 'Template % applied to client %', p_template_id, p_clientId;
-
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE EXCEPTION 'COA Transaction Failed to apply template: %', SQLERRM;
-END;
-$$;
-
--- ====================================================
 -- INVENTORY MODULE
 -- ===================================================
 CREATE OR REPLACE PROCEDURE Finance.inventory_module
@@ -549,7 +514,7 @@ BEGIN
 
         -- Accounts Payable
         INSERT INTO Finance.account_payables 
-        (supplier_id, transaction_id)
+        (vendor_id, transaction_id)
         VALUES
         (p_reference_id, p_transaction_id)
         RETURNING Payable_id INTO new_returning_id;

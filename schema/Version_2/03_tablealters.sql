@@ -2,7 +2,7 @@ ALTER TABLE Finance.warehouses ADD COLUMN client_id INT REFERENCES clients (clie
 
 ALTER TABLE Finance.operations ADD COLUMN client_id INT REFERENCES clients (client_id);
 
-ALTER TABLE Finance.suppliers ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.vendors ADD COLUMN client_id INT REFERENCES clients (client_id);
 
 ALTER TABLE Finance.customers ADD COLUMN client_id INT REFERENCES clients (client_id);
 
