@@ -2,8 +2,6 @@
 
 A modular **Accounting database system** designed to handle inventory, sales, and financial transactions using PostgreSQL.
 
-This project demonstrates real-world database engineering concepts including **data modeling, partitioning, transaction processing, and financial accounting logic**.
-
 ---
 
 ## 🚀 Features
