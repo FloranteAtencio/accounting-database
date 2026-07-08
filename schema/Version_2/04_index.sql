@@ -17,7 +17,7 @@ BEGIN;
     CREATE INDEX idx_journals_chart ON Finance.journals(chart_id);
 
     CREATE INDEX idx_ar_customer ON Finance.account_receivables(customer_id);
-    CREATE INDEX idx_ap_supplier ON Finance.account_payables(supplier_id);
+    CREATE INDEX idx_ap_supplier ON Finance.account_payables(vendor_id);
 
     CREATE INDEX idx_inventory_composite 
     ON Finance.inventory_audits(product_id, warehouse_id); 
