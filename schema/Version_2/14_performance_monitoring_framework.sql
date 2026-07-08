@@ -209,7 +209,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Find slow queries
+-- Find slow queries (uses pg_stat_activity - no extension required)
 DROP FUNCTION IF EXISTS dba_admin.find_slow_queries(INT) CASCADE;
 CREATE FUNCTION dba_admin.find_slow_queries(p_threshold_ms INT DEFAULT 1000)
 RETURNS TABLE(
@@ -222,14 +222,16 @@ RETURNS TABLE(
 BEGIN
     RETURN QUERY
     SELECT 
-        query,
-        total_time::BIGINT,
-        calls,
-        ROUND(mean_time, 2),
-        max_time::BIGINT
-    FROM pg_stat_statements
-    WHERE mean_time > p_threshold_ms
-    ORDER BY total_time DESC
+        COALESCE(query, 'N/A')::TEXT,
+        EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - query_start))::BIGINT,
+        1::INT,
+        EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - query_start))::NUMERIC,
+        EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - query_start))::BIGINT
+    FROM pg_stat_activity
+    WHERE query_start IS NOT NULL
+        AND state = 'active'
+        AND EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - query_start)) * 1000 > p_threshold_ms
+    ORDER BY query_start ASC
     LIMIT 20;
 END;
 $$ LANGUAGE plpgsql;
