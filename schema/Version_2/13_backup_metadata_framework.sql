@@ -153,12 +153,12 @@ BEGIN
         t.database_name,
         MAX(b.backup_date),
         EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - MAX(b.backup_date)))::INT / 3600,
-        MAX(b.status),
+        MAX(b.status)::VARCHAR,
         t.rto_minutes,
         t.rpo_minutes,
         (EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - MAX(b.backup_date)))::INT / 60) <= t.rpo_minutes,
         MAX(b.restored_at),
-        CASE WHEN MAX(b.status) = 'SUCCESS' AND MAX(b.restored_at) > CURRENT_TIMESTAMP - INTERVAL '7 days' 
+        CASE WHEN MAX(b.status)::VARCHAR = 'SUCCESS' AND MAX(b.restored_at) > CURRENT_TIMESTAMP - INTERVAL '7 days' 
              THEN TRUE ELSE FALSE END
     FROM dba_admin.rpo_rto_targets t
     LEFT JOIN dba_admin.backup_history b ON t.database_name = b.database_name
