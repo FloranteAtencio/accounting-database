@@ -1,12 +1,12 @@
-ALTER TABLE Finance.warehouses ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.warehouses ADD COLUMN client_id INT REFERENCES Finance.clients (client_id);
 
-ALTER TABLE Finance.operations ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.operations ADD COLUMN client_id INT REFERENCES Finance.clients (client_id);
 
-ALTER TABLE Finance.vendors ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.vendors ADD COLUMN client_id INT REFERENCES Finance.clients (client_id);
 
-ALTER TABLE Finance.customers ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.customers ADD COLUMN client_id INT REFERENCES Finance.clients (client_id);
 
-ALTER TABLE Finance.inventory_audits ADD COLUMN client_id INT REFERENCES clients (client_id);
+ALTER TABLE Finance.inventory_audits ADD COLUMN client_id INT REFERENCES Finance.clients (client_id);
 
 ALTER TABLE Finance.clients 
 ADD inventory_method VARCHAR(20) CHECK (inventory_method IN ('Perpertual','Periodic')),
