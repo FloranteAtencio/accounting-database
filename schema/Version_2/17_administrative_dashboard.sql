@@ -157,12 +157,12 @@ WHERE state != 'idle'
     AND query_start < CURRENT_TIMESTAMP - INTERVAL '5 minutes'
 ORDER BY query_start;
 
--- Transaction ID wraparound status
+-- Transaction ID wraparound status (compatible with PostgreSQL 10+)
 SELECT 
     datname,
-    ROUND((2147483647 - next_xid) / 1000000.0, 2) as mxids_until_wraparound_millions,
-    CASE WHEN (2147483647 - next_xid) < 100000000 THEN 'CRITICAL' 
-         WHEN (2147483647 - next_xid) < 500000000 THEN 'WARNING'
+    ROUND((2147483647 - CAST(datfrozenxid AS BIGINT)) / 1000000.0, 2) as mxids_until_wraparound_millions,
+    CASE WHEN (2147483647 - CAST(datfrozenxid AS BIGINT)) < 100000000 THEN 'CRITICAL' 
+         WHEN (2147483647 - CAST(datfrozenxid AS BIGINT)) < 500000000 THEN 'WARNING'
          ELSE 'HEALTHY' END as status
 FROM pg_database;
 
