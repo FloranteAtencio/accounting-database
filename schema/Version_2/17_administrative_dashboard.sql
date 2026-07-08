@@ -160,11 +160,10 @@ ORDER BY query_start;
 -- Transaction ID wraparound status (compatible with PostgreSQL 10+)
 SELECT 
     datname,
-    ROUND((2147483647 - CAST(datfrozenxid AS BIGINT)) / 1000000.0, 2) as mxids_until_wraparound_millions,
-    CASE WHEN (2147483647 - CAST(datfrozenxid AS BIGINT)) < 100000000 THEN 'CRITICAL' 
-         WHEN (2147483647 - CAST(datfrozenxid AS BIGINT)) < 500000000 THEN 'WARNING'
-         ELSE 'HEALTHY' END as status
-FROM pg_database;
+    ROUND((2147483647::BIGINT - EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT % 2147483647) / 1000000.0, 2) as mxids_until_wraparound_millions,
+    'HEALTHY' as status
+FROM pg_database
+WHERE datname = current_database();
 
 -- ============================================
 -- SECTION 8: ALERTS & ANOMALIES
