@@ -52,7 +52,7 @@ CREATE INDEX idx_security_events_type ON dba_admin.security_events(event_type);
 -- ============================================
 
 -- Admin role (full access)
-DROP ROLE IF EXISTS db_admin CASCADE;
+DROP ROLE IF EXISTS db_admin;
 CREATE ROLE db_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA Finance TO db_admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA Finance TO db_admin;
@@ -63,21 +63,21 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA Finance GRANT ALL ON SEQUENCES TO db_admin;
 ALTER DEFAULT PRIVILEGES IN SCHEMA Finance GRANT ALL ON FUNCTIONS TO db_admin;
 
 -- Read-only role
-DROP ROLE IF EXISTS db_readonly CASCADE;
+DROP ROLE IF EXISTS db_readonly;
 CREATE ROLE db_readonly;
 GRANT USAGE ON SCHEMA Finance TO db_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA Finance TO db_readonly;
 ALTER DEFAULT PRIVILEGES IN SCHEMA Finance GRANT SELECT ON TABLES TO db_readonly;
 
 -- Analyst role (read + reporting)
-DROP ROLE IF EXISTS db_analyst CASCADE;
+DROP ROLE IF EXISTS db_analyst;
 CREATE ROLE db_analyst;
 GRANT USAGE ON SCHEMA Finance TO db_analyst;
 GRANT SELECT ON ALL TABLES IN SCHEMA Finance TO db_analyst;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA Finance TO db_analyst;
 
 -- Application role (data import/export)
-DROP ROLE IF EXISTS db_app CASCADE;
+DROP ROLE IF EXISTS db_app;
 CREATE ROLE db_app;
 GRANT USAGE ON SCHEMA Finance TO db_app;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA Finance TO db_app;
@@ -85,7 +85,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA Finance TO db_app;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA Finance TO db_app;
 
 -- Auditor role (audit logging access)
-DROP ROLE IF EXISTS db_auditor CASCADE;
+DROP ROLE IF EXISTS db_auditor;
 CREATE ROLE db_auditor;
 GRANT USAGE ON SCHEMA Finance TO db_auditor;
 GRANT SELECT ON ALL TABLES IN SCHEMA Finance TO db_auditor;
@@ -96,19 +96,19 @@ GRANT SELECT ON ALL TABLES IN SCHEMA dba_admin TO db_auditor;
 -- ============================================
 
 -- Example users (change passwords in production)
-DROP USER IF EXISTS admin_user CASCADE;
+DROP USER IF EXISTS admin_user;
 CREATE USER admin_user WITH PASSWORD 'change_me_in_production' IN ROLE db_admin;
 
-DROP USER IF EXISTS app_user CASCADE;
+DROP USER IF EXISTS app_user;
 CREATE USER app_user WITH PASSWORD 'change_me_in_production' IN ROLE db_app;
 
-DROP USER IF EXISTS analyst_user CASCADE;
+DROP USER IF EXISTS analyst_user;
 CREATE USER analyst_user WITH PASSWORD 'change_me_in_production' IN ROLE db_analyst;
 
-DROP USER IF EXISTS readonly_user CASCADE;
+DROP USER IF EXISTS readonly_user;
 CREATE USER readonly_user WITH PASSWORD 'change_me_in_production' IN ROLE db_readonly;
 
-DROP USER IF EXISTS auditor_user CASCADE;
+DROP USER IF EXISTS auditor_user;
 CREATE USER auditor_user WITH PASSWORD 'change_me_in_production' IN ROLE db_auditor;
 
 -- ============================================
