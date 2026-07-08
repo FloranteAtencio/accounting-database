@@ -200,7 +200,7 @@ ORDER BY deviation_percent DESC;
 -- Last vacuum/analyze times
 SELECT 
     schemaname,
-    tablename,
+    relname as tablename,
     last_vacuum,
     last_autovacuum,
     last_analyze,
@@ -213,7 +213,7 @@ ORDER BY last_vacuum DESC;
 
 -- Maintenance recommendations
 SELECT 
-    schemaname || '.' || tablename as table_name,
+    schemaname || '.' || relname as table_name,
     CASE WHEN last_vacuum IS NULL THEN 'Never vacuumed - RUN VACUUM'
          WHEN last_vacuum < CURRENT_TIMESTAMP - INTERVAL '7 days' THEN 'Vacuum > 7 days old'
          ELSE 'OK' END as vacuum_status,
