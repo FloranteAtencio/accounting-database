@@ -184,20 +184,30 @@ RETURNS TABLE(
     days_since_last_failover INT,
     recovery_objective_met BOOLEAN
 ) AS $$
+DECLARE
+    v_replication_lag NUMERIC;
+    v_last_failover TIMESTAMP;
 BEGIN
+    -- Get latest replication lag
+    SELECT COALESCE(replication_lag_seconds, 0) INTO v_replication_lag
+    FROM dba_admin.replication_status 
+    ORDER BY check_time DESC LIMIT 1;
+    
+    -- Get last failover time
+    SELECT MAX(event_time) INTO v_last_failover
+    FROM dba_admin.failover_recovery_log 
+    WHERE event_type = 'FAILOVER';
+    
     RETURN QUERY
     SELECT 
         c.primary_server,
         c.standby_server,
         c.ha_enabled,
         c.dr_enabled,
-        COALESCE((SELECT replication_lag_seconds FROM dba_admin.replication_status 
-                  ORDER BY check_time DESC LIMIT 1), 0),
-        (SELECT MAX(event_time) FROM dba_admin.failover_recovery_log WHERE event_type = 'FAILOVER'),
-        EXTRACT(DAY FROM (CURRENT_TIMESTAMP - 
-            (SELECT MAX(event_time) FROM dba_admin.failover_recovery_log WHERE event_type = 'FAILOVER')))::INT,
-        (SELECT replication_lag_seconds FROM dba_admin.replication_status 
-         ORDER BY check_time DESC LIMIT 1) < 30
+        v_replication_lag,
+        v_last_failover,
+        EXTRACT(DAY FROM (CURRENT_TIMESTAMP - v_last_failover))::INT,
+        v_replication_lag < 30
     FROM dba_admin.ha_dr_configuration c;
 END;
 $$ LANGUAGE plpgsql;
