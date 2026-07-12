@@ -42,14 +42,14 @@ fi
 
 # Drop and recreate database
 echo "[$(date)] Dropping database $DB_NAME..." >> "$LOG_FILE"
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
 
 echo "[$(date)] Creating database $DB_NAME..." >> "$LOG_FILE"
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d postgres -c "CREATE DATABASE $DB_NAME;"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d postgres -c "CREATE DATABASE $DB_NAME;"
 
 # Restore
 echo "[$(date)] Restoring database..." >> "$LOG_FILE"
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_PATH"
+docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_PATH"
 
 if [ $? -eq 0 ]; then
     echo "[$(date)] ✓ Restore successful" >> "$LOG_FILE"
