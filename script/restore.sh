@@ -49,7 +49,7 @@ docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d postgres -c "CREATE DATABASE
 
 # Restore
 echo "[$(date)] Restoring database..." >> "$LOG_FILE"
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -f "$BACKUP_PATH"
+docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_PATH"
 
 if [ $? -eq 0 ]; then
     echo "[$(date)] ✓ Restore successful" >> "$LOG_FILE"
