@@ -1,304 +1,205 @@
 BEGIN;
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Collins, Williams and Wagner', '(259)469-4994', 'lstanton@example.net', '86210 Harold Courts
-South Samuel, ME 50392');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Patrick Roberson', '001-588-849-7', 'ashleysparks@example.net', '0951 Brittany Pike Suite 001
-Clayborough, VI 54509');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1000, 'thank', 'Guess write four data local cultural key.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1000, 11,63,88,'2025-12-26') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Moreno Ltd', '736.317.2083', 'nmoran@example.org', '76216 Bradley Drive
-East Robertfort, AK 99245');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Williams', '729.632.7919', 'jeremiah55@example.org', '9471 Bonilla Extension
-Mitchelltown, OR 81492');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1001, 'future', 'Forget table difference paper improve.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1001, 11,72,92,'2025-06-09') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Clark Group', '(462)778-4299', 'ggarcia@example.com', '033 Young Skyway
-East Amandahaven, UT 10677');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Katherine Thomas', '903-347-1066x', 'egardner@example.com', '393 Melissa Roads Suite 045
-Phamhaven, WY 45688');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1002, 'go', 'Seat line box operation bar mention.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1002, 78,33,61,'2025-09-01') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Fernandez-Stevens', '(828)969-2887', 'travis11@example.org', '2588 Sandra Radial Apt. 603
-North Nicole, OK 04268');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Mary Frazier', '588.503.5850x', 'nancyibarra@example.com', '444 Morales Cliff
-South Rebecca, IN 01334');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1003, 'care', 'Republican week assume course character your.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1003, 48,71,92,'2025-08-22') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Scott PLC', '+1-477-292-80', 'tiffany76@example.com', '507 Anthony Square Apt. 061
-Wilsonburgh, TX 77083');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Gregory Simpson', '759-740-7932x', 'gardnerkimberly@example.net', '65278 Marshall Coves
-Port Jamesside, WA 24377');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1004, 'unit', 'Movement short in south them.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1004, 47,61,73,'2025-03-02') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Moreno-Walsh', '(383)819-1116', 'ynavarro@example.org', '671 Joseph Springs
-North Sarah, MH 78649');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Barbara York', '001-651-601-6', 'leevanessa@example.com', 'PSC 9006, Box 7872
-APO AA 05696');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1005, 'strategy', 'Member follow away street push.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1005, 12,56,68,'2025-04-26') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Ortiz Group', '593.441.9610', 'staceypowell@example.org', '73263 Matthew Neck Suite 849
-Sydneymouth, FM 30289');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Natalie York', '231.482.2272x', 'clinton33@example.com', '3238 Jessica Lodge
-Lake Amyport, NC 97363');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1006, 'attorney', 'Else firm three method.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1006, 99,72,92,'2025-11-09') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Jackson Ltd', '249-519-2125', 'kanderson@example.com', '82026 Tina Well Apt. 435
-Kimberlyville, SC 01142');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Andrea Scott', '+1-400-898-43', 'stevenscolleen@example.com', '488 Ford Cape Apt. 745
-Smithhaven, WI 56646');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1007, 'head', 'Strong discover home ever low nation recent result.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1007, 17,40,58,'2025-10-19') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Garcia-Garner', '+1-599-458-11', 'jeffreygeorge@example.net', '74371 Wells Valley
-North Sierraton, ID 49679');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Dr. Patrick Harris', '8439218487', 'nlove@example.com', '53555 Angela Spring Apt. 013
-West Karenside, NJ 43691');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1008, 'hand', 'Eat lose knowledge thought position media.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1008, 35,70,80,'2025-04-08') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Mccoy-Martinez', '001-235-255-1', 'ywashington@example.net', 'Unit 2729 Box 9543
-DPO AP 50566');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Julie Williams', '001-656-441-7', 'brandon40@example.org', '521 Haynes Crest Apt. 354
-Timothymouth, AS 15021');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1009, 'least', 'Step take prove stuff character bag.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1009, 61,41,71,'2025-07-01') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Boyd Group', '+1-423-634-07', 'harriswilliam@example.org', '821 Jennings Pines
-New Justin, ME 29407');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Brittany Johnson', '(277)226-0814', 'meredithmeyer@example.net', 'Unit 5269 Box 1333
-DPO AP 80401');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1010, 'until', 'Large magazine still window.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1010, 75,23,50,'2025-07-14') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Robinson and Sons', '(478)909-2103', 'mpotter@example.net', '77958 Joshua Haven
-Lake Brandonborough, VI 88331');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Booth', '+1-846-228-32', 'kbradley@example.com', 'PSC 4368, Box 1749
-APO AE 83433');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1011, 'woman', 'Cost need according term behind prepare school wide.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1011, 63,35,75,'2025-03-02') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Fowler PLC', '001-432-710-9', 'ovalenzuela@example.net', '036 Miller Union
-East Jenniferport, GU 02618');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Sherry Perry', '(241)405-0786', 'ywhite@example.net', '7441 Walter Lane Suite 796
-Castillomouth, OH 11834');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1012, 'less', 'Upon fear better model public institution partner.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1012, 35,64,78,'2025-11-22') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Caldwell, Petersen and Ellison', '(293)325-5342', 'lwright@example.com', '5337 Steven Underpass
-Davidberg, CO 28891');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jennifer Lane', '(891)552-7109', 'aburke@example.net', '888 Wright Streets
-Dianachester, MP 04047');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1013, 'cell', 'Yeah blood black across resource every player note.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1013, 49,53,81,'2025-09-14') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Buck, Mcbride and Mitchell', '(974)966-2039', 'victor73@example.org', '15926 Larson Pines
-Jonesshire, MH 42392');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Charles Barker', '492.996.7509x', 'thomas46@example.net', '3427 Deborah Dale
-Jamesbury, DC 70183');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1014, 'detail', 'Appear state manager traditional save player story.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1014, 10,31,59,'2025-06-02') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Morales Inc', '592.307.5070', 'bondhannah@example.com', '70399 Melissa Stravenue
-South Jeanette, AZ 56943');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jenna Kim', '(430)342-0068', 'lori12@example.com', '099 David Fields
-West Kevinfort, HI 75906');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1015, 'market', 'Firm bad opportunity last program ready because.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1015, 67,54,87,'2025-02-21') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Quinn-Hahn', '001-375-380-6', 'angela14@example.net', '90268 Derek Villages
-Hernandezport, NM 59317');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('David Duffy', '(229)452-2315', 'gespinoza@example.com', '49593 Flores Mission
-East Susanmouth, NJ 95638');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1016, 'still', 'Sort employee culture.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1016, 95,47,72,'2025-12-25') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Kemp, Webster and Davis', '001-941-539-1', 'joel97@example.org', '609 Anderson Trail
-Adkinsshire, SC 03472');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Suzanne Morales', '553.987.1356', 'parkjennifer@example.com', '792 Cooper Forks Apt. 116
-Rachelfort, DC 14699');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1017, 'assume', 'Argue eye strategy worry brother democratic.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1017, 30,52,73,'2025-10-17') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Barnett-Martinez', '+1-686-242-09', 'dcrawford@example.org', '5104 Tucker Greens
-Colebury, NY 11469');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Timothy Singleton', '734-693-3198x', 'millerjesus@example.net', '64585 Laura Drive
-Lake Josephtown, OH 13794');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1018, 'respond', 'Issue whether southern next.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1018, 16,36,58,'2025-01-03') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Herrera and Sons', '243-819-4107', 'hansonnicole@example.com', '82275 Bonilla Islands Apt. 406
-Morganstad, DE 78288');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Wayne Wheeler', '001-747-465-9', 'wkeith@example.net', '20274 Simmons Trail
-Kyleshire, AR 27619');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1019, 'news', 'Street different factor.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1019, 97,43,60,'2025-03-30') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Malone, Taylor and Moore', '(523)744-5831', 'phillipsmarcus@example.net', '66504 Teresa Loaf Suite 880
-West Steven, CA 63908');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Joel Brown', '510-862-1367', 'csmith@example.org', '0004 Cynthia Glen
-Jasonberg, WY 22665');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1020, 'during', 'Whether able despite within serious affect represent move.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1020, 44,19,53,'2025-11-03') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Webster-Carter', '001-886-555-8', 'khubbard@example.net', '39769 Keith Cliff
-Fryechester, IN 02391');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Peter Wilson', '(893)922-6904', 'espinozamadison@example.net', '458 Curry Manor Apt. 239
-East Maryport, AL 20956');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1021, 'method', 'Anything trade wind teach.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1021, 18,55,95,'2025-10-06') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Stewart, Hayes and Freeman', '351.383.6984x', 'moorebrooke@example.com', '71224 Harris Squares
-West Josephton, PA 88849');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Singleton', '295-722-3378', 'matthewpugh@example.org', '7577 Hanson Camp Apt. 737
-Reynoldsfurt, VI 05836');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1022, 'mission', 'Ground decision not affect charge.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1022, 78,81,99,'2025-07-19') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Foster LLC', '+1-316-651-95', 'mauriceescobar@example.com', '902 Sarah Parkways Apt. 867
-Lake Stephanie, TX 35577');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Maria Wells', '+1-504-447-27', 'brownhayley@example.net', 'PSC 2458, Box 7537
-APO AE 22607');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1023, 'firm', 'Response white meeting get news.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1023, 68,35,62,'2025-04-15') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Davis, Rogers and Mendoza', '631-806-5397', 'jwest@example.net', '979 Nicholas Motorway Suite 101
-Shanemouth, DE 61002');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Mary Cole', '+1-514-341-94', 'christopher56@example.net', '46378 Wood Gateway Apt. 528
-Alexanderfort, UT 98219');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1024, 'police', 'Move anyone worry.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1024, 27,79,96,'2025-07-23') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Johnson-Andrews', '+1-916-565-56', 'jennifer39@example.com', '752 Cardenas Plain
-Seanside, VA 18750');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('John Grimes', '(545)692-9744', 'qblair@example.org', '732 Walker Lock Suite 022
-New Davidport, MI 06220');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1025, 'live', 'Laugh consumer car he seat.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1025, 62,62,93,'2025-09-10') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Ortega, Hanson and Clements', '+1-435-454-83', 'yolanda15@example.com', '25671 French Alley
-Stacyside, OK 53063');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Gregory Obrien', '001-700-687-1', 'raymond70@example.org', '70806 Colin Crest
-North Jason, VA 90338');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1026, 'five', 'Party between owner long town computer detail.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1026, 82,66,91,'2025-03-06') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Robinson-Clayton', '(409)897-4456', 'paul57@example.net', 'USNS Hernandez
-FPO AE 22511');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kenneth Ingram', '(323)706-8745', 'davistiffany@example.net', '6407 Smith Alley Apt. 397
-East Sabrinastad, PW 01202');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1027, 'recent', 'Above follow manager effect well will also.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1027, 37,34,57,'2025-08-12') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Smith Inc', '6393594088', 'qrasmussen@example.net', '243 Wagner Rapids Apt. 316
-Donaldport, WI 74623');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Tiffany Dennis', '001-481-229-0', 'maureen21@example.org', '38072 Jackie Estate
-West Madison, PW 15376');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1028, 'however', 'Worker simple seven trial.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1028, 94,64,87,'2025-02-23') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Merritt PLC', '296-861-4397x', 'paul48@example.org', '5306 Kyle Meadow Suite 397
-West Mariahaven, SC 69879');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Samantha Morris', '936.861.8876', 'hailey50@example.net', 'PSC 3922, Box 4505
-APO AE 31429');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1029, 'case', 'Place race tend story throughout employee range.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1029, 75,62,84,'2025-05-31') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Morgan, Lynch and Burnett', '469.505.5218x', 'patricia70@example.net', '16595 Allen Tunnel Suite 328
-Glovermouth, OK 31943');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Paula Ruiz', '(956)273-6160', 'andrew08@example.org', '1319 Sean Groves Suite 374
-Williamsshire, OK 07576');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1030, 'say', 'Professor Republican could compare your peace bar.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1030, 13,69,79,'2025-07-13') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Alvarado, Long and Campbell', '+1-819-902-64', 'kristine83@example.org', '9286 Jennifer Route Suite 096
-East Amyberg, AL 93504');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('William Rogers', '(453)793-6297', 'uwhite@example.net', '469 Danielle Plaza
-North Stephanie, SD 21169');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1031, 'model', 'Mr skin deal blue season culture cup science.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1031, 71,55,70,'2025-08-22') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Castro-Nicholson', '(466)763-7420', 'carol83@example.net', '508 Bradley Ridges Apt. 052
-Goodville, MO 72399');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Shannon Sweeney', '913-983-4826', 'rodriguezjessica@example.com', '8531 Ballard Forks Suite 736
-North Justinview, HI 16155');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1032, 'music', 'Central catch face thousand.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1032, 77,52,83,'2025-07-24') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Dunlap, Barber and Santiago', '001-840-464-6', 'justingreen@example.com', '850 Young Place Suite 664
-Jasonmouth, AL 29374');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Mark Baker', '663.910.5104x', 'jessicastone@example.org', '9026 Powell Islands
-Villegasbury, SC 79273');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1033, 'everybody', 'Pick idea always yard interview future right.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1033, 75,74,92,'2025-06-03') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Brewer, Goodwin and Atkins', '5762441432', 'roger79@example.org', '8372 Johnson Pines Apt. 612
-Ryanbury, NV 68104');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Patricia Burke', '+1-478-253-45', 'biancazavala@example.org', '0232 Davis Trail Apt. 651
-South Benjaminport, ID 05985');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1034, 'floor', 'Decision clearly difficult evidence discover size travel total.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1034, 80,39,60,'2025-01-17') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Jones-Joseph', '+1-791-471-30', 'guy91@example.com', '4268 Skinner Locks
-South Tiffanyfort, PA 91646');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Christopher Garcia', '(647)851-5265', 'seananderson@example.org', '4911 Morales Crescent Suite 857
-Gravesbury, KY 33925');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1035, 'what', 'Dark in arrive deal good take.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1035, 26,40,61,'2025-10-30') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Ferguson, Young and Booth', '(318)693-9987', 'karenflores@example.com', '150 Katherine Burg Apt. 822
-Fowlerport, MT 67524');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Elaine Cruz', '001-514-395-5', 'kaylee77@example.net', '7139 Davis Estates Apt. 896
-South Derrick, OH 93291');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1036, 'also', 'Imagine discussion ago.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1036, 67,85,95,'2025-04-17') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Williams, Howell and Fritz', '+1-797-701-51', 'bruce24@example.net', '000 Bruce Motorway Suite 246
-East Antonio, WY 03365');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Ann Robinson', '520.310.3166', 'brittanyhansen@example.com', '7495 Mark Orchard Apt. 321
-North Jason, MI 90474');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1037, 'plan', 'Itself animal develop into enough before life.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1037, 90,51,69,'2025-04-06') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Manning, Peterson and Poole', '+1-770-527-37', 'wilsonmichael@example.net', '4777 Shaw Ramp
-East Mark, MP 63282');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Ricardo Griffin', '6689256525', 'davidthompson@example.com', '00742 Martin Turnpike
-East Randallland, NE 45615');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1038, 'speak', 'Most model wonder real financial ahead.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1038, 47,33,72,'2025-07-28') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wilson, Hill and Stark', '001-972-535-7', 'christopher17@example.net', '2278 Carla Squares Suite 124
-Lake Gary, WV 17737');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Dwayne Allen', '(636)538-5186', 'rachelterrell@example.com', '20806 Knight Field Apt. 571
-Kirkburgh, IN 25278');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1039, 'pretty', 'Thought public piece vote.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1039, 69,38,62,'2025-01-22') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wu-Kramer', '372.323.6389', 'spierce@example.net', '710 Burke Parkway Suite 954
-Lake Tamara, CO 29549');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Paul Wilson', '(716)622-2809', 'william62@example.org', '6295 Rachel Mills
-Patriciamouth, TX 81534');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1040, 'century', 'Guess prevent support have bank.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1040, 50,45,69,'2025-02-19') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wolf Ltd', '216.839.1269x', 'rjohnson@example.org', '5004 Baker Glens
-North Brianville, TX 14957');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Leah Smith', '780-399-4425x', 'rebeccafox@example.com', '32361 Tom Spurs
-South Jennifer, IN 26563');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1041, 'explain', 'Traditional cover can appear else.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1041, 69,26,57,'2025-02-25') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Delacruz, Henry and Griffin', '908.517.4437x', 'uhenderson@example.org', '998 Barry Shore Suite 118
-Lake Edwardbury, MP 92360');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Emily Long', '001-480-817-0', 'raymond84@example.org', 'Unit 5382 Box 4709
-DPO AE 23762');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1042, 'compare', 'Candidate must present give.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1042, 49,77,100,'2025-05-20') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Lara-Collier', '+1-672-367-54', 'rpatterson@example.net', '224 James Keys Apt. 809
-West Alexanderburgh, TX 42865');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Samuel Henry', '988-264-0340x', 'imathews@example.com', '07217 Suarez Flat Suite 952
-Caitlynland, IN 23215');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1043, 'staff', 'Drop health stand avoid window letter.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1043, 24,25,59,'2025-12-19') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wade Ltd', '830.607.4112x', 'bryantkimberly@example.com', '3696 Sandra Square Apt. 789
-New Dakotaview, TN 47357');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kevin Smith', '584-603-7141', 'william26@example.org', '583 Christopher Prairie Suite 881
-Lake Brian, CT 82729');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1044, 'theory', 'Explain catch executive.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1044, 12,32,50,'2025-05-11') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wilkins, Perez and Fisher', '931.727.0165x', 'johnreynolds@example.org', '2538 Cook Estates Suite 040
-West Melissastad, KY 06804');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Emily Patel', '831.755.2317', 'denise47@example.com', '190 Kristin Plaza
-Martinton, PR 90821');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1045, 'benefit', 'Present specific have body.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1045, 43,34,60,'2025-03-05') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Bradley, Jennings and Beard', '+1-460-737-75', 'esparzachristopher@example.com', '2724 Dixon Estates
-Leemouth, GA 33167');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kimberly Johnson', '523-896-6608x', 'denisebird@example.com', '9697 Terri Alley Suite 064
-North Meganview, OH 73712');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1046, 'edge', 'Hundred try top baby fill care.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1046, 10,49,66,'2025-06-09') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Murphy-Hayes', '001-621-616-4', 'johnsonjesus@example.com', 'Unit 9298 Box 3899
-DPO AP 48712');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Christopher Lee', '912.622.7802', 'millertimothy@example.com', '782 Smith Wall
-Brittanyburgh, OH 17431');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1047, 'improve', 'Easy itself risk something.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1047, 14,24,53,'2025-03-11') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Stewart Inc', '001-943-679-4', 'carrollrichard@example.org', '23092 Maria Islands Apt. 557
-East Kristinafurt, NC 56808');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Edward Singleton', '(532)526-5478', 'xwolf@example.org', '25214 Danielle Court Apt. 540
-Bautistashire, CA 30981');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1048, 'material', 'None consumer budget spring political.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1048, 50,39,76,'2025-02-28') 
-INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('George LLC', '(218)679-0127', 'tylerboyer@example.net', '054 Ashley Creek
-New Veronicaport, NM 84903');
-INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Robert Harper', '590-750-6324x', 'ramosvictor@example.org', '9842 Bell Expressway
-Johnsonshire, MD 49405');
-INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1049, 'market', 'Door hand government debate.', 'unit');
-INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1049, 97,64,99,'2025-06-22') 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Sandoval Inc', '(668)693-3883', 'falexander@example.org', 'Unit 8062 Box 9263 DPO AA 71455');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Shane Hill', '925-997-9164', 'kathryn37@example.org', '7682 Ward Walk Suite 909 New Rodneyburgh, MI 88519');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1000, 'us', 'Service tell poor side join late crime stop.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1000, 23,35,54,'2025-05-27'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Miranda Group', '(874)575-9873', 'bradleyshields@example.net', '6899 Knight Square Suite 084 Stevenstad, LA 49686');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Patricia Stephens', '414.561.9270', 'howardgloria@example.com', '559 Alex Crescent Apt. 053 Port Mark, WY 94183');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1001, 'who', 'Child middle industry maintain watch coach attack.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1001, 13,36,61,'2025-12-16'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Goodman PLC', '+1-265-344-43', 'deborah58@example.net', '89092 Cohen Overpass Emilyland, MS 05446');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Adams', '001-264-422-6', 'tlopez@example.net', '38623 Derek Square West Colleenberg, MH 98437');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1002, 'former', 'Song look product interest.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1002, 48,46,76,'2025-11-10'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wade, Garcia and Ellis', '763.839.7476x', 'danny14@example.com', '5335 Carney Extensions Apt. 895 North Michael, NV 23087');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Robert Pratt', '(763)793-3765', 'katrina91@example.org', '48401 Luna Junctions Suite 057 Port Austin, WY 60898');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1003, 'decide', 'Hold commercial beautiful road four improve.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1003, 68,45,67,'2025-06-13'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Alvarado, Turner and Kim', '(469)645-5516', 'terri26@example.org', '9091 Brian Terrace Apt. 719 New Matthew, IA 02098');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Brian Wood', '483-753-2895', 'hahnkyle@example.com', '204 Lisa Plain Lake Glendaton, TN 17878');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1004, 'policy', 'Become soldier stock civil coach.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1004, 38,40,74,'2025-08-22'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Stone Inc', '8002834960', 'lrivera@example.org', 'PSC 4727, Box 9616 APO AE 79861');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jessica Taylor', '(618)653-9095', 'donnajones@example.net', '691 Schmidt Village Salasland, VI 03505');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1005, 'your', 'Box next relate lot.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1005, 90,39,55,'2025-04-13'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Johnson Group', '3554204126', 'bryansullivan@example.org', 'USNS Griffin FPO AP 20027');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Paul Dennis', '322-465-7750', 'hicksholly@example.com', 'PSC 9545, Box 7124 APO AP 81679');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1006, 'truth', 'Tv media employee effect another.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1006, 100,60,94,'2025-12-10'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wilson and Sons', '001-844-840-4', 'washingtonrichard@example.com', 'USS Buckley FPO AA 95568');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Melissa Estrada', '001-610-627-3', 'espinozadavid@example.net', '391 Tamara Overpass Apt. 200 North Juanton, CO 10728');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1007, 'situation', 'Trade indicate these could sport quickly.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1007, 31,36,72,'2025-08-11'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Miller-Simmons', '215-316-7730', 'herrerajessica@example.com', '5490 Hunter Isle Gordonton, MO 48670');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Christopher Harvey', '931-584-1424', 'dadams@example.net', '2404 Tran Neck Suite 345 Sweeneyhaven, SC 19440');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1008, 'particular', 'Box lose maintain break.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1008, 38,38,67,'2025-05-04'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Rojas, Simpson and Christian', '(432)982-5977', 'adamhayes@example.org', '56634 Gregory Forest North Cassidyberg, DC 90050');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Thomas Clark', '445.293.2764', 'tara30@example.org', '5450 Kelly Mills East Chelseamouth, AL 23813');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1009, 'actually', 'Sell pressure summer parent.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1009, 82,49,80,'2025-07-29'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Campos and Sons', '528.360.1236x', 'udavidson@example.net', '20594 Cindy Fords Suite 493 Port Debramouth, WY 42044');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Thomas Owens', '988-912-9403x', 'richardschristopher@example.org', '976 Amanda Mountains Apt. 326 South Michaelport, GU 76939');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1010, 'other', 'Environmental send executive find.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1010, 62,53,65,'2025-01-04'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Smith, Torres and Marsh', '+1-421-284-61', 'brandon81@example.net', '715 Green Squares Apt. 962 Simmonsborough, MP 73319');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Elizabeth Hampton', '001-361-978-8', 'qbyrd@example.com', 'PSC 6181, Box 2057 APO AE 25009');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1011, 'modern', 'Avoid free seem product capital machine among light.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1011, 26,60,72,'2025-01-15'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Hawkins-Davenport', '468.739.3451x', 'logan50@example.org', '283 Veronica Trafficway Aliciafort, ND 18858');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Linda Hale', '(909)651-7608', 'rebecca99@example.net', '7756 Church Port Apt. 897 East Travis, IA 05498');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1012, 'money', 'Key week word shake decade some.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1012, 100,51,67,'2025-08-10'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Lopez Inc', '965.490.6570x', 'christopher05@example.com', '408 Jimenez Point Suite 172 Marialand, WA 30209');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Melissa Davis', '9096089928', 'strongtimothy@example.net', '604 Joseph Parks Apt. 611 Joshuachester, AK 38551');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1013, 'card', 'End appear realize focus interest traditional join.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1013, 94,77,91,'2025-03-07'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Smith-Gonzales', '+1-678-537-64', 'rodriguezjoshua@example.org', '391 Thomas Orchard South Joshuaton, GU 99219');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Ethan Morris', '2674786859', 'roy73@example.net', '990 Golden Bypass Suite 666 East Laura, TX 38845');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1014, 'word', 'Resource where reduce raise we more at.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1014, 27,35,62,'2025-12-04'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Thomas-Hart', '2368694643', 'lisagraves@example.net', '315 Johnson Light Lake Bruceburgh, PW 41772');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jane Harris', '001-214-445-5', 'esnyder@example.net', '450 Rice Isle Port Katie, PR 97123');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1015, 'parent', 'After condition your finish law particular every.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1015, 96,46,71,'2025-11-26'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Steele, Villa and Richardson', '+1-678-766-76', 'ycharles@example.org', '75471 Peters Trail Suite 978 South Blakestad, UT 98432');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kimberly Hammond', '(905)431-6929', 'eddie96@example.org', 'USNS Carroll FPO AP 74173');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1016, 'trade', 'So manager five tree training baby.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1016, 38,56,90,'2025-12-11'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Sanders, Brooks and Fischer', '387-975-2339x', 'fbrown@example.org', '860 Navarro Inlet Apt. 340 West Larrychester, OR 79708');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Brenda Stewart', '001-660-294-1', 'heidi66@example.org', '8651 Nicholas Cape West Tina, MD 77741');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1017, 'ever', 'Hard choice cold fly by economic style.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1017, 43,54,83,'2025-12-29'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Newton-Harrison', '877-222-3039x', 'colecompton@example.net', '709 Sarah Branch Apt. 785 Alyssaside, NH 93138');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Yu', '+1-629-759-88', 'wmason@example.net', '343 Bean Mills Newmantown, MN 59251');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1018, 'such', 'Across get democratic tree color center.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1018, 31,63,74,'2025-03-24'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Young-Mcdonald', '554-592-4098x', 'contreraschristopher@example.org', '616 David Radial East Natalie, FL 04577');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Scott Burns', '871-522-3230', 'penakelly@example.org', '704 Fuller Cove Apt. 635 West Benjamin, WA 52041');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1019, 'for', 'Voice research Mrs manager executive determine mission.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1019, 74,60,79,'2025-07-12'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Graham Ltd', '+1-208-762-74', 'josephatkinson@example.com', '0716 Lauren Landing Suite 711 Hartmanfort, LA 79762');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Nicholas Farmer', '535-818-3156', 'jennifer26@example.org', '648 Alvarado Bridge Michaelfort, KS 12187');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1020, 'walk', 'Summer collection magazine law term occur red sense.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1020, 40,60,81,'2025-12-08'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wells, Mcdonald and Berger', '6138499810', 'jeremygray@example.net', '28590 Leonard Light Apt. 703 Moorebury, IN 03365');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Sarah Phillips', '358.430.3184x', 'susan20@example.com', '293 Jared Falls Lewisburgh, ID 52814');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1021, 'meeting', 'Choose develop space safe move join theory couple.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1021, 47,65,81,'2025-09-28'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Murray PLC', '747-256-3888x', 'phillipsvanessa@example.net', 'PSC 4006, Box 9607 APO AP 29935');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jennifer Dawson', '001-704-257-1', 'heathersmith@example.net', '956 Ariel Ridges North Jeremyshire, FM 16850');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1022, 'kid', 'Population idea choice security common check myself.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1022, 87,62,99,'2025-10-27'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Cruz-Bradley', '8399575712', 'torresterry@example.org', '7475 Rebecca Flat Apt. 364 Michelletown, ID 65995');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Yvonne Wilson', '(951)440-4269', 'lee15@example.org', '316 Glenn Meadow Lisamouth, OK 55057');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1023, 'adult', 'Nature each describe who course strategy.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1023, 23,26,65,'2025-06-07'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Dorsey, Williamson and Smith', '745.907.3747', 'richkaren@example.org', '936 Mitchell Junctions Port William, MN 96380');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Summer Riley', '+1-419-239-01', 'zfox@example.org', '8059 Jennifer Trail Suite 366 New Margaret, PW 06417');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1024, 'magazine', 'Still never prepare sense idea what.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1024, 76,30,66,'2025-11-11'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Ryan Ltd', '866-316-8716', 'hannahtaylor@example.org', '76304 Roberto Island Apt. 440 Garretthaven, OH 35491');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('David Jones', '845-609-4118x', 'courtney15@example.net', '38343 William Center Suite 364 Coryfort, MP 56090');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1025, 'skin', 'Up be off.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1025, 38,70,100,'2025-02-12'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Pollard-Singh', '622-419-4075x', 'joshuagarcia@example.org', '52664 James Fork Suite 709 Summersmouth, KS 21606');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Patrick Miller', '001-345-290-4', 'tina82@example.org', '0215 Robinson Walk Suite 253 West Daltonton, MH 68705');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1026, 'side', 'Heart guy adult safe force our recognize.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1026, 59,67,97,'2025-12-13'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Cook-Jones', '486.594.3850x', 'melissa15@example.net', '9797 Mary Ramp Apt. 040 New Josephfurt, FL 03281');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Alicia Mercado', '4269862521', 'sarah69@example.net', '85949 Antonio Neck Suite 512 Johnsonhaven, IL 27686');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1027, 'phone', 'House glass leg news tend.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1027, 45,51,81,'2025-01-09'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Evans, Vasquez and Scott', '(906)245-1971', 'jessica36@example.org', '84305 Randy Mission Lake Amber, WI 25326');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jennifer Pearson', '001-237-371-3', 'danielcolon@example.net', '3592 Jorge Road Stacymouth, AS 05278');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1028, 'head', 'Try hair member business off watch.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1028, 78,26,62,'2025-06-27'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Crosby LLC', '849-918-7526', 'johnsonbrad@example.net', '89915 Hardy Plaza Port Patriciabury, MN 30916');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Michael Patrick', '+1-608-933-00', 'nathanjohnson@example.org', '391 Melton Union Melissaborough, TX 87697');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1029, 'town', 'Rate method control manage mention charge able message.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1029, 46,23,59,'2025-02-07'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Andrade-Lee', '(930)653-8634', 'lholland@example.net', '343 Kane Courts Suite 497 Lake Seanmouth, OK 15065');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Cathy Thompson', '(330)764-9998', 'jenniferholmes@example.org', '681 Lauren Locks Port Elizabeth, VI 03282');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1030, 'space', 'Movement teach read social entire.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1030, 84,35,68,'2025-01-08'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Jones Group', '684.948.6011', 'kyoung@example.net', '174 Lynn Harbors Suite 334 Codymouth, AR 76335');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Chad Pitts', '274.649.3618', 'zoneal@example.net', '2489 Nicholas Expressway New Kellyfort, MS 49958');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1031, 'might', 'Remain pull call.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1031, 94,52,74,'2025-08-20'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Fitzgerald-Griffith', '880.441.1792', 'robert25@example.net', '2076 Galloway Lakes Suite 202 West James, AZ 67389');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jessica Holt', '001-594-846-2', 'antoniojohns@example.net', 'Unit 0224 Box 7814 DPO AP 56828');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1032, 'consider', 'Call yes dream spend hundred.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1032, 78,59,77,'2025-08-31'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Reed Inc', '+1-567-415-25', 'fosterpatrick@example.net', '398 Elizabeth Radial West Patrick, TX 77749');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jacqueline Jones', '(587)750-1275', 'daniellenorris@example.com', 'Unit 1012 Box 0419 DPO AP 83826');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1033, 'care', 'Expect must common ten.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1033, 69,67,87,'2025-07-10'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Barnett-Jones', '313-293-4981x', 'vwebb@example.org', '65857 Kristen Circles Wallacemouth, AL 15435');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Thomas Dillon', '878.489.8727', 'chenrandall@example.net', '41578 Dawn Drive Apt. 092 Ryantown, GU 04586');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1034, 'impact', 'First attention pass probably thing different dog.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1034, 79,37,55,'2025-03-22'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Mcbride-Gardner', '564-366-0909x', 'susan06@example.com', '073 Troy Camp Apt. 197 Fergusonshire, UT 97117');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Adam Lee', '380.645.1001x', 'williamvelasquez@example.org', '535 Emily Street New Pamelaville, CA 17923');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1035, 'expect', 'Drop very matter new any evidence voice.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1035, 60,33,53,'2025-10-08'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Flowers-Williams', '+1-717-815-70', 'jefferyrosales@example.net', '26578 Mendoza Port New Julie, FM 72086');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Rhonda Cochran', '(645)976-8457', 'bhurley@example.net', '054 Samuel Mission Kingview, AS 02146');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1036, 'foreign', 'Consumer parent letter senior case project people.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1036, 15,48,69,'2025-09-28'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Dorsey-Jackson', '001-669-851-4', 'edward06@example.net', '0167 Delgado Valleys New Arthur, WY 42026');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Jeremy Howell', '444-536-5239', 'browngary@example.net', '30890 Zachary Estate Ginaborough, CA 61717');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1037, 'street', 'Far middle significant wish student police.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1037, 66,59,89,'2025-08-13'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Collins, Miller and Richard', '+1-659-726-31', 'michelleoliver@example.org', '177 Maria Lodge Harttown, NV 27124');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Aaron Thomas', '+1-276-583-72', 'jbrown@example.org', '09464 Joshua Extensions Hansonhaven, MI 01069');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1038, 'along', 'Change operation staff.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1038, 41,43,82,'2025-06-24'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Barber, Conway and Garcia', '(967)797-3054', 'ybarnes@example.net', '58627 Ronald Skyway Suite 377 South Rachel, FL 08638');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Andrea Larson', '817.379.0959x', 'sandrafrancis@example.org', '75723 Stewart Estate East Davidbury, RI 29944');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1039, 'however', 'Light event unit.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1039, 86,50,83,'2025-03-10'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Mckinney-Clark', '339-648-0049x', 'bjohnson@example.net', 'PSC 4099, Box 1400 APO AP 03528');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Marcus Sanders', '5844327489', 'adriana62@example.com', '2900 Mitchell Forge Sanchezbury, KY 95830');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1040, 'cut', 'Executive lawyer per become skin.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1040, 85,68,95,'2025-11-28'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Pacheco-Graves', '935.485.0238x', 'timothydavis@example.com', '8273 Benjamin Shore Apt. 485 South Kristin, PA 08389');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Matthew Casey', '(211)233-9427', 'terrigreen@example.com', '2799 Arellano Forge Port Vanessa, IA 20114');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1041, 'loss', 'Real determine my surface would range.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1041, 33,48,85,'2025-04-14'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Allison-Simpson', '+1-553-415-46', 'aharris@example.net', '848 David Ridges Youngchester, VI 27175');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Ethan Sanchez', '331-381-5692', 'james15@example.net', '024 Mary Falls Kaylaton, PA 01614');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1042, 'reality', 'Prevent free nice north of door.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1042, 85,34,65,'2025-03-28'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Herman Group', '(385)632-2585', 'mcneilryan@example.org', '476 Katie Grove Suite 189 East Sandratown, NH 02852');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Aaron Morgan', '986.678.2468', 'vfisher@example.com', '13004 Andrew Place East Ericborough, VI 42806');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1043, 'loss', 'Especially thing between especially.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1043, 50,11,50,'2025-03-03'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Wood-Owens', '9995454489', 'sampsonstephanie@example.org', '579 Reid Glen Suite 619 Stephaniemouth, HI 68272');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Brandon Ramirez', '(610)616-0499', 'nolankevin@example.net', '8780 David Ramp North Jamesmouth, LA 09343');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1044, 'thus', 'Reason moment focus deal pretty every.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1044, 94,72,83,'2025-09-26'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Brown, Bryant and Mendoza', '001-253-407-8', 'wrightjeremy@example.com', '9657 Melissa Squares Suite 020 Lake Christopherview, AR 01015');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Spencer Banks', '9204268594', 'lpeterson@example.net', 'Unit 1847 Box 0196 DPO AA 32903');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1045, 'imagine', 'Later staff edge each Congress.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1045, 25,35,51,'2025-07-01'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Bell-Allen', '789.887.2651x', 'patriciamcconnell@example.net', '36157 Martin Lake Apt. 682 New Kevin, AS 76450');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Larry Villanueva', '664-910-5991x', 'sholder@example.org', '668 Branch Harbors Judychester, UT 78273');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1046, 'nation', 'Two ever mention federal group.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1046, 42,40,68,'2025-02-16'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Miles Inc', '9948916765', 'carl62@example.net', '374 Joshua Mission Suite 304 Jeffreyland, CO 91743');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Levi Gonzalez', '200.969.6630', 'sherylmcknight@example.com', '732 Brendan Shoal Suite 440 Wangmouth, SC 51073');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1047, 'finish', 'Outside animal pattern billion dream.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1047, 99,51,64,'2025-03-25'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Sweeney, Jones and Hansen', '(834)227-5846', 'zcombs@example.org', '7341 Dean Mountains Aliciaborough, MO 81101');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kenneth Joseph', '001-238-636-6', 'sarahjames@example.org', '18215 Rose Way Suite 681 Michaeltown, AL 24959');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1048, 'score', 'Situation exist thought little man firm physical.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1048, 100,51,71,'2025-11-07'); 
+INSERT INTO Finance.vendors (vendor_name, contact_info, email, address) VALUES ('Thompson LLC', '001-667-599-0', 'penaroy@example.com', '38570 Tyler Junction Apt. 593 Birdfort, NH 10881');
+INSERT INTO Finance.customers (customer_name, contact_info, email, address) VALUES ('Kevin Snyder', '3163102420', 'allen88@example.org', '3047 Taylor Burgs Trevorstad, TN 19945');
+INSERT INTO Finance.products (product_id, product_name, description, product_unit) VALUES (1049, 'perhaps', 'Ready month animal TV difference low main local.', 'unit');
+INSERT INTO Finance.operations (product_id, quantity, product_cost, product_price, purchase_date) VALUES (1049, 31,57,74,'2025-03-11'); 
+
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Default'));
 INSERT INTO Finance.clients(INFO) VALUES (jsonb_build_object('Name','Ezra'));
 INSERT INTO Finance.products (product_name, Description, product_unit)
