@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS Finance.journals (
     DROP TABLE IF EXISTS Finance.vendors CASCADE;
     CREATE TABLE IF NOT EXISTS Finance.vendors (
         vendor_id SERIAL PRIMARY KEY,
-        supplier_name VARCHAR(255) NOT NULL,
+        vendor_name VARCHAR(255) NOT NULL,
         contact_info VARCHAR(50) NOT NULL,
         email VARCHAR(255) NOT NULL,
         address VARCHAR(100) NOT NULL
