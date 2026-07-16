@@ -10,30 +10,30 @@ BEGIN;
 -- 1. DOMAIN TYPES (Reusable Validation)
 -- ============================================
 
--- Email domain
-DROP DOMAIN IF EXISTS email_type CASCADE;
-CREATE DOMAIN email_type AS VARCHAR(255)
-    CONSTRAINT valid_email CHECK (VALUE ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$');
+-- -- Email domain
+-- DROP DOMAIN IF EXISTS email_type CASCADE;
+-- CREATE DOMAIN email_type AS VARCHAR(255)
+--     CONSTRAINT valid_email CHECK (VALUE ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$');
 
--- Phone domain
-DROP DOMAIN IF EXISTS phone_type CASCADE;
-CREATE DOMAIN phone_type AS VARCHAR(20)
-    CONSTRAINT valid_phone CHECK (VALUE ~ '^\+?1?\d{9,15}$' OR VALUE = '');
+-- -- Phone domain
+-- DROP DOMAIN IF EXISTS phone_type CASCADE;
+-- CREATE DOMAIN phone_type AS VARCHAR(20)
+--     CONSTRAINT valid_phone CHECK (VALUE ~ '^\+?1?\d{9,15}$' OR VALUE = '');
 
--- Amount domain (non-negative)
-DROP DOMAIN IF EXISTS amount_type CASCADE;
-CREATE DOMAIN amount_type AS DECIMAL(15,2)
-    CONSTRAINT positive_amount CHECK (VALUE >= 0);
+-- -- Amount domain (non-negative)
+-- DROP DOMAIN IF EXISTS amount_type CASCADE;
+-- CREATE DOMAIN amount_type AS DECIMAL(15,2)
+--     CONSTRAINT positive_amount CHECK (VALUE >= 0);
 
--- Quantity domain (positive integer)
-DROP DOMAIN IF EXISTS quantity_type CASCADE;
-CREATE DOMAIN quantity_type AS INT
-    CONSTRAINT positive_quantity CHECK (VALUE > 0);
+-- -- Quantity domain (positive integer)
+-- DROP DOMAIN IF EXISTS quantity_type CASCADE;
+-- CREATE DOMAIN quantity_type AS INT
+--     CONSTRAINT positive_quantity CHECK (VALUE > 0);
 
--- Account code domain
-DROP DOMAIN IF EXISTS account_code_type CASCADE;
-CREATE DOMAIN account_code_type AS INT
-    CONSTRAINT valid_account_code CHECK (VALUE > 0);
+-- -- Account code domain
+-- DROP DOMAIN IF EXISTS account_code_type CASCADE;
+-- CREATE DOMAIN account_code_type AS INT
+--     CONSTRAINT valid_account_code CHECK (VALUE > 0);
 
 -- ============================================
 -- 2. STRENGTHEN EXISTING TABLES
@@ -168,40 +168,62 @@ ALTER TABLE Finance.event_log
     ALTER COLUMN payload SET NOT NULL,
     ALTER COLUMN idempotency_key SET NOT NULL;
 
--- ============================================
--- 3. ADD PERFORMANCE INDEXES
--- ============================================
+    ALTER TABLE Finance.charts 
+    ADD CONSTRAINT charts_chk_type CHECK (Type IN ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense','Contra Revenue','Contra Asset','Contra Liability','Contra Equity','Contra Expense'));
 
--- Transactions indexes
-CREATE INDEX IF NOT EXISTS idx_transactions_client_id ON Finance.transactions(client_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON Finance.transactions(created_at);
-CREATE INDEX IF NOT EXISTS idx_transactions_idempotency ON Finance.transactions(idempotency_key);
+    ALTER TABLE Finance.inventory_audits 
+    ADD CONSTRAINT inventoryaudits_chk_actiontype CHECK (Action_type IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
 
--- Journals indexes
-CREATE INDEX IF NOT EXISTS idx_journals_date ON Finance.journals(date);
-CREATE INDEX IF NOT EXISTS idx_journals_transaction_id ON Finance.journals(transaction_id);
-CREATE INDEX IF NOT EXISTS idx_journals_chart_id ON Finance.journals(chart_id);
+    ALTER TABLE Finance.ap_ext 
+    ADD CONSTRAINT accountpayable_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
--- AR/AP indexes
-CREATE INDEX IF NOT EXISTS idx_ar_ext_due_date ON Finance.ar_ext(due_date);
-CREATE INDEX IF NOT EXISTS idx_ar_ext_status ON Finance.ar_ext(status);
-CREATE INDEX IF NOT EXISTS idx_ap_ext_due_date ON Finance.ap_ext(due_date);
-CREATE INDEX IF NOT EXISTS idx_ap_ext_status ON Finance.ap_ext(status);
+    ALTER TABLE Finance.ar_ext
+    ADD CONSTRAINT accountreceivables_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
--- Inventory indexes
-CREATE INDEX IF NOT EXISTS idx_inventory_audits_date ON Finance.inventory_audits(movement_date);
-CREATE INDEX IF NOT EXISTS idx_inventory_audits_product ON Finance.inventory_audits(product_id);
-CREATE INDEX IF NOT EXISTS idx_inventory_audits_warehouse ON Finance.inventory_audits(warehouse_id);
+    ALTER TABLE Finance.audit_logs 
+    ADD CONSTRAINT auditlogs_chk_status CHECK (Operation IN ('INSERT', 'UPDATE', 'DELETE'));
 
--- Audit indexes
-CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON Finance.audit_logs(log_time);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_table ON Finance.audit_logs(table_name);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON Finance.audit_logs(changed_by);
+    ALTER TABLE Finance.vendors
+    ADD CONSTRAINT chk_valid_email_supplier CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
--- Event log indexes
-CREATE INDEX IF NOT EXISTS idx_event_log_type ON Finance.event_log(event_type);
-CREATE INDEX IF NOT EXISTS idx_event_log_status ON Finance.event_log(status);
-CREATE INDEX IF NOT EXISTS idx_event_log_created ON Finance.event_log(created_at);
+    ALTER TABLE Finance.customers
+    ADD CONSTRAINT chk_valid_email_customers CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+
+
+-- -- ============================================
+-- -- 3. ADD PERFORMANCE INDEXES
+-- -- ============================================
+
+-- -- Transactions indexes
+-- CREATE INDEX IF NOT EXISTS idx_transactions_client_id ON Finance.transactions(client_id);
+-- CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON Finance.transactions(created_at);
+-- CREATE INDEX IF NOT EXISTS idx_transactions_idempotency ON Finance.transactions(idempotency_key);
+
+-- -- Journals indexes
+-- CREATE INDEX IF NOT EXISTS idx_journals_date ON Finance.journals(date);
+-- CREATE INDEX IF NOT EXISTS idx_journals_transaction_id ON Finance.journals(transaction_id);
+-- CREATE INDEX IF NOT EXISTS idx_journals_chart_id ON Finance.journals(chart_id);
+
+-- -- AR/AP indexes
+-- CREATE INDEX IF NOT EXISTS idx_ar_ext_due_date ON Finance.ar_ext(due_date);
+-- CREATE INDEX IF NOT EXISTS idx_ar_ext_status ON Finance.ar_ext(status);
+-- CREATE INDEX IF NOT EXISTS idx_ap_ext_due_date ON Finance.ap_ext(due_date);
+-- CREATE INDEX IF NOT EXISTS idx_ap_ext_status ON Finance.ap_ext(status);
+
+-- -- Inventory indexes
+-- CREATE INDEX IF NOT EXISTS idx_inventory_audits_date ON Finance.inventory_audits(movement_date);
+-- CREATE INDEX IF NOT EXISTS idx_inventory_audits_product ON Finance.inventory_audits(product_id);
+-- CREATE INDEX IF NOT EXISTS idx_inventory_audits_warehouse ON Finance.inventory_audits(warehouse_id);
+
+-- -- Audit indexes
+-- CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON Finance.audit_logs(log_time);
+-- CREATE INDEX IF NOT EXISTS idx_audit_logs_table ON Finance.audit_logs(table_name);
+-- CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON Finance.audit_logs(changed_by);
+
+-- -- Event log indexes
+-- CREATE INDEX IF NOT EXISTS idx_event_log_type ON Finance.event_log(event_type);
+-- CREATE INDEX IF NOT EXISTS idx_event_log_status ON Finance.event_log(status);
+-- CREATE INDEX IF NOT EXISTS idx_event_log_created ON Finance.event_log(created_at);
 
 COMMIT;
 
