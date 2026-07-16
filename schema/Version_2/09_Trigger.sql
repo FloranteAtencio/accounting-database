@@ -1,4 +1,4 @@
-
+BEGIN;
 -- ============================================
 -- Seperated Functions
 -- STEP 1. create function audit log
@@ -321,3 +321,5 @@ FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(template_account
 CREATE TRIGGER charts_changes
 AFTER INSERT OR UPDATE OR DELETE ON Finance.charts
 FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(chart_id);
+
+COMMIT;
