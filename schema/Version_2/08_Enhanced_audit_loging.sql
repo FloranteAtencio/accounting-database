@@ -106,6 +106,7 @@ CREATE INDEX idx_import_validation_field ON Finance.import_validation_log(field_
 -- ============================================
 
 -- Function to start an import session
+-- This is the very first function needed to call
 DROP FUNCTION IF EXISTS Finance.start_import_session(INT, VARCHAR, VARCHAR, VARCHAR) CASCADE;
 CREATE FUNCTION Finance.start_import_session(
     p_client_id INT,
@@ -126,6 +127,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to log an import record
+-- This is the function where you need to call after the after the process in the main schema table related.
 DROP FUNCTION IF EXISTS Finance.log_import_record(INT, INT, VARCHAR, JSONB, VARCHAR, TEXT, INT) CASCADE;
 CREATE FUNCTION Finance.log_import_record(
     p_session_id INT,
