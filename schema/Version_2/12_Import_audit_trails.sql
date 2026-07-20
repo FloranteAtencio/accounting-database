@@ -117,9 +117,8 @@ CREATE TABLE Finance.compliance_log (
     compliance_rule VARCHAR(255) NOT NULL,
     rule_description TEXT,
     check_type VARCHAR(50) NOT NULL CHECK (check_type IN (
-        'BALANCE_CHECK', 'AMOUNT_CHECK', 'DATE_CHECK', 
-        'DUPLICATE_CHECK', 'THRESHOLD_CHECK', 'RECONCILIATION_CHECK'
-    )),
+        'BALANCE_CHECK', 'AMOUNT_CHECK', 'DATE_CHECK', 'CLIENT_CHECK','CUSTOMER_CHECK','DUPLICATE_CHECK', 'THRESHOLD_CHECK', 'RECONCILIATION_CHECK'
+        )),
     status VARCHAR(20) NOT NULL CHECK (status IN ('PASS', 'FAIL', 'WARNING')),
     details TEXT,
     checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
