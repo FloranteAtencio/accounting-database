@@ -52,7 +52,7 @@ CREATE FUNCTION Staging.ar_import_data(
     p_amount DECIMAL(12,2)
 
 )
-RETURN INT AS $$
+RETURNS INT AS $$
     new_ar_staging_id INT;
 BEGIN
     INSERT INTO Staging.stg_ar_imports( 
