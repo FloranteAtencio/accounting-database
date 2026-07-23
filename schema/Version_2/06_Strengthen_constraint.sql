@@ -72,7 +72,7 @@ ALTER TABLE Finance.customers
 
 -- Vendors
 ALTER TABLE Finance.vendors
-    ALTER COLUMN supplier_name SET NOT NULL,
+    ALTER COLUMN vendor_name SET NOT NULL,
     ALTER COLUMN contact_info SET NOT NULL,
     ALTER COLUMN email SET NOT NULL,
     ALTER COLUMN address SET NOT NULL;
