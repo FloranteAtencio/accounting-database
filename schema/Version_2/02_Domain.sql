@@ -24,19 +24,19 @@ DROP DOMAIN IF EXISTS account_code_type CASCADE;
 CREATE DOMAIN account_code_type AS INT
     CONSTRAINT valid_account_code CHECK (VALUE > 0);
 
-DROP DOMAIN IF EXIST charts_typing CASCADE;
+DROP DOMAIN IF EXISTS charts_typing CASCADE;
 CREATE DOMAIN charts_typing AS VARCHAR(50)
     CONSTRAINT valid_charts_typing CHECK ( VALUE IN ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense','Contra Revenue','Contra Asset','Contra Liability','Contra Equity','Contra Expense'));
 
-DROP DOMAIN IF EXIST action_typing  CASCADE;
+DROP DOMAIN IF EXISTS action_typing  CASCADE;
 CREATE DOMAIN action_typing as  VARCHAR(50)
     CONSTRAINT valid_action_typing CHECK (VALUE IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
 
-DROP DOMAIN IF EXIST status_typing CASCADE;
+DROP DOMAIN IF EXISTS status_typing CASCADE;
 CREATE DOMAIN status_typing as VARCHAR(50)
     CONSTRAINT valid_status_typing CHECK (VALUE IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
-DROP DOMAIN IF EXIST audit_log_typing CASCADE;
+DROP DOMAIN IF EXISTS audit_log_typing CASCADE;
 CREATE DOMAIN audit_log_typing as VARCHAR(50)
     CONSTRAINT valid_audit_log_typing CHECK (VALUE IN ('INSERT', 'UPDATE', 'DELETE'));
 
