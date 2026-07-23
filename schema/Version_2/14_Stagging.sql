@@ -198,7 +198,7 @@ BEGIN
         WHERE a.staging_record_id = b.id 
         AND a.session_id = b.session_id
         AND b.validation_status = ''VALID''
-        $fmt$,
+        $fmt$
         , table_related);
 
 EXCEPTION
