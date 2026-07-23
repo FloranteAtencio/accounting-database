@@ -266,6 +266,7 @@ AS $$
 DECLARE
     r RECORD;
     new_previous_state VARCHAR(50);
+    new_session_id INT;
 BEGIN
 
     SELECT session_id INTO new_session_id
