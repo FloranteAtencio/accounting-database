@@ -238,11 +238,11 @@ FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(transaction_id);
 -- 2
 CREATE TRIGGER audit_inventory
 AFTER INSERT OR UPDATE OR DELETE ON Finance.inventory_audits
-FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(management_id)
+FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(management_id);
 -- 3
 CREATE TRIGGER audit_journals
 AFTER INSERT OR UPDATE OR DELETE ON Finance.journals
-FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(journal_id)
+FOR EACH ROW EXECUTE FUNCTION Finance.fn_extended_audit_trigger(journal_id);
 -- 4
 CREATE TRIGGER audit_ap
 AFTER INSERT OR UPDATE OR DELETE ON Finance.account_payables
