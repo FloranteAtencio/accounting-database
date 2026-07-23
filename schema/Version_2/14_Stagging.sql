@@ -53,6 +53,7 @@ CREATE FUNCTION Staging.ar_import_data(
 
 )
 RETURNS INT AS $$
+DECLARE
     new_ar_staging_id INT;
 BEGIN
     INSERT INTO Staging.stg_ar_imports( 
