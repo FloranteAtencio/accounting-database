@@ -235,7 +235,7 @@ BEGIN
     END IF;
 
     IF p_approve_state NOT IN ('APPROVE_L1','APPROVE_L2','APPROVE_L3') THEN
-        RAISE EXCEPTION 'Please Check approve state: APPROVE_L1, APPROVE_L2, APPROVE_L3'
+        RAISE EXCEPTION 'Please Check approve state: APPROVE_L1, APPROVE_L2, APPROVE_L3';
     END IF;
 
     PERFORM 1 FROM Finance.import_sessions a where a.session_id = p_session_id;
