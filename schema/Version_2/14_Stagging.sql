@@ -1,3 +1,12 @@
+-- =======================================================================
+-- 14. STAGING SHCEMA PART 
+-- this stagging schema is for validation, sanitation and approval matters!
+-- ====================================================================
+
+SELECT '14. StagGing schema Start' as  Status;
+
+BEGIN;
+
 CREATE SCHEMA Staging;
 
 -- 1. STAGING TABLE
@@ -71,7 +80,7 @@ BEGIN
 
     INSERT INTO Staging.import_workflows
     (session_id, staging_record_id, staging_table,previous_state, new_state, change_by)
-    VALUES(p_session_id, new_ar_staging_id, 'Staging.ar_import_data', 'DRAFT', NULL, current_user)
+    VALUES(p_session_id, new_ar_staging_id, 'Staging.ar_import_data', 'DRAFT', NULL, current_user);
 
     RETURN new_ar_staging_id;
 END; 
@@ -300,3 +309,7 @@ BEGIN
 
 END;
 $$;
+
+COMMIT;
+
+SELECT '14. Stagging schema COMPLETE!' as  Status;

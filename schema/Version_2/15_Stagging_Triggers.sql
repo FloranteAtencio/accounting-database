@@ -1,6 +1,11 @@
 -- ============================================
 -- 5. AUTO LINEAGE TRIGGER
 -- ============================================
+
+SELECT '15. STAGGING TRIGGERS START' as  Status;
+
+BEGIN;
+
 CREATE OR REPLACE FUNCTION Finance.auto_lineage_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -32,3 +37,6 @@ DROP TRIGGER IF EXISTS trg_auto_lineage ON Staging.stg_ar_imports;
 CREATE TRIGGER trg_auto_lineage
 AFTER INSERT ON Staging.stg_ar_imports
 FOR EACH ROW EXECUTE FUNCTION Finance.auto_lineage_trigger();
+COMMIT;
+
+SELECT '15. STAGGING TRIGGERS COMPLETE' as  Status;
