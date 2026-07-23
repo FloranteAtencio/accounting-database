@@ -107,7 +107,6 @@ $$;
 -- Seperated Functions
 -- STEP 3. Create function trigger
 -- ============================================
-
 CREATE OR REPLACE FUNCTION Finance.fn_extended_audit_trigger()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -119,52 +118,47 @@ DECLARE
     v_record_pk INT;
     v_audit_id INT;
     v_changed_by TEXT;
+    
+    -- FIX: Declare v_field as TEXT, but use a RECORD for the loop if needed, 
+    -- OR simply iterate correctly. 
+    -- The error often happens if the loop variable type doesn't match the SELECT output perfectly.
+    -- Let's use a RECORD to be safe, then extract the value.
+    v_row RECORD; 
+    v_field_name TEXT;
+    v_old_value TEXT;
+    v_new_value TEXT;
 BEGIN
-
     v_changed_by := CURRENT_USER;
     v_pk_column := TG_ARGV[0];
 
+    -- Handle Primary Key extraction
     IF TG_OP = 'DELETE' THEN
-        v_client_id := COALESCE(OLD.client_id,NULL);
+        v_client_id := COALESCE(OLD.client_id, NULL);
         v_record_text := OLD::TEXT;
 
-        EXECUTE format(
-            'SELECT ($1).%I',
-            v_pk_column
-        )
+        EXECUTE format('SELECT ($1).%I', v_pk_column)
         INTO v_record_pk
         USING OLD;
 
     ELSE
-        v_client_id := COALESCE(NEW.client_id,NULL);
+        v_client_id := COALESCE(NEW.client_id, NULL);
         v_record_text := NEW::TEXT;
 
-        EXECUTE format(
-            'SELECT ($1).%I',
-            v_pk_column
-        )
+        EXECUTE format('SELECT ($1).%I', v_pk_column)
         INTO v_record_pk
         USING NEW;
     END IF;
 
-    --------------------------------------------------
-    -- Create blockchain audit record
-    --------------------------------------------------
+    -- Create audit header
+    v_audit_id := Finance.create_audit_log(
+        TG_TABLE_NAME,
+        v_record_text,
+        TG_OP,
+        v_changed_by
+    );
 
-    v_audit_id :=
-        Finance.create_audit_log(
-            TG_TABLE_NAME,
-            v_record_text,
-            TG_OP,
-            v_changed_by
-        );
-
-    --------------------------------------------------
-    -- Store row snapshot
-    --------------------------------------------------
-
+    -- Handle DELETE
     IF TG_OP = 'DELETE' THEN
-
         PERFORM Finance.write_extended_audit(
             v_audit_id,
             v_client_id,
@@ -176,13 +170,11 @@ BEGIN
             NULL,
             v_changed_by
         );
-
         RETURN OLD;
-
     END IF;
 
+    -- Handle INSERT
     IF TG_OP = 'INSERT' THEN
-
         PERFORM Finance.write_extended_audit(
             v_audit_id,
             v_client_id,
@@ -194,53 +186,51 @@ BEGIN
             row_to_json(NEW)::TEXT,
             v_changed_by
         );
-
         RETURN NEW;
-
     END IF;
 
+    -- Handle UPDATE
     IF TG_OP = 'UPDATE' THEN
+        -- FIX: Use a RECORD variable for the loop
+        FOR v_row IN
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = TG_TABLE_SCHEMA
+            AND table_name = TG_TABLE_NAME
+        LOOP
+            v_field_name := v_row.column_name;
 
-    FOR v_field IN
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_schema = TG_TABLE_SCHEMA
-          AND table_name = TG_TABLE_NAME
-    LOOP
+            -- Skip audit for internal columns if needed (e.g., updated_at, changed_by)
+            -- IF v_field_name IN ('updated_at', 'changed_by') THEN CONTINUE; END IF;
 
-        EXECUTE format(
-            'SELECT ($1).%I::TEXT, ($2).%I::TEXT',
-            v_field,
-            v_field
-        )
-        INTO v_old_value, v_new_value
-        USING OLD, NEW;
+            EXECUTE format(
+                'SELECT ($1).%I::TEXT, ($2).%I::TEXT',
+                v_field_name,
+                v_field_name
+            )
+            INTO v_old_value, v_new_value
+            USING OLD, NEW;
 
-        IF v_old_value IS DISTINCT FROM v_new_value THEN
+            IF v_old_value IS DISTINCT FROM v_new_value THEN
+                PERFORM Finance.write_extended_audit(
+                    v_audit_id,
+                    v_client_id,
+                    TG_TABLE_NAME,
+                    v_record_pk,
+                    'UPDATE',
+                    v_field_name,
+                    v_old_value,
+                    v_new_value,
+                    v_changed_by
+                );
+            END IF;
+        END LOOP;
 
-            PERFORM Finance.write_extended_audit(
-                v_audit_id,
-                v_client_id,
-                TG_TABLE_NAME,
-                v_record_pk,
-                'UPDATE',
-                v_field,
-                v_old_value,
-                v_new_value,
-                v_changed_by
-            );
-
-        END IF;
-
-    END LOOP;
-
-    RETURN NEW;
-
-END IF;
+        RETURN NEW;
+    END IF;
 
 END;
 $$;
-
 -- 1
 CREATE TRIGGER audit_transactions
 AFTER INSERT OR UPDATE OR DELETE ON Finance.transactions
