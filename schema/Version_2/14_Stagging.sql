@@ -50,7 +50,6 @@ CREATE TABLE Staging.import_approvals (
     comments TEXT
 );
 
-
 DROP FUNCTION IF EXISTS Staging.ar_import_data(INT,INT,DATE,DATE,DECIMAL) CASCADE;
 CREATE FUNCTION Staging.ar_import_data(
     p_session_id INT,

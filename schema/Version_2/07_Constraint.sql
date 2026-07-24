@@ -5,36 +5,6 @@
 -- ============================================
 
 BEGIN;
-
--- ============================================
--- 1. DOMAIN TYPES (Reusable Validation)
--- ============================================
-
--- -- Email domain
--- DROP DOMAIN IF EXISTS email_type CASCADE;
--- CREATE DOMAIN email_type AS VARCHAR(255)
---     CONSTRAINT valid_email CHECK (VALUE ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$');
-
--- -- Phone domain
--- DROP DOMAIN IF EXISTS phone_type CASCADE;
--- CREATE DOMAIN phone_type AS VARCHAR(20)
---     CONSTRAINT valid_phone CHECK (VALUE ~ '^\+?1?\d{9,15}$' OR VALUE = '');
-
--- -- Amount domain (non-negative)
--- DROP DOMAIN IF EXISTS amount_type CASCADE;
--- CREATE DOMAIN amount_type AS DECIMAL(15,2)
---     CONSTRAINT positive_amount CHECK (VALUE >= 0);
-
--- -- Quantity domain (positive integer)
--- DROP DOMAIN IF EXISTS quantity_type CASCADE;
--- CREATE DOMAIN quantity_type AS INT
---     CONSTRAINT positive_quantity CHECK (VALUE > 0);
-
--- -- Account code domain
--- DROP DOMAIN IF EXISTS account_code_type CASCADE;
--- CREATE DOMAIN account_code_type AS INT
---     CONSTRAINT valid_account_code CHECK (VALUE > 0);
-
 -- ============================================
 -- 2. STRENGTHEN EXISTING TABLES
 -- ============================================
@@ -168,27 +138,55 @@ ALTER TABLE Finance.event_log
     ALTER COLUMN payload SET NOT NULL,
     ALTER COLUMN idempotency_key SET NOT NULL;
 
-    ALTER TABLE Finance.charts 
+ALTER TABLE Finance.charts 
     ADD CONSTRAINT charts_chk_type CHECK (Type IN ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense','Contra Revenue','Contra Asset','Contra Liability','Contra Equity','Contra Expense'));
 
-    ALTER TABLE Finance.inventory_audits 
+ALTER TABLE Finance.inventory_audits 
     ADD CONSTRAINT inventoryaudits_chk_actiontype CHECK (Action_type IN ('Purchase', 'Sale', 'Sale Return', 'Purchase Return', 'Transfer'));
 
-    ALTER TABLE Finance.ap_ext 
+ALTER TABLE Finance.ap_ext 
     ADD CONSTRAINT accountpayable_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
-    ALTER TABLE Finance.ar_ext
+ALTER TABLE Finance.ar_ext
     ADD CONSTRAINT accountreceivables_chk_status CHECK (Status IN ('Pending', 'Paid', 'Overdue','Returned','Partially Returned','Partially Paid'));
 
-    ALTER TABLE Finance.audit_logs 
+ALTER TABLE Finance.audit_logs 
     ADD CONSTRAINT auditlogs_chk_status CHECK (Operation IN ('INSERT', 'UPDATE', 'DELETE'));
 
-    ALTER TABLE Finance.vendors
+ALTER TABLE Finance.vendors
     ADD CONSTRAINT chk_valid_email_supplier CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
-    ALTER TABLE Finance.customers
+ALTER TABLE Finance.customers
     ADD CONSTRAINT chk_valid_email_customers CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
+-- ============================================
+-- 1. DOMAIN TYPES (Reusable Validation)
+-- ============================================
+
+-- -- Email domain
+-- DROP DOMAIN IF EXISTS email_type CASCADE;
+-- CREATE DOMAIN email_type AS VARCHAR(255)
+--     CONSTRAINT valid_email CHECK (VALUE ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$');
+
+-- -- Phone domain
+-- DROP DOMAIN IF EXISTS phone_type CASCADE;
+-- CREATE DOMAIN phone_type AS VARCHAR(20)
+--     CONSTRAINT valid_phone CHECK (VALUE ~ '^\+?1?\d{9,15}$' OR VALUE = '');
+
+-- -- Amount domain (non-negative)
+-- DROP DOMAIN IF EXISTS amount_type CASCADE;
+-- CREATE DOMAIN amount_type AS DECIMAL(15,2)
+--     CONSTRAINT positive_amount CHECK (VALUE >= 0);
+
+-- -- Quantity domain (positive integer)
+-- DROP DOMAIN IF EXISTS quantity_type CASCADE;
+-- CREATE DOMAIN quantity_type AS INT
+--     CONSTRAINT positive_quantity CHECK (VALUE > 0);
+
+-- -- Account code domain
+-- DROP DOMAIN IF EXISTS account_code_type CASCADE;
+-- CREATE DOMAIN account_code_type AS INT
+--     CONSTRAINT valid_account_code CHECK (VALUE > 0);
 
 -- -- ============================================
 -- -- 3. ADD PERFORMANCE INDEXES
